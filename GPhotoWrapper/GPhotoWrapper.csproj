@@ -1,0 +1,68 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{E4DCFEAB-A4B4-4EBC-A2AA-E33901C74235}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>GPhotoWrapper</RootNamespace>
+    <AssemblyName>GPhotoWrapper</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>none</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="Camera.cs" />
+    <Compile Include="CameraAbilitiesList.cs" />
+    <Compile Include="CameraFile.cs" />
+    <Compile Include="CameraFilesystem.cs" />
+    <Compile Include="CameraList.cs" />
+    <Compile Include="CameraWidget.cs" />
+    <Compile Include="Context.cs" />
+    <Compile Include="ErrorCodes.cs" />
+    <Compile Include="Object.cs" />
+    <Compile Include="Port.cs" />
+    <Compile Include="PortInfo.cs" />
+    <Compile Include="PortInfoList.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\GPhotoWrapperInterface\GPhotoWrapperInterface.csproj">
+      <Project>{4C1198A2-3418-4CCB-AAB0-1D15E1E741D8}</Project>
+      <Name>GPhotoWrapperInterface</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <None Include="GPhotoWrapper.dll.config" />
+    <None Include="check-camera-list.sh.in" />
+    <None Include="check-sizes.sh.in" />
+    <None Include="libgphoto2-sharp.pc.in" />
+    <None Include="Makefile.am" />
+    <None Include="Makefile.in" />
+    <None Include="testsizes.c" />
+    <None Include="testsizes-createsource.sh" />
+    <None Include="testsizes-typelist.txt" />
+    <None Include="app.config" />
+  </ItemGroup>
+</Project>

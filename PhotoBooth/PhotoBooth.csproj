@@ -1,0 +1,80 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{532E283C-98AA-417B-8F31-7BD2DA8EA090}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>com.prodg.photobooth</RootNamespace>
+    <AssemblyName>PhotoBooth</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <DebugType>none</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="domain\ImageProcessor.cs" />
+    <Compile Include="domain\PhotoBooth.cs" />
+    <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="application\PhotoBoothConsole.cs" />
+    <Compile Include="infrastructure\command\ConsoleCommandReceiver.cs" />
+    <Compile Include="infrastructure\command\SerialCommandTransceiver.cs" />
+    <Compile Include="infrastructure\hardware\CameraStub.cs" />
+    <Compile Include="infrastructure\hardware\HardwareException.cs" />
+    <Compile Include="infrastructure\hardware\ICamera.cs" />
+    <Compile Include="infrastructure\hardware\Camera.cs" />
+    <Compile Include="common\ILogger.cs" />
+    <Compile Include="common\ConsoleLogger.cs" />
+    <Compile Include="domain\IPhotoSession.cs" />
+    <Compile Include="domain\IImageProcessor.cs" />
+    <Compile Include="infrastructure\command\ICommandReceiver.cs" />
+    <Compile Include="infrastructure\hardware\IRemoteControl.cs" />
+    <Compile Include="domain\PhotoSession.cs" />
+    <Compile Include="infrastructure\hardware\RemoteControl.cs" />
+    <Compile Include="infrastructure\hardware\HardwareV1.cs" />
+    <Compile Include="infrastructure\hardware\IHardware.cs" />
+    <Compile Include="infrastructure\hardware\IHardwareController.cs" />
+    <Compile Include="infrastructure\command\ICommandTransmitter.cs" />
+    <Compile Include="infrastructure\command\CommandType.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <Content Include="PhotoBooth.exe.config">
+      <DeployService-Deploy>true</DeployService-Deploy>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\GPhotoWrapperInterface\GPhotoWrapperInterface.csproj">
+      <Project>{4C1198A2-3418-4CCB-AAB0-1D15E1E741D8}</Project>
+      <Name>GPhotoWrapperInterface</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\GPhotoWrapper\GPhotoWrapper.csproj">
+      <Project>{E4DCFEAB-A4B4-4EBC-A2AA-E33901C74235}</Project>
+      <Name>GPhotoWrapper</Name>
+    </ProjectReference>
+  </ItemGroup>
+</Project>

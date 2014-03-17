@@ -1,0 +1,49 @@
+﻿<Properties>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|x86" ctype="Workspace" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="GPhotoWrapperConsoleTest/Main.cs" ctype="Workbench">
+    <Files>
+      <File FileName="GPhotoWrapper/Camera.cs" Line="10" Column="2" />
+      <File FileName="GPhotoWrapper/CameraAbilitiesList.cs" Line="16" Column="3" />
+      <File FileName="GPhotoWrapper/CameraFilesystem.cs" Line="1" Column="1" />
+      <File FileName="GPhotoWrapper/CameraList.cs" Line="15" Column="6" />
+      <File FileName="GPhotoWrapper/Object.cs" Line="1" Column="1" />
+      <File FileName="GPhotoWrapper/PortInfo.cs" Line="1" Column="1" />
+      <File FileName="GPhotoWrapper/PortInfoList.cs" Line="1" Column="1" />
+      <File FileName="GPhotoWrapper/AssemblyInfo.cs" Line="26" Column="34" />
+      <File FileName="GPhotoWrapper/CameraFile.cs" Line="1" Column="1" />
+      <File FileName="PhotoBooth/Main.cs" Line="14" Column="5" />
+      <File FileName="GPhotoWrapper/CameraWidget.cs" Line="331" Column="1" />
+      <File FileName="GPhotoWrapper/Port.cs" Line="1" Column="1" />
+      <File FileName="GPhotoWrapper/Context.cs" Line="15" Column="3" />
+      <File FileName="GPhotoWrapper/ErrorCodes.cs" Line="1" Column="1" />
+      <File FileName="GPhotoWrapperConsoleTest/TestGphoto2Sharp.cs" Line="14" Column="3" />
+      <File FileName="GPhotoWrapperConsoleTest/Main.cs" Line="57" Column="7" />
+      <File FileName="GPhotoWrapper/AssemblyInfo.cs.in" Line="33" Column="1" />
+      <File FileName="GPhotoWrapper/check-sizes.sh.in" Line="1" Column="1" />
+      <File FileName="GPhotoWrapper/testsizes.c" Line="1" Column="1" />
+      <File FileName="GPhotoWrapper/testsizes-createsource.sh" Line="1" Column="1" />
+      <File FileName="GPhotoWrapper/testsizes-typelist.txt" Line="1" Column="1" />
+      <File FileName="GPhotoWrapper/Makefile.in" Line="18" Column="2" />
+      <File FileName="GPhotoWrapper/Makefile.am" Line="14" Column="2" />
+      <File FileName="GPhotoWrapper/libgphoto2-sharp.pc.in" Line="1" Column="1" />
+      <File FileName="GPhotoWrapper/check-camera-list.sh.in" Line="1" Column="1" />
+      <File FileName="GPhotoWrapperConsoleTest/AssemblyInfo.cs" Line="1" Column="1" />
+      <File FileName="PhotoBooth/AssemblyInfo.cs" Line="1" Column="1" />
+      <File FileName="GPhotoWrapper/GPhotoWrapper.dll.config" Line="7" Column="11" />
+      <File FileName="GPhotoWrapper/app.config" Line="7" Column="17" />
+    </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State expanded="True">
+          <Node name="GPhotoWrapperConsoleTest" expanded="True">
+            <Node name="References" expanded="True" />
+          </Node>
+          <Node name="PhotoBooth" expanded="True" selected="True" />
+        </State>
+      </Pad>
+      <Pad Id="ClassPad">
+        <State expanded="True" selected="True" />
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+</Properties>

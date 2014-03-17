@@ -1,0 +1,201 @@
+﻿/*
+ *Copyright 2014 Patrick Bronneberg
+ * 
+*/
+
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO.Ports;
+using System.Threading;
+using com.prodg.photobooth.common;
+
+namespace com.prodg.photobooth.infrastructure.command
+{
+    public class SerialCommandTransceiver : ICommandReceiver, ICommandTransmitter
+    {
+        private readonly ILogger logger;
+        private bool running;
+        private Thread listenerThread;
+
+        private SerialPort serialPort;
+
+        private const string DefaultPortName = "COM1";
+        private const int DefaultBaudRate = 115200;
+        private const Parity DefaultParity = Parity.None;
+
+        private Queue<string> commandQueue;
+        private readonly List<CommandType> subscriptions = new List<CommandType>();
+
+
+        public SerialCommandTransceiver(ILogger logger)
+        {
+            this.logger = logger;
+
+            serialPort = new SerialPort(DefaultPortName, DefaultBaudRate, DefaultParity)
+                {
+                    Handshake = Handshake.None,
+                    // Set the read/write timeouts
+                    ReadTimeout = 100,
+                    WriteTimeout = 100
+                };
+
+
+            commandQueue = new Queue<string>();
+        }
+
+        #region ICommandReceiver Members
+
+        public event EventHandler<CommandReceivedEventArgs> CommandReceived;
+
+        public void Subscribe(CommandType command)
+        {
+            subscriptions.Add(command);
+        }
+
+        #endregion
+
+        #region IHardwareController Members
+
+        public void Start()
+        {
+            if (running || listenerThread != null)
+            {
+                throw new InvalidOperationException("Not allowed to start twice");
+            }
+            listenerThread = new Thread(SerialWorker);
+            running = true;
+            commandQueue.Clear();
+
+            logger.LogInfo("Starting serial command transceiver");
+            serialPort.Open();
+
+            listenerThread.Start();
+            running = true;
+        }
+
+        public void Stop()
+        {
+            logger.LogInfo("Stopping serial command transceiver");
+
+            running = false;
+            if (!listenerThread.Join(5000))
+            {
+                logger.LogWarning("Serial listener not stopped on time: force quit");
+                listenerThread.Abort();
+            }
+
+            serialPort.Close();
+        }
+
+        private void SerialWorker()
+        {
+            while (running)
+            {
+                //Process commands
+                string message = serialPort.ReadLine();
+                if (!string.IsNullOrEmpty(message))
+                {
+                    //Parse & Handle command
+                    HandleCommand(message);
+                }
+
+                //Trigger commands
+                while (!string.IsNullOrEmpty(commandQueue.Peek()))
+                {
+                    serialPort.WriteLine(commandQueue.Dequeue());
+                }
+            }
+        }
+
+        #endregion
+
+
+        #region IDisposable Implementation
+
+        bool disposed;
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        private void Dispose(bool disposing)
+        {
+            if (!disposed)
+            {
+                if (disposing)
+                {
+                    // Clean up managed objects
+                    Stop();
+
+                    if (serialPort != null)
+                    {
+                        serialPort.Dispose();
+                        serialPort = null;
+                    }
+                    if (commandQueue != null)
+                    {
+                        commandQueue.Clear();
+                        commandQueue = null;
+                    }
+                }
+                // clean up any unmanaged objects
+                disposed = true;
+            }
+            else
+            {
+                Console.WriteLine("Saved us from doubly disposing an object!");
+            }
+        }
+
+
+        ~SerialCommandTransceiver()
+        {
+            Dispose(false);
+        }
+
+        #endregion
+
+        #region ICommandTransmitter Members
+
+        public void SendCommand(CommandType buttonType, string context, string value)
+        {
+            string compiledCommand = CompileCommand(buttonType, context, value);
+            logger.LogInfo(String.Format(CultureInfo.InvariantCulture, "Send Command: {0}",
+                                         compiledCommand));
+
+            commandQueue.Enqueue(compiledCommand);
+        }
+
+        private string CompileCommand(CommandType buttonType, string context, string value)
+        {
+            return String.Format(CultureInfo.InvariantCulture, "C:{0}:{1}:{2}", buttonType, context, value);
+        }
+
+        private void HandleCommand(string serialLine)
+        {
+            string[] parts = serialLine.Split(':');
+            if (parts.Length != 4 || !parts[0].Equals("C"))
+            {
+                return;
+            }
+            var commandType = (CommandType)Enum.Parse(typeof(CommandType), parts[1]);
+            string context = parts[2];
+            string value = parts[3];
+
+            logger.LogInfo(String.Format(CultureInfo.InvariantCulture, "Received command:{0} - {1} - {2}", commandType,
+                                         context, value));
+
+            if (subscriptions.Contains(commandType) && CommandReceived != null)
+            {
+                //Throw the received event
+                CommandReceived.Invoke(this, new CommandReceivedEventArgs(commandType));
+            }
+        }
+
+
+        #endregion
+    }
+}
