@@ -6,7 +6,6 @@
 
 using System;
 using System.IO;
-using System.Threading;
 using com.prodg.photobooth.common;
 
 namespace com.prodg.photobooth.infrastructure.hardware
@@ -37,12 +36,10 @@ namespace com.prodg.photobooth.infrastructure.hardware
 			}
 		}
 
-	    public string Capture(string capturePath)
+	    public bool Capture(string capturePath)
 	    {
-	        logger.LogInfo("Starting capture");
-	
-	        string imagePath = Path.Combine(capturePath, "dummy.jpg");
-	        return imagePath;
+	        logger.LogInfo("Starting capture to: "+capturePath);
+	        return true;
 	    }
 
 	    public void Clean ()

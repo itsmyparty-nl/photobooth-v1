@@ -70,29 +70,42 @@ namespace com.prodg.photobooth.domain
             hardware.TriggerControl.Prepare();
         }
 
+        private string GetSessionStoragePath(int sessionIndex)
+        {
+            string sessionId = sessionIndex.ToString(CultureInfo.InvariantCulture);
+            return Path.Combine(baseStoragePath, sessionId);
+        }
+
         private void OnTriggerControlTriggered(object sender, RemoteControlEventArgs e)
         {
             hardware.TriggerControl.Release();
             try
             {
-                sessionIndex++;
+                //Get the next session storage path which is unused
+                while (Directory.Exists(GetSessionStoragePath(sessionIndex)))
+                {
+                    sessionIndex++;
+                }
+                string storagePath = GetSessionStoragePath(sessionIndex);
+                logger.LogInfo("Creating directory for session: " + storagePath);
+                Directory.CreateDirectory(storagePath);
 
-                string sessionId = sessionIndex.ToString(CultureInfo.InvariantCulture);
-                string storagePath = Path.Combine(baseStoragePath, sessionId);
-                var session = new PhotoSession(sessionId, storagePath, imageProcessor, logger);
+                var session = new PhotoSession(sessionIndex.ToString(CultureInfo.InvariantCulture), storagePath,
+                                               imageProcessor, logger);
                 
                 int photoIndex = 0;
                 int tryIndex = 0;
-                while (photoIndex < 3 && tryIndex < 20)
+                while (photoIndex < 3 && tryIndex < 5)
                 {
-                    string imagePath = hardware.Camera.Capture(session.StoragePath);
-                    if (!string.IsNullOrEmpty(imagePath))
+                    string imagePath = Path.Combine(session.StoragePath, photoIndex + ".jpg");
+                    if (hardware.Camera.Capture(imagePath))
                     {
                         session.AddPicture(imagePath);
                         photoIndex++;
                     }
                     tryIndex++;
                 }
+                //Clean all data on the camera
                 hardware.Camera.Clean();
                 session.Finish();
 

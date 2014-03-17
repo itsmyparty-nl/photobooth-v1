@@ -62,12 +62,12 @@ namespace com.prodg.photobooth.infrastructure.hardware
 			}
 		}
 
-	    public string Capture(string capturePath)
+	    public bool Capture(string capturePath)
 	    {
 	        logger.LogInfo("Starting capture");
 	        if (!CheckInitialized())
 	        {
-	            return null;
+	            return false;
 	        }
 
 	        try
@@ -77,15 +77,18 @@ namespace com.prodg.photobooth.infrastructure.hardware
 	            LibGPhoto2.ICameraFile cameraFile = camera.GetFile(path.folder, path.name, LibGPhoto2.CameraFileType.Normal,
 	                                                               context);
 
-                string imagePath = Path.Combine(capturePath, path.name);
-                cameraFile.Save(imagePath);
-	            return imagePath;
+                logger.LogInfo("Saving file to: "+capturePath);
+                cameraFile.Save(capturePath);
+
+                //Remove the file from the camera buffer
+                camera.DeleteFile(path.folder, path.name, context);
+	            return true;
 	        }
 	        catch (Exception exception)
 	        {
-	            logger.LogException("Camera capture failed", exception);
+	            logger.LogException("Camera capture failed, starting camera re-init", exception);
 	            ResetCameraOnFailure();
-	            return null;
+	            return false;
 	        }
 	    }
 

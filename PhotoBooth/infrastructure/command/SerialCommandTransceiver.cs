@@ -32,13 +32,13 @@ namespace com.prodg.photobooth.infrastructure.command
         {
             this.logger = logger;
 
-            serialPort = new SerialPort(DefaultPortName, DefaultBaudRate, DefaultParity)
-                {
-                    Handshake = Handshake.None,
-                    // Set the read/write timeouts
-                    ReadTimeout = 100,
-                    WriteTimeout = 100
-                };
+            //serialPort = new SerialPort(DefaultPortName, DefaultBaudRate, DefaultParity)
+            //    {
+            //        Handshake = Handshake.None,
+            //        // Set the read/write timeouts
+            //        ReadTimeout = 100,
+            //        WriteTimeout = 100
+            //    };
 
 
             commandQueue = new Queue<string>();
@@ -68,7 +68,7 @@ namespace com.prodg.photobooth.infrastructure.command
             commandQueue.Clear();
 
             logger.LogInfo("Starting serial command transceiver");
-            serialPort.Open();
+            //serialPort.Open();
 
             listenerThread.Start();
             running = true;
@@ -85,7 +85,7 @@ namespace com.prodg.photobooth.infrastructure.command
                 listenerThread.Abort();
             }
 
-            serialPort.Close();
+            //serialPort.Close();
         }
 
         private void SerialWorker()
@@ -93,7 +93,7 @@ namespace com.prodg.photobooth.infrastructure.command
             while (running)
             {
                 //Process commands
-                string message = serialPort.ReadLine();
+                string message = null; // serialPort.ReadLine();
                 if (!string.IsNullOrEmpty(message))
                 {
                     //Parse & Handle command
@@ -101,9 +101,13 @@ namespace com.prodg.photobooth.infrastructure.command
                 }
 
                 //Trigger commands
-                while (!string.IsNullOrEmpty(commandQueue.Peek()))
+                while (commandQueue.Count > 0)
                 {
-                    serialPort.WriteLine(commandQueue.Dequeue());
+                    if (!string.IsNullOrEmpty(commandQueue.Peek()))
+                    {
+                        logger.LogInfo("Sending serial data: " + commandQueue.Dequeue());
+                        //serialPort.WriteLine(commandQueue.Dequeue());
+                    }
                 }
             }
         }
@@ -149,7 +153,6 @@ namespace com.prodg.photobooth.infrastructure.command
                 Console.WriteLine("Saved us from doubly disposing an object!");
             }
         }
-
 
         ~SerialCommandTransceiver()
         {
