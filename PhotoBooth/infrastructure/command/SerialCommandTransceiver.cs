@@ -1,7 +1,21 @@
-﻿/*
- *Copyright 2014 Patrick Bronneberg
- * 
+﻿#region PhotoBooth - MIT - (c) 2014 Patrick Bronneberg
+/*
+  PhotoBooth - an application to control a DIY photobooth
+
+  Permission is hereby granted, free of charge, to any person obtaining
+  a copy of this software and associated documentation files (the
+  "Software"), to deal in the Software without restriction, including
+  without limitation the rights to use, copy, modify, merge, publish,
+  distribute, sublicense, and/or sell copies of the Software, and to
+  permit persons to whom the Software is furnished to do so, subject to
+  the following conditions:
+
+  The above copyright notice and this permission notice shall be
+  included in all copies or substantial portions of the Software.
+  
+  Copyright 2014 Patrick Bronneberg
 */
+#endregion
 
 using System;
 using System.Collections.Generic;
@@ -25,7 +39,7 @@ namespace com.prodg.photobooth.infrastructure.command
         private const Parity DefaultParity = Parity.None;
 
         private Queue<string> commandQueue;
-        private readonly List<CommandType> subscriptions = new List<CommandType>();
+        private readonly List<Command> subscriptions = new List<Command>();
 
 
         public SerialCommandTransceiver(ILogger logger)
@@ -48,7 +62,7 @@ namespace com.prodg.photobooth.infrastructure.command
 
         public event EventHandler<CommandReceivedEventArgs> CommandReceived;
 
-        public void Subscribe(CommandType command)
+        public void Subscribe(Command command)
         {
             subscriptions.Add(command);
         }
@@ -163,7 +177,7 @@ namespace com.prodg.photobooth.infrastructure.command
 
         #region ICommandTransmitter Members
 
-        public void SendCommand(CommandType buttonType, string context, string value)
+        public void SendCommand(Command buttonType, string context, string value)
         {
             string compiledCommand = CompileCommand(buttonType, context, value);
             logger.LogInfo(String.Format(CultureInfo.InvariantCulture, "Send Command: {0}",
@@ -172,7 +186,7 @@ namespace com.prodg.photobooth.infrastructure.command
             commandQueue.Enqueue(compiledCommand);
         }
 
-        private string CompileCommand(CommandType buttonType, string context, string value)
+        private string CompileCommand(Command buttonType, string context, string value)
         {
             return String.Format(CultureInfo.InvariantCulture, "C:{0}:{1}:{2}", buttonType, context, value);
         }
@@ -184,7 +198,7 @@ namespace com.prodg.photobooth.infrastructure.command
             {
                 return;
             }
-            var commandType = (CommandType)Enum.Parse(typeof(CommandType), parts[1]);
+            var commandType = (Command)Enum.Parse(typeof(Command), parts[1]);
             string context = parts[2];
             string value = parts[3];
 
