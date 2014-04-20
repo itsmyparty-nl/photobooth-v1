@@ -52,7 +52,7 @@ namespace com.prodg.photobooth.domain
         {
             try
             {
-                return imageProcessor.Process(Id, pictures);
+                return imageProcessor.Process(Id, StoragePath, pictures);
             }
             catch (Exception ex)
             {

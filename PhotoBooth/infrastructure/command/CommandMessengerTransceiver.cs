@@ -184,6 +184,16 @@ namespace com.prodg.photobooth.infrastructure.command
                                          commandType));
         }
 
+        public void SendCommand(Command buttonType, string context)
+        {
+            SendCommand(buttonType, context, string.Empty);
+        }
+
+        public void SendCommand(Command buttonType)
+        {
+            SendCommand(buttonType, string.Empty, string.Empty);
+        }
+
         #endregion
 
         // Callback function that prints that the Arduino has acknowledged

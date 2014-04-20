@@ -1,7 +1,7 @@
 #include <SoftTimer.h>
 #include <SoftPwmTask.h>
 
-#define INPUT_PIN 3
+#define INPUT_PIN 8
 
 /* In this demonstration a pulsating is implemented. */
 

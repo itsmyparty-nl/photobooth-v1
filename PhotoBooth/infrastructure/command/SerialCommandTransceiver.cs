@@ -186,6 +186,16 @@ namespace com.prodg.photobooth.infrastructure.command
             commandQueue.Enqueue(compiledCommand);
         }
 
+        public void SendCommand(Command buttonType, string context)
+        {
+            SendCommand(buttonType, context, String.Empty);
+        }
+
+        public void SendCommand(Command buttonType)
+        {
+            SendCommand(buttonType, String.Empty, String.Empty);
+        }
+
         private string CompileCommand(Command buttonType, string context, string value)
         {
             return String.Format(CultureInfo.InvariantCulture, "C:{0}:{1}:{2}", buttonType, context, value);

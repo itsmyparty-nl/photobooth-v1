@@ -108,7 +108,7 @@ namespace com.prodg.photobooth.domain
                 
                 int photoIndex = 0;
                 int tryIndex = 0;
-                while (photoIndex < 3 && tryIndex < 5)
+                while (photoIndex < 4 && tryIndex < 7)
                 {
                     string imagePath = Path.Combine(session.StoragePath, photoIndex + ".jpg");
                     if (hardware.Camera.Capture(imagePath))

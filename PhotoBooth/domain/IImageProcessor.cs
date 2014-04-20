@@ -30,12 +30,14 @@ namespace com.prodg.photobooth.domain
 		/// Processes the images into a single image
 		/// </summary>
 		/// <param name="id">The identifier of the image</param>
-		/// <param name="images">
+		/// <param name="storagePath">The folder to store the resulting image in</param>
+        /// <param name="images">
 		/// A <see cref="IList<System.String>" />
 		/// </param>
+        /// 
 		/// <returns>
 		/// A <see cref="System.String"/> containing the path of the result image
 		/// </returns>
-		string Process(string id, IList<string> images);
+		string Process(string id, string storagePath, IList<string> images);
 	}
 }
