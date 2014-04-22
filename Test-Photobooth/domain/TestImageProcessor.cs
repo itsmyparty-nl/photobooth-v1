@@ -38,7 +38,7 @@ namespace Test_Photobooth.domain
         {
             ConsoleLogger logger = new ConsoleLogger();
             imageProcessor = new ImageProcessor(logger);
-            images = new List<string> { @"C:\Data\Projects\PhotoBooth\Test-Photobooth\bin\Debug\resources\img1.JPG", @"C:\Data\Projects\PhotoBooth\Test-Photobooth\bin\Debug\resources\img2.JPG", @"C:\Data\Projects\PhotoBooth\Test-Photobooth\bin\Debug\resources\img3.JPG", @"C:\Data\Projects\PhotoBooth\Test-Photobooth\bin\Debug\resources\img4.JPG" };
+			images = new List<string> { @"/home/user/projects/photobooth/Test-Photobooth/bin/debug/resources/img1.JPG", @"/home/user/projects/photobooth/Test-Photobooth/bin/debug/resources/img2.JPG", @"/home/user/projects/photobooth/Test-Photobooth/bin/debug/resources/img3.JPG", @"/home/user/projects/photobooth/Test-Photobooth/bin/debug/resources/img4.JPG" };
         }
 
         [TearDown]
