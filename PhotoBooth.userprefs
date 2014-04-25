@@ -1,20 +1,28 @@
 ﻿<Properties GitUserInfo="UsingGIT">
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|Mixed Platforms" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="PhotoBoothGUI/MainWindow.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="PhotoBooth/PhotoBooth.dll.config">
     <Files>
-      <File FileName="Test-Photobooth/domain/TestImageProcessor.cs" Line="41" Column="341" />
-      <File FileName="PhotoBoothGUI/MainWindow.cs" Line="10" Column="22" />
-      <File FileName="PhotoBoothGUI/Program.cs" Line="13" Column="16" />
-      <File FileName="../../monodevelop/mono-3.2.8/mcs/class/System.Drawing/System.Drawing/gdipFunctions.cs" Line="220" Column="1" />
-      <File FileName="PhotoBooth/application/PhotoBoothConsole.cs" Line="31" Column="1" />
+      <File FileName="Test-Photobooth/domain/TestImageProcessor.cs" Line="1" Column="1" />
+      <File FileName="PhotoBoothGUI/MainWindow.cs" Line="29" Column="16" />
+      <File FileName="PhotoBoothGUI/Program.cs" Line="1" Column="1" />
+      <File FileName="../../monodevelop/mono-3.2.8/mcs/class/System.Drawing/System.Drawing/gdipFunctions.cs" Line="1" Column="1" />
+      <File FileName="PhotoBooth/application/PhotoBoothConsole.cs" Line="1" Column="1" />
+      <File FileName="PhotoBooth/AssemblyInfo.cs" Line="1" Column="1" />
+      <File FileName="PhotoBooth/domain/PhotoBooth.cs" Line="103" Column="48" />
+      <File FileName="PhotoBoothConsole/application/PhotoBoothConsole.cs" Line="1" Column="1" />
+      <File FileName="PhotoBoothGUI/common/TextBoxLogger.cs" Line="1" Column="1" />
+      <File FileName="PhotoBooth/infrastructure/hardware/IHardware.cs" Line="1" Column="1" />
+      <File FileName="PhotoBooth/infrastructure/hardware/HardwareV1.cs" Line="45" Column="9" />
+      <File FileName="PhotoBooth/infrastructure/hardware/IRemoteControl.cs" Line="42" Column="56" />
+      <File FileName="PhotoBooth/infrastructure/hardware/Camera.cs" Line="1" Column="1" />
+      <File FileName="PhotoBooth/domain/IPhotoSession.cs" Line="25" Column="44" />
+      <File FileName="PhotoBooth/domain/ImageProcessor.cs" Line="104" Column="21" />
+      <File FileName="PhotoBooth/domain/PhotoSession.cs" Line="19" Column="1" />
+      <File FileName="PhotoBoothGUI/domain/ButtonRemoteControl.cs" Line="6" Column="2" />
+      <File FileName="PhotoBoothGUI/Infrastructure/hardware/GuiHardware.cs" Line="47" Column="3" />
+      <File FileName="PhotoBoothGUI/PhotoBoothGUI.exe.config" Line="8" Column="17" />
+      <File FileName="PhotoBooth/PhotoBooth.dll.config" Line="3" Column="31" />
     </Files>
-    <Pads>
-      <Pad Id="MonoDevelop.NUnit.TestPad">
-        <State expanded="True">
-          <Node name="Test-Photobooth" selected="True" />
-        </State>
-      </Pad>
-    </Pads>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore />

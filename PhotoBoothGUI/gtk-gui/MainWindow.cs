@@ -6,10 +6,11 @@ public partial class MainWindow
 	private global::Gtk.VBox vbox1;
 	private global::Gtk.Image imagePhoto;
 	private global::Gtk.Label labelInstruction;
+	private global::Gtk.ScrolledWindow GtkScrolledWindow;
+	private global::Gtk.TextView textview1;
 	private global::Gtk.HBox hbox3;
 	private global::Gtk.Button buttonTrigger;
 	private global::Gtk.Button buttonPrint;
-	private global::Gtk.Button buttonCancel;
 	private global::Gtk.Button buttonExit;
 	private global::Gtk.Statusbar statusbar1;
 
@@ -26,8 +27,8 @@ public partial class MainWindow
 		this.vbox1.Spacing = 6;
 		// Container child vbox1.Gtk.Box+BoxChild
 		this.imagePhoto = new global::Gtk.Image ();
-		this.imagePhoto.WidthRequest = 1024;
-		this.imagePhoto.HeightRequest = 786;
+		this.imagePhoto.WidthRequest = 800;
+		this.imagePhoto.HeightRequest = 600;
 		this.imagePhoto.Name = "imagePhoto";
 		this.vbox1.Add (this.imagePhoto);
 		global::Gtk.Box.BoxChild w1 = ((global::Gtk.Box.BoxChild)(this.vbox1 [this.imagePhoto]));
@@ -46,6 +47,19 @@ public partial class MainWindow
 		w2.Expand = false;
 		w2.Fill = false;
 		// Container child vbox1.Gtk.Box+BoxChild
+		this.GtkScrolledWindow = new global::Gtk.ScrolledWindow ();
+		this.GtkScrolledWindow.Name = "GtkScrolledWindow";
+		this.GtkScrolledWindow.ShadowType = ((global::Gtk.ShadowType)(1));
+		// Container child GtkScrolledWindow.Gtk.Container+ContainerChild
+		this.textview1 = new global::Gtk.TextView ();
+		this.textview1.CanFocus = true;
+		this.textview1.Name = "textview1";
+		this.textview1.Editable = false;
+		this.GtkScrolledWindow.Add (this.textview1);
+		this.vbox1.Add (this.GtkScrolledWindow);
+		global::Gtk.Box.BoxChild w4 = ((global::Gtk.Box.BoxChild)(this.vbox1 [this.GtkScrolledWindow]));
+		w4.Position = 2;
+		// Container child vbox1.Gtk.Box+BoxChild
 		this.hbox3 = new global::Gtk.HBox ();
 		this.hbox3.Name = "hbox3";
 		this.hbox3.Spacing = 6;
@@ -55,11 +69,11 @@ public partial class MainWindow
 		this.buttonTrigger.Name = "buttonTrigger";
 		this.buttonTrigger.Label = global::Mono.Unix.Catalog.GetString ("Trigger");
 		this.hbox3.Add (this.buttonTrigger);
-		global::Gtk.Box.BoxChild w3 = ((global::Gtk.Box.BoxChild)(this.hbox3 [this.buttonTrigger]));
-		w3.PackType = ((global::Gtk.PackType)(1));
-		w3.Position = 0;
-		w3.Expand = false;
-		w3.Fill = false;
+		global::Gtk.Box.BoxChild w5 = ((global::Gtk.Box.BoxChild)(this.hbox3 [this.buttonTrigger]));
+		w5.PackType = ((global::Gtk.PackType)(1));
+		w5.Position = 0;
+		w5.Expand = false;
+		w5.Fill = false;
 		// Container child hbox3.Gtk.Box+BoxChild
 		this.buttonPrint = new global::Gtk.Button ();
 		this.buttonPrint.CanFocus = true;
@@ -67,23 +81,11 @@ public partial class MainWindow
 		this.buttonPrint.UseUnderline = true;
 		this.buttonPrint.Label = global::Mono.Unix.Catalog.GetString ("Print");
 		this.hbox3.Add (this.buttonPrint);
-		global::Gtk.Box.BoxChild w4 = ((global::Gtk.Box.BoxChild)(this.hbox3 [this.buttonPrint]));
-		w4.PackType = ((global::Gtk.PackType)(1));
-		w4.Position = 1;
-		w4.Expand = false;
-		w4.Fill = false;
-		// Container child hbox3.Gtk.Box+BoxChild
-		this.buttonCancel = new global::Gtk.Button ();
-		this.buttonCancel.CanFocus = true;
-		this.buttonCancel.Name = "buttonCancel";
-		this.buttonCancel.UseUnderline = true;
-		this.buttonCancel.Label = global::Mono.Unix.Catalog.GetString ("Cancel");
-		this.hbox3.Add (this.buttonCancel);
-		global::Gtk.Box.BoxChild w5 = ((global::Gtk.Box.BoxChild)(this.hbox3 [this.buttonCancel]));
-		w5.PackType = ((global::Gtk.PackType)(1));
-		w5.Position = 2;
-		w5.Expand = false;
-		w5.Fill = false;
+		global::Gtk.Box.BoxChild w6 = ((global::Gtk.Box.BoxChild)(this.hbox3 [this.buttonPrint]));
+		w6.PackType = ((global::Gtk.PackType)(1));
+		w6.Position = 1;
+		w6.Expand = false;
+		w6.Fill = false;
 		// Container child hbox3.Gtk.Box+BoxChild
 		this.buttonExit = new global::Gtk.Button ();
 		this.buttonExit.CanFocus = true;
@@ -91,32 +93,32 @@ public partial class MainWindow
 		this.buttonExit.UseUnderline = true;
 		this.buttonExit.Label = global::Mono.Unix.Catalog.GetString ("Exit");
 		this.hbox3.Add (this.buttonExit);
-		global::Gtk.Box.BoxChild w6 = ((global::Gtk.Box.BoxChild)(this.hbox3 [this.buttonExit]));
-		w6.PackType = ((global::Gtk.PackType)(1));
-		w6.Position = 3;
-		w6.Expand = false;
-		w6.Fill = false;
-		this.vbox1.Add (this.hbox3);
-		global::Gtk.Box.BoxChild w7 = ((global::Gtk.Box.BoxChild)(this.vbox1 [this.hbox3]));
+		global::Gtk.Box.BoxChild w7 = ((global::Gtk.Box.BoxChild)(this.hbox3 [this.buttonExit]));
+		w7.PackType = ((global::Gtk.PackType)(1));
 		w7.Position = 2;
 		w7.Expand = false;
 		w7.Fill = false;
+		this.vbox1.Add (this.hbox3);
+		global::Gtk.Box.BoxChild w8 = ((global::Gtk.Box.BoxChild)(this.vbox1 [this.hbox3]));
+		w8.Position = 3;
+		w8.Expand = false;
+		w8.Fill = false;
 		// Container child vbox1.Gtk.Box+BoxChild
 		this.statusbar1 = new global::Gtk.Statusbar ();
 		this.statusbar1.Name = "statusbar1";
 		this.statusbar1.Spacing = 6;
 		this.vbox1.Add (this.statusbar1);
-		global::Gtk.Box.BoxChild w8 = ((global::Gtk.Box.BoxChild)(this.vbox1 [this.statusbar1]));
-		w8.PackType = ((global::Gtk.PackType)(1));
-		w8.Position = 3;
-		w8.Expand = false;
-		w8.Fill = false;
+		global::Gtk.Box.BoxChild w9 = ((global::Gtk.Box.BoxChild)(this.vbox1 [this.statusbar1]));
+		w9.PackType = ((global::Gtk.PackType)(1));
+		w9.Position = 4;
+		w9.Expand = false;
+		w9.Fill = false;
 		this.Add (this.vbox1);
 		if ((this.Child != null)) {
 			this.Child.ShowAll ();
 		}
 		this.DefaultWidth = 1026;
-		this.DefaultHeight = 915;
+		this.DefaultHeight = 1005;
 		this.Show ();
 		this.DeleteEvent += new global::Gtk.DeleteEventHandler (this.OnDeleteEvent);
 		this.KeyPressEvent += new global::Gtk.KeyPressEventHandler (this.OnKeyPress);

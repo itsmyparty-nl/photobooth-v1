@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test-Photobooth", "Test-Pho
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PhotoBoothGUI", "PhotoBoothGUI\PhotoBoothGUI.csproj", "{60C3900D-211C-40D3-8DA5-6BC4D6860F9E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PhotoBoothConsole", "PhotoBoothConsole\PhotoBoothConsole.csproj", "{9308315E-4BBF-458D-BDF9-55D5C4F54884}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -79,6 +81,18 @@ Global
 		{60C3900D-211C-40D3-8DA5-6BC4D6860F9E}.Release|Mixed Platforms.Build.0 = Release|Mixed Platforms
 		{60C3900D-211C-40D3-8DA5-6BC4D6860F9E}.Release|x86.ActiveCfg = Release|Mixed Platforms
 		{60C3900D-211C-40D3-8DA5-6BC4D6860F9E}.Release|x86.Build.0 = Release|Mixed Platforms
+		{9308315E-4BBF-458D-BDF9-55D5C4F54884}.Debug|Any CPU.ActiveCfg = Debug|Mixed Platforms
+		{9308315E-4BBF-458D-BDF9-55D5C4F54884}.Debug|Any CPU.Build.0 = Debug|Mixed Platforms
+		{9308315E-4BBF-458D-BDF9-55D5C4F54884}.Debug|Mixed Platforms.ActiveCfg = Debug|Mixed Platforms
+		{9308315E-4BBF-458D-BDF9-55D5C4F54884}.Debug|Mixed Platforms.Build.0 = Debug|Mixed Platforms
+		{9308315E-4BBF-458D-BDF9-55D5C4F54884}.Debug|x86.ActiveCfg = Debug|Mixed Platforms
+		{9308315E-4BBF-458D-BDF9-55D5C4F54884}.Debug|x86.Build.0 = Debug|Mixed Platforms
+		{9308315E-4BBF-458D-BDF9-55D5C4F54884}.Release|Any CPU.ActiveCfg = Release|Mixed Platforms
+		{9308315E-4BBF-458D-BDF9-55D5C4F54884}.Release|Any CPU.Build.0 = Release|Mixed Platforms
+		{9308315E-4BBF-458D-BDF9-55D5C4F54884}.Release|Mixed Platforms.ActiveCfg = Release|Mixed Platforms
+		{9308315E-4BBF-458D-BDF9-55D5C4F54884}.Release|Mixed Platforms.Build.0 = Release|Mixed Platforms
+		{9308315E-4BBF-458D-BDF9-55D5C4F54884}.Release|x86.ActiveCfg = Release|Mixed Platforms
+		{9308315E-4BBF-458D-BDF9-55D5C4F54884}.Release|x86.Build.0 = Release|Mixed Platforms
 		{AB8E5826-DEA4-4284-A51F-B44B1E5C0AD9}.Debug|Any CPU.ActiveCfg = Debug|x86
 		{AB8E5826-DEA4-4284-A51F-B44B1E5C0AD9}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
 		{AB8E5826-DEA4-4284-A51F-B44B1E5C0AD9}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
@@ -103,7 +117,7 @@ Global
 		{E4DCFEAB-A4B4-4EBC-A2AA-E33901C74235}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
-		StartupItem = GPhotoWrapper\GPhotoWrapper.csproj
+		StartupItem = PhotoBooth\PhotoBooth.csproj
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

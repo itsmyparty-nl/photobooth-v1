@@ -54,6 +54,7 @@
       <Package>gtk-sharp-2.0</Package>
     </Reference>
     <Reference Include="Mono.Posix" />
+    <Reference Include="System.Drawing" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="gtk-gui\gui.stetic">
@@ -66,6 +67,12 @@
     <Compile Include="gtk-gui\MainWindow.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="common\TextBoxLogger.cs" />
+    <Compile Include="domain\ButtonRemoteControl.cs" />
+    <Compile Include="Infrastructure\hardware\GuiHardware.cs" />
+    <Compile Include="Infrastructure\hardware\HardwareV1.cs">
+      <DependentUpon>GuiHardware.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -73,5 +80,17 @@
       <Project>{532E283C-98AA-417B-8F31-7BD2DA8EA090}</Project>
       <Name>PhotoBooth</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="common\" />
+    <Folder Include="domain\" />
+    <Folder Include="Infrastructure\" />
+    <Folder Include="Infrastructure\hardware\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="PhotoBoothGUI.exe.config">
+      <DeployService-Deploy>True</DeployService-Deploy>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 </Project>

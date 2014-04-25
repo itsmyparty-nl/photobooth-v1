@@ -122,7 +122,7 @@ namespace com.prodg.photobooth.domain
                     using (Graphics g = System.Drawing.Graphics.FromImage(finalImage))
                     {
                         //set background color
-                        g.Clear(Color.White);
+						g.Clear(backgroundColor);
 
                         //go through each image and draw it on the final image
 

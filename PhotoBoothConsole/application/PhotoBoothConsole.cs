@@ -1,4 +1,4 @@
-#region PhotoBooth - MIT - (c) 2014 Patrick Bronneberg
+﻿#region PhotoBooth - MIT - (c) 2014 Patrick Bronneberg
 /*
   PhotoBooth - an application to control a DIY photobooth
 
@@ -16,35 +16,31 @@
   Copyright 2014 Patrick Bronneberg
 */
 #endregion
+
 using System;
+using com.prodg.photobooth.common;
+using com.prodg.photobooth.domain;
+using com.prodg.photobooth.infrastructure.hardware;
 
-namespace com.prodg.photobooth.domain
+namespace com.prodg.photobooth.application
 {
-	public class PictureAddedEventArgs : EventArgs
+	public static class PhotoBoothConsole
 	{
-		public PictureAddedEventArgs(string picturePath, int currentCount)
+		public static void Main (string[] args)
 		{
-			PicturePath = picturePath;
-			CurrentCount = currentCount;
+			ILogger logger = new ConsoleLogger();
+			IHardware hardware = new HardwareV1(logger);
+			var photoBooth = new PhotoBooth(hardware, logger);
+
+			//Start
+			photoBooth.Start();
+			//Wait until the photobooth is finished
+			photoBooth.Finished.WaitOne();
+			//Stop
+			photoBooth.Stop();
+
+			//Keep the application open
+			Console.ReadLine();
 		}
-
-		public string PicturePath {get; private set;}
-
-		public int CurrentCount {get; private set;}
-	}
-
-	public interface IPhotoSession
-	{
-		event EventHandler<PictureAddedEventArgs> Finished;
-
-		event EventHandler<PictureAddedEventArgs> PictureAdded;
-
-		string Id { get;}
-		
-		string StoragePath { get; }
-		
-		void AddPicture(string path);
-		
-		string Finish();
 	}
 }

@@ -26,12 +26,29 @@ using com.prodg.photobooth.infrastructure.hardware;
 
 namespace com.prodg.photobooth.domain
 {
-    public class PhotoBooth
+	public class SessionChangeEventArgs : EventArgs
+	{
+		public SessionChangeEventArgs(IPhotoSession session)
+		{
+			Session = session;
+		}
+
+		public IPhotoSession Session {get; private set;}
+	}
+
+	public class PhotoBooth
     {
         private readonly ILogger logger;
         private readonly IHardware hardware;
         private readonly IImageProcessor imageProcessor;
         private readonly string baseStoragePath;
+
+		public event EventHandler<SessionChangeEventArgs> SessionChanged;
+
+		public IPhotoSession CurrentSession {
+			get;
+			private set;
+		}
 
         private int sessionIndex;
         
@@ -43,7 +60,7 @@ namespace com.prodg.photobooth.domain
             this.logger = logger;
             imageProcessor = new ImageProcessor(logger);
 
-            baseStoragePath = "/mnt/pictures/";
+			baseStoragePath = "/home/user/pictures";
         }
 
         public void Start()
@@ -103,24 +120,25 @@ namespace com.prodg.photobooth.domain
                 logger.LogInfo("Creating directory for session: " + storagePath);
                 Directory.CreateDirectory(storagePath);
 
-                var session = new PhotoSession(sessionIndex.ToString(CultureInfo.InvariantCulture), storagePath,
+				CurrentSession = new PhotoSession(sessionIndex.ToString(CultureInfo.InvariantCulture), storagePath,
                                                imageProcessor, logger);
-                
+				SessionChanged.Invoke(this, new SessionChangeEventArgs(CurrentSession));
+
                 int photoIndex = 0;
                 int tryIndex = 0;
                 while (photoIndex < 4 && tryIndex < 7)
                 {
-                    string imagePath = Path.Combine(session.StoragePath, photoIndex + ".jpg");
+					string imagePath = Path.Combine(CurrentSession.StoragePath, photoIndex + ".jpg");
                     if (hardware.Camera.Capture(imagePath))
                     {
-                        session.AddPicture(imagePath);
+						CurrentSession.AddPicture(imagePath);
                         photoIndex++;
                     }
                     tryIndex++;
                 }
                 //Clean all data on the camera
                 hardware.Camera.Clean();
-                session.Finish();
+				CurrentSession.Finish();
 
                 //Afer capturing we're ready for printing
                 hardware.PrintControl.Prepare();

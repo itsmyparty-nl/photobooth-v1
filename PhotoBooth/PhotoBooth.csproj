@@ -78,7 +78,6 @@
     <Compile Include="domain\ImageProcessor.cs" />
     <Compile Include="domain\PhotoBooth.cs" />
     <Compile Include="AssemblyInfo.cs" />
-    <Compile Include="application\PhotoBoothConsole.cs" />
     <Compile Include="infrastructure\command\ConsoleCommandReceiver.cs" />
     <Compile Include="infrastructure\command\CommandMessengerTransceiver.cs" />
     <Compile Include="infrastructure\command\SerialCommandTransceiver.cs" />
@@ -102,7 +101,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
-    <Content Include="PhotoBooth.exe.config">
+    <Content Include="PhotoBooth.dll.config">
       <DeployService-Deploy>True</DeployService-Deploy>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

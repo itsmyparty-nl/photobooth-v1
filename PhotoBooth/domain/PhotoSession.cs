@@ -29,6 +29,9 @@ namespace com.prodg.photobooth.domain
         private readonly IImageProcessor imageProcessor;
         private readonly ILogger logger;
 
+		public event EventHandler<PictureAddedEventArgs> PictureAdded;
+		public event EventHandler<PictureAddedEventArgs> Finished;
+
         public string Id { get; private set; }
 
         public string StoragePath { get; private set; }
@@ -46,13 +49,17 @@ namespace com.prodg.photobooth.domain
         public void AddPicture(string path)
         {
             pictures.Add(path);
+			//Send out an event that a picture was added
+			PictureAdded.Invoke(this, new PictureAddedEventArgs(path, pictures.Count));
         }
 
         public string Finish()
         {
             try
             {
-                return imageProcessor.Process(Id, StoragePath, pictures);
+				string imagePath = imageProcessor.Process(Id, StoragePath, pictures);
+				Finished.Invoke(this, new PictureAddedEventArgs(imagePath, pictures.Count));
+				return imagePath;
             }
             catch (Exception ex)
             {
