@@ -19,6 +19,7 @@
 
 using System;
 using com.prodg.photobooth.common;
+using com.prodg.photobooth.config;
 using com.prodg.photobooth.domain;
 using com.prodg.photobooth.infrastructure.hardware;
 
@@ -28,9 +29,11 @@ namespace com.prodg.photobooth.application
 	{
 		public static void Main (string[] args)
 		{
-			ILogger logger = new ConsoleLogger();
+		    ISettings settings = null;
+            ILogger logger = new ConsoleLogger();
 			IHardware hardware = new HardwareV1(logger);
-			var photoBooth = new PhotoBooth(hardware, logger);
+            IImageProcessor imageProcessor = new CollageImageProcessor(logger,settings);
+		 	var photoBooth = new PhotoBooth(hardware, imageProcessor, logger, settings);
 
 			//Start
 			photoBooth.Start();

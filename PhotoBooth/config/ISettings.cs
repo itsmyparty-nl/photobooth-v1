@@ -1,4 +1,4 @@
-#region PhotoBooth - MIT - (c) 2014 Patrick Bronneberg
+﻿#region PhotoBooth - MIT - (c) 2014 Patrick Bronneberg
 /*
   PhotoBooth - an application to control a DIY photobooth
 
@@ -18,33 +18,36 @@
 #endregion
 using System;
 
-namespace com.prodg.photobooth.domain
+namespace com.prodg.photobooth.config
 {
-	public class PictureAddedEventArgs : EventArgs
-	{
-		public PictureAddedEventArgs(string picturePath, int currentCount)
-		{
-			PicturePath = picturePath;
-			CurrentCount = currentCount;
-		}
+    public interface ISettings
+    {
+        #region Command Messenger part
 
-		public string PicturePath {get; private set;}
+        string SerialPortName { get; }
 
-		public int CurrentCount {get; private set;}
-	}
+        int SerialPortBaudRate { get; }
 
-	public interface IPhotoSession
-	{
-		event EventHandler<PictureAddedEventArgs> Finished;
+        bool SerialPortDtrEnable { get; }
 
-		event EventHandler<PictureAddedEventArgs> PictureAdded;
+        #endregion
 
-		string Id { get;}
-		
-		string StoragePath { get; }
-		
-		void AddPicture(string path);
-		
-		string Finish();
-	}
+        #region Image storage
+
+        string StoragePath { get; }
+
+        #endregion
+
+        #region Image processing
+
+        int CollageGridWidth { get; }
+
+        int CollageGridHeight { get; }
+
+        float CollageScalePercentage { get; }
+
+        int CollagePaddingPixels { get; }
+
+        #endregion
+    }
 }

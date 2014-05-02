@@ -75,7 +75,8 @@
     <Reference Include="System.Drawing" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="domain\ImageProcessor.cs" />
+    <Compile Include="domain\CollageImageProcessor.cs" />
+    <Compile Include="config\ISettings.cs" />
     <Compile Include="domain\PhotoBooth.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="infrastructure\command\ConsoleCommandReceiver.cs" />
@@ -83,11 +84,11 @@
     <Compile Include="infrastructure\command\SerialCommandTransceiver.cs" />
     <Compile Include="infrastructure\hardware\CameraStub.cs" />
     <Compile Include="infrastructure\hardware\HardwareException.cs" />
+    <Compile Include="infrastructure\hardware\HardwareV2.cs" />
     <Compile Include="infrastructure\hardware\ICamera.cs" />
     <Compile Include="infrastructure\hardware\Camera.cs" />
     <Compile Include="common\ILogger.cs" />
     <Compile Include="common\ConsoleLogger.cs" />
-    <Compile Include="domain\IPhotoSession.cs" />
     <Compile Include="domain\IImageProcessor.cs" />
     <Compile Include="infrastructure\command\ICommandReceiver.cs" />
     <Compile Include="infrastructure\hardware\IRemoteControl.cs" />

@@ -31,6 +31,8 @@ namespace com.prodg.photobooth.infrastructure.hardware
 		private LibGPhoto2.ICamera camera;
 		private readonly ILogger logger;
 		private bool initialized;
+	    private const string CameraBaseFolder = @"/";
+
 
 		public string Id { get; private set; }
 
@@ -87,7 +89,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
 	        try
 	        {
 	            LibGPhoto2.ICameraFilePath path = camera.Capture(LibGPhoto2.CameraCaptureType.Image, context);
-	            logger.LogInfo("Capture finished. File: " + path.folder + "\\" + path.name);
+	            logger.LogInfo("Capture finished. File: " + Path.Combine(path.folder, path.name));
 	            LibGPhoto2.ICameraFile cameraFile = camera.GetFile(path.folder, path.name, LibGPhoto2.CameraFileType.Normal,
 	                                                               context);
 
@@ -108,7 +110,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
 
 	    public void Clean ()
 		{
-			camera.DeleteAll ("/", context);
+            camera.DeleteAll(CameraBaseFolder, context);
 		}
 
 		private bool CheckInitialized ()

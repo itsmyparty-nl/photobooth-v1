@@ -18,55 +18,50 @@
 #endregion
 
 using System;
-using System.Globalization;
+using System.Drawing;
 using System.IO;
 using System.Threading;
 using com.prodg.photobooth.common;
+using com.prodg.photobooth.config;
 using com.prodg.photobooth.infrastructure.hardware;
 
 namespace com.prodg.photobooth.domain
 {
-	public class SessionChangeEventArgs : EventArgs
-	{
-		public SessionChangeEventArgs(IPhotoSession session)
-		{
-			Session = session;
-		}
+    public class PictureAddedEventArgs : EventArgs
+    {
+        public PictureAddedEventArgs(Image picture, bool isFinal)
+        {
+            Picture = picture;
+            IsFinal = isFinal;
+        }
 
-		public IPhotoSession Session {get; private set;}
-	}
+        public Image Picture { get; private set; }
+        public bool IsFinal { get; private set; }
+    }
 
-	public class PhotoBooth
+    public class PhotoBooth: IDisposable
     {
         private readonly ILogger logger;
         private readonly IHardware hardware;
         private readonly IImageProcessor imageProcessor;
-        private readonly string baseStoragePath;
+        private readonly ISettings settings;
 
-		public event EventHandler<SessionChangeEventArgs> SessionChanged;
+        public event EventHandler<PictureAddedEventArgs> PictureAdded;
 
-		public IPhotoSession CurrentSession {
-			get;
-			private set;
-		}
-
-        private int sessionIndex;
-        
         public readonly ManualResetEvent Finished = new ManualResetEvent(false);
 
-        public PhotoBooth(IHardware hardware, ILogger logger)
+        public PhotoBooth(IHardware hardware, IImageProcessor imageProcessor, ILogger logger, ISettings settings)
         {
             this.hardware = hardware;
             this.logger = logger;
-            imageProcessor = new ImageProcessor(logger);
-
-			baseStoragePath = "/home/user/pictures";
+            this.settings = settings;
+            this.imageProcessor = imageProcessor;
         }
 
         public void Start()
         {
             logger.LogInfo("Initializing Photobooth");
- 
+
             hardware.Initialize();
 
             hardware.TriggerControl.Triggered += OnTriggerControlTriggered;
@@ -100,46 +95,38 @@ namespace com.prodg.photobooth.domain
             hardware.TriggerControl.Prepare();
         }
 
-        private string GetSessionStoragePath(int sessionIndex)
-        {
-            string sessionId = sessionIndex.ToString(CultureInfo.InvariantCulture);
-            return Path.Combine(baseStoragePath, sessionId);
-        }
-
         private void OnTriggerControlTriggered(object sender, RemoteControlEventArgs e)
         {
             hardware.TriggerControl.Release();
             try
             {
-                //Get the next session storage path which is unused
-                while (Directory.Exists(GetSessionStoragePath(sessionIndex)))
+                int failureCount = 0;
+                using (var session = new PhotoSession(settings))
                 {
-                    sessionIndex++;
-                }
-                string storagePath = GetSessionStoragePath(sessionIndex);
-                logger.LogInfo("Creating directory for session: " + storagePath);
-                Directory.CreateDirectory(storagePath);
-
-				CurrentSession = new PhotoSession(sessionIndex.ToString(CultureInfo.InvariantCulture), storagePath,
-                                               imageProcessor, logger);
-				SessionChanged.Invoke(this, new SessionChangeEventArgs(CurrentSession));
-
-                int photoIndex = 0;
-                int tryIndex = 0;
-                while (photoIndex < 4 && tryIndex < 7)
-                {
-					string imagePath = Path.Combine(CurrentSession.StoragePath, photoIndex + ".jpg");
-                    if (hardware.Camera.Capture(imagePath))
+                    while (session.ImageCount < imageProcessor.RequiredImages && failureCount < 3)
                     {
-						CurrentSession.AddPicture(imagePath);
-                        photoIndex++;
+                        string imagePath = session.GetNextImagePath();
+                        if (hardware.Camera.Capture(imagePath))
+                        {
+                            Image image = session.AddPicture(imagePath);
+                            //Signal that a new picture was added
+                            if (PictureAdded != null)
+                            {
+                                PictureAdded.Invoke(this, new PictureAddedEventArgs(image, false));
+                            }
+                        }
+                        else
+                        {
+                            failureCount++;
+                        }
                     }
-                    tryIndex++;
+                    Image finalImage = imageProcessor.Process(session);
+                    //Signal that a new picture was added
+                    if (PictureAdded != null)
+                    {
+                        PictureAdded.Invoke(this, new PictureAddedEventArgs(finalImage, false));
+                    }
                 }
-                //Clean all data on the camera
-                hardware.Camera.Clean();
-				CurrentSession.Finish();
-
                 //Afer capturing we're ready for printing
                 hardware.PrintControl.Prepare();
             }
@@ -149,6 +136,19 @@ namespace com.prodg.photobooth.domain
                 //In case anything went wrong, forget about this session and move on to the next
                 hardware.TriggerControl.Prepare();
             }
+            finally
+            {
+                hardware.Camera.Clean();
+            }
         }
+
+        #region IDisposable Members
+
+        public void Dispose()
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
     }
 }

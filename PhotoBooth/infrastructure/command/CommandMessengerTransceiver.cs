@@ -23,6 +23,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using com.prodg.photobooth.common;
+using com.prodg.photobooth.config;
 using CommandMessenger;
 using CommandMessenger.TransportLayer;
 
@@ -37,16 +38,20 @@ namespace com.prodg.photobooth.infrastructure.command
         private CmdMessenger messenger;
         private ITransport transport;
 
-        public CommandMessengerTransceiver(ILogger logger)
+        public CommandMessengerTransceiver(ILogger logger, ISettings settings)
         {
             this.logger = logger;
             // Create Serial Port object
             // Note that for some boards (e.g. Sparkfun Pro Micro) DtrEnable may need to be true.
-            //transport = new SerialTransport
-            //{
-            //    CurrentSerialSettings = { PortName = "COM6", BaudRate = 115200, DtrEnable = false } // object initializer
-            //};
-            transport = new StubbedTransport();
+            transport = new SerialTransport
+            {
+                CurrentSerialSettings =
+                {
+                    PortName = settings.SerialPortName,
+                    BaudRate = settings.SerialPortBaudRate,
+                    DtrEnable = settings.SerialPortDtrEnable
+                }
+            };
             
             // Initialize the command messenger with the Serial Port transport layer
             messenger = new CmdMessenger(transport);
@@ -93,7 +98,6 @@ namespace com.prodg.photobooth.infrastructure.command
         }
 
         #endregion
-
 
         #region IDisposable Implementation
 

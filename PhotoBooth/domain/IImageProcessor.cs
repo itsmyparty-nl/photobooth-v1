@@ -17,7 +17,7 @@
 */
 #endregion
 
-using System.Collections.Generic;
+using System.Drawing;
 
 namespace com.prodg.photobooth.domain
 {
@@ -26,18 +26,17 @@ namespace com.prodg.photobooth.domain
 	/// </summary>
 	public interface IImageProcessor
 	{
-		/// <summary>
+	    /// <summary>
+	    /// The required number of images to process
+	    /// </summary>
+        int RequiredImages { get; }
+        
+        /// <summary>
 		/// Processes the images into a single image
 		/// </summary>
-		/// <param name="id">The identifier of the image</param>
-		/// <param name="storagePath">The folder to store the resulting image in</param>
-        /// <param name="images">
-		/// A <see cref="IList<System.String>" />
-		/// </param>
-        /// 
 		/// <returns>
-		/// A <see cref="System.String"/> containing the path of the result image
+		/// The resulting image
 		/// </returns>
-		string Process(string id, string storagePath, IList<string> images);
+		Image Process(PhotoSession session);
 	}
 }

@@ -19,54 +19,100 @@
 
 using System;
 using System.Collections.Generic;
-using com.prodg.photobooth.common;
+using System.Drawing;
+using System.Globalization;
+using System.IO;
+using com.prodg.photobooth.config;
 
 namespace com.prodg.photobooth.domain
 {
-    public class PhotoSession : IPhotoSession
+    /// <summary>
+    /// A single session in which pictures are taken which are processed into a single result image
+    /// </summary>
+    public class PhotoSession: IDisposable
     {
-        private readonly List<string> pictures;
-        private readonly IImageProcessor imageProcessor;
-        private readonly ILogger logger;
-
-		public event EventHandler<PictureAddedEventArgs> PictureAdded;
-		public event EventHandler<PictureAddedEventArgs> Finished;
-
-        public string Id { get; private set; }
-
+        /// <summary>
+        /// Cache the last index for performance, consider an alternate implementation
+        /// </summary>
+        private static int _lastSessionIndex;  
+        
+        private readonly ISettings settings;
+        
         public string StoragePath { get; private set; }
+        
+        public List<Image> Images { get; private set; }
 
-        public PhotoSession(string id, string storagePath, IImageProcessor imageProcessor, ILogger logger)
+        public int ImageCount { get { return Images.Count; } }
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="logger"></param>
+        /// <param name="settings"></param>
+        public PhotoSession(ISettings settings)
         {
-            Id = id;
-            StoragePath = storagePath;
+            Images = new List<Image>();
+            this.settings = settings;
 
-            pictures = new List<string>();
-            this.imageProcessor = imageProcessor;
-            this.logger = logger;
+            PrepareSession();
         }
 
-        public void AddPicture(string path)
+        public string GetNextImagePath()
         {
-            pictures.Add(path);
-			//Send out an event that a picture was added
-			PictureAdded.Invoke(this, new PictureAddedEventArgs(path, pictures.Count));
+            return Path.Combine(StoragePath, (ImageCount +1) + ".jpg");
         }
 
-        public string Finish()
+        public Image AddPicture(string path)
         {
-            try
+            if (string.IsNullOrWhiteSpace(path))
             {
-				string imagePath = imageProcessor.Process(Id, StoragePath, pictures);
-				Finished.Invoke(this, new PictureAddedEventArgs(imagePath, pictures.Count));
-				return imagePath;
+                throw new ArgumentException("Cannot resolve an image from an empty path");
             }
-            catch (Exception ex)
-            {
-                logger.LogException("Error finishing photo session", ex);
-                return null;
-            }
+            Image image = Image.FromFile(path);
+            Images.Add(image);
+
+            return image;
         }
+
+        #region Helper methods
+        
+        private string PrepareSession()
+        {
+            int sessionIndex = GetNextSessionIndex();
+            string storagePath = GetSessionPath(sessionIndex);
+            
+            //Note: do not catch the exceptions since this is inrecoverable
+            Directory.CreateDirectory(storagePath);
+
+            return storagePath;
+        }
+
+        private int GetNextSessionIndex()
+        {
+            _lastSessionIndex++;
+            //Get the next session storage path which is unused
+            while (Directory.Exists(GetSessionPath(_lastSessionIndex)))
+            {
+                _lastSessionIndex++;
+            }
+            return _lastSessionIndex;
+        }
+
+        private string GetSessionPath(int index)
+        {
+            return Path.Combine(settings.StoragePath, index.ToString(CultureInfo.InvariantCulture));
+        }
+
+        #endregion
+
+        #region IDisposable Members
+
+        public void Dispose()
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
     }
 }
 
