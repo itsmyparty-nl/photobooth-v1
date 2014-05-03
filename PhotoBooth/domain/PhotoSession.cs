@@ -42,6 +42,8 @@ namespace com.prodg.photobooth.domain
         
         public List<Image> Images { get; private set; }
 
+        public Image ResultImage { get; set; }
+
         public int ImageCount { get { return Images.Count; } }
 
         /// <summary>
@@ -105,14 +107,50 @@ namespace com.prodg.photobooth.domain
 
         #endregion
 
-        #region IDisposable Members
+        #region IDisposable Implementation
 
-        public void Dispose()
-        {
-            throw new NotImplementedException();
-        }
+		bool disposed;
 
-        #endregion
+		public void Dispose ()
+		{
+			Dispose (true);
+			GC.SuppressFinalize (this);
+		}
+
+		private void Dispose (bool disposing)
+		{
+		    if (!disposed)
+		    {
+		        if (disposing)
+		        {
+		            // Clean up managed objects
+		            if (Images != null)
+		            {
+		                foreach (var image in Images)
+		                {
+		                    image.Dispose();
+		                }
+		                Images.Clear();
+		                Images = null;
+		            }
+
+		            if (ResultImage != null)
+		            {
+		                ResultImage.Dispose();
+		                ResultImage = null;
+		            }
+		        }
+		        // clean up any unmanaged objects
+		        disposed = true;
+		    }
+		}
+
+		~PhotoSession()
+		{
+			Dispose (false);
+		}
+		
+		#endregion
     }
 }
 

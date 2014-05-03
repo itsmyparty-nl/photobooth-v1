@@ -33,14 +33,14 @@ namespace com.prodg.photobooth.application
             ILogger logger = new ConsoleLogger();
 			IHardware hardware = new HardwareV1(logger);
             IImageProcessor imageProcessor = new CollageImageProcessor(logger,settings);
-		 	var photoBooth = new PhotoBooth(hardware, imageProcessor, logger, settings);
+		 	var photoBooth = new PhotoBoothService(hardware, imageProcessor, logger, settings);
 
 			//Start
-			photoBooth.Start();
+			photoBooth.StartUp();
 			//Wait until the photobooth is finished
 			photoBooth.Finished.WaitOne();
 			//Stop
-			photoBooth.Stop();
+			photoBooth.ShutDown();
 
 			//Keep the application open
 			Console.ReadLine();

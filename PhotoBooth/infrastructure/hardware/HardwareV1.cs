@@ -38,22 +38,22 @@ namespace com.prodg.photobooth.infrastructure.hardware
             commandReceiver = new ConsoleCommandReceiver(logger);
             commandTransmitter = new SerialCommandTransceiver(logger);
 
-            TriggerControl = new RemoteControl(Command.Trigger, commandReceiver, commandTransmitter, logger);
-            PrintControl = new RemoteControl(Command.Print, commandReceiver, commandTransmitter, logger);
-            PowerControl = new RemoteControl(Command.Power, commandReceiver, commandTransmitter, logger);
+            TriggerControl = new RemoteTrigger(Command.Trigger, commandReceiver, commandTransmitter, logger);
+            PrintControl = new RemoteTrigger(Command.Print, commandReceiver, commandTransmitter, logger);
+            PowerControl = new RemoteTrigger(Command.Power, commandReceiver, commandTransmitter, logger);
         }
         
         #region IHardware Members
 
         public ICamera Camera { get; private set; }
 
-        public IRemoteControl TriggerControl { get; private set; }
+        public ITriggerControl TriggerControl { get; private set; }
     
-        public IRemoteControl PrintControl { get; private set; }
+        public ITriggerControl PrintControl { get; private set; }
 
-        public IRemoteControl PowerControl { get; private set; }
+        public ITriggerControl PowerControl { get; private set; }
        
-        public void Initialize()
+        public void Acquire()
         {
             logger.LogInfo("Initializing hardware v1");
 

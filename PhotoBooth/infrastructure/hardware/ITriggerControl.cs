@@ -21,9 +21,9 @@ using System;
 
 namespace com.prodg.photobooth.infrastructure.hardware
 {
-	public class RemoteControlEventArgs : EventArgs
+	public class TriggerControlEventArgs : EventArgs
     {
-        public RemoteControlEventArgs(string id)
+        public TriggerControlEventArgs(string id)
 		{
 			RemoteControlId = id;
 		}
@@ -31,7 +31,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
 		public string RemoteControlId {get; private set;}
     }
 	
-	public interface IRemoteControl: IDisposable
+	public interface ITriggerControl: IDisposable
 	{
 		string Id {get;}
 		
@@ -39,6 +39,6 @@ namespace com.prodg.photobooth.infrastructure.hardware
 		
 		void Release();
 		
-		event EventHandler<RemoteControlEventArgs> Triggered;
+		event EventHandler<TriggerControlEventArgs> Fired;
 	}
 }

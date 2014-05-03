@@ -24,13 +24,13 @@ namespace com.prodg.photobooth.infrastructure.hardware
     {
         ICamera Camera { get;}
 
-        IRemoteControl TriggerControl { get;}
+        ITriggerControl TriggerControl { get;}
         
-        IRemoteControl PrintControl { get;}
+        ITriggerControl PrintControl { get;}
 
-        IRemoteControl PowerControl { get;}
+        ITriggerControl PowerControl { get;}
 
-        void Initialize();
+        void Acquire();
 
         void Release();
     }

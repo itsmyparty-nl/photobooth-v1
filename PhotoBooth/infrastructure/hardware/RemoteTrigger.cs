@@ -24,7 +24,7 @@ using com.prodg.photobooth.infrastructure.command;
 
 namespace com.prodg.photobooth.infrastructure.hardware
 {
-    public class RemoteControl : IRemoteControl
+    public class RemoteTrigger : ITriggerControl
     {
         private readonly ICommandReceiver commandReceiver;
         private readonly ICommandTransmitter commandTransmitter;
@@ -32,7 +32,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
         private readonly Command command;
         private bool prepared;
 
-        public RemoteControl(Command command,
+        public RemoteTrigger(Command command,
             ICommandReceiver commandReceiver, ICommandTransmitter commandTransmitter, ILogger logger)
         {
             Id = command.ToString();
@@ -75,16 +75,16 @@ namespace com.prodg.photobooth.infrastructure.hardware
             prepared = false;
         }
 
-        public event EventHandler<RemoteControlEventArgs> Triggered;
+        public event EventHandler<TriggerControlEventArgs> Fired;
 
         #endregion
 
         private void OnCommandReceived(object sender, CommandReceivedEventArgs e)
         {
             //Only handle a single button type: the one that's configured
-            if (e.Command.Equals(command) && Triggered != null)
+            if (e.Command.Equals(command) && Fired != null)
             {
-               Triggered.Invoke(this, new RemoteControlEventArgs(Id)); 
+               Fired.Invoke(this, new TriggerControlEventArgs(Id)); 
             }
         }
 
@@ -112,7 +112,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
 			}
 		}
 
-		~RemoteControl()
+		~RemoteTrigger()
 		{
 			Dispose (false);
 		}
