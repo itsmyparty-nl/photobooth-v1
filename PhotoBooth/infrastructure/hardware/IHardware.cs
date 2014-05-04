@@ -20,7 +20,7 @@
 using System;
 namespace com.prodg.photobooth.infrastructure.hardware
 {
-    public interface IHardware: IDisposable
+    public interface IHardware
     {
         ICamera Camera { get;}
 

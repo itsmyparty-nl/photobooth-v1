@@ -16,36 +16,64 @@
   Copyright 2014 Patrick Bronneberg
 */
 #endregion
-using System;
 
 namespace com.prodg.photobooth.config
 {
+    /// <summary>
+    /// Interface for the photobooth settings
+    /// </summary>
     public interface ISettings
     {
         #region Command Messenger part
 
+        /// <summary>
+        /// The name of the serial port connection to the hardware e.g. COM1 on Windows or /dev/tty0 on linux
+        /// </summary>
         string SerialPortName { get; }
 
+        /// <summary>
+        /// The baud rate of the serial port connection to the hardware e.g. 9600
+        /// </summary>
         int SerialPortBaudRate { get; }
 
+        /// <summary>
+        /// Enable / disable the Data Terminal Ready (DTR) signal of the serial port connection to the hardware
+        /// </summary>
+        /// <remarks>Data Terminal Ready (DTR) is typically enabled during XON/XOFF software handshaking and
+        ///  Request to Send/Clear to Send (RTS/CTS) hardware handshaking, and modem communications.</remarks>
         bool SerialPortDtrEnable { get; }
 
         #endregion
 
         #region Image storage
 
+        /// <summary>
+        /// The base path for storing images and other related data
+        /// </summary>
         string StoragePath { get; }
 
         #endregion
 
-        #region Image processing
+        #region Collage image processing
 
+        /// <summary>
+        /// The grid Width of the collage created by the collage image processer (default: 2)
+        /// </summary>
         int CollageGridWidth { get; }
 
+        /// <summary>
+        /// The grid Height of the collage created by the collage image processer (default: 2)
+        /// </summary>
         int CollageGridHeight { get; }
 
+        /// <summary>
+        /// The scaling percentage for input images to be used in the collageby the collage image processer (default: 0.25) 
+        /// </summary>
         float CollageScalePercentage { get; }
 
+        /// <summary>
+        /// The number of pixels to pad outside of images in the collageby the collage image processer (default: 30) 
+        /// </summary>
         int CollagePaddingPixels { get; }
 
         #endregion

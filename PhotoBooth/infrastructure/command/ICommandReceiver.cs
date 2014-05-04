@@ -37,5 +37,7 @@ namespace com.prodg.photobooth.infrastructure.command
         event EventHandler<CommandReceivedEventArgs> CommandReceived;
         
         void Subscribe(Command command);
+
+        void UnSubscribe(Command command);
     }
 }

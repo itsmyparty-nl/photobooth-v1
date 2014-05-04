@@ -16,7 +16,6 @@
 */
 #endregion
 
-
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -52,7 +51,7 @@ namespace com.prodg.photobooth.infrastructure.command
 
         #region ICommandReceiver Members
 
-        public void Start()
+        public void Initialize()
         {
             if (running || listenerThread != null)
             {
@@ -64,7 +63,7 @@ namespace com.prodg.photobooth.infrastructure.command
             logger.LogInfo(String.Format(CultureInfo.InvariantCulture, "{0}: Started", Id));
         }
 
-        public void Stop()
+        public void DeInitialize()
         {
             if (running && listenerThread != null)
             {
@@ -81,9 +80,24 @@ namespace com.prodg.photobooth.infrastructure.command
         {
             if (!commandKeyMapping.ContainsKey(command))
             {
-                throw new NotSupportedException("The provided command is not supported: " + command.ToString());
+                throw new NotSupportedException("The provided command is not supported: " + command);
             }
-            subscriptions.Add(commandKeyMapping[command]);
+            if (!subscriptions.Contains(commandKeyMapping[command]))
+            {
+                subscriptions.Add(commandKeyMapping[command]);
+            }
+        }
+
+        public void UnSubscribe(Command command)
+        {
+            if (!commandKeyMapping.ContainsKey(command))
+            {
+                throw new NotSupportedException("The provided command is not supported: " + command);
+            }
+            if (subscriptions.Contains(commandKeyMapping[command]))
+            {
+                subscriptions.Remove(commandKeyMapping[command]);
+            }            
         }
 
         #endregion
@@ -132,7 +146,7 @@ namespace com.prodg.photobooth.infrastructure.command
                 if (disposing)
                 {
                     // Clean up managed objects
-                    Stop();
+                    DeInitialize();
                 }
                 // clean up any unmanaged objects
                 disposed = true;

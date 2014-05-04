@@ -73,9 +73,9 @@ namespace com.prodg.photobooth.domain
             hardware.PowerControl.Fired += OnPowerControlTriggered;
 
             //Start with the trigger control and power control armed
-            hardware.TriggerControl.Prepare();
-            hardware.PowerControl.Prepare();
-            hardware.PrintControl.Release();
+            hardware.TriggerControl.ArmTrigger();
+            hardware.PowerControl.ArmTrigger();
+            hardware.PrintControl.ReleaseTrigger();
         }
 
         /// <summary>
@@ -86,9 +86,9 @@ namespace com.prodg.photobooth.domain
             logger.LogInfo("Stopping Photobooth application model");
 
             //Release all controls 
-            hardware.TriggerControl.Release();
-            hardware.PowerControl.Release();
-            hardware.PrintControl.Release();
+            hardware.TriggerControl.ReleaseTrigger();
+            hardware.PowerControl.ReleaseTrigger();
+            hardware.PrintControl.ReleaseTrigger();
 
             //Unsubscribe from all hardware events
             hardware.TriggerControl.Fired += OnTriggerControlTriggered;
@@ -125,7 +125,7 @@ namespace com.prodg.photobooth.domain
             try
             {
                 //Release the print button to prevent printing twice
-                hardware.PrintControl.Release();
+                hardware.PrintControl.ReleaseTrigger();
                 //Print
                 if (sessionQueue.Count > 0)
                 {
@@ -142,14 +142,14 @@ namespace com.prodg.photobooth.domain
                     return;
                 }
                 //After printing we're ready for the next session
-                hardware.TriggerControl.Prepare();
+                hardware.TriggerControl.ArmTrigger();
             }
             catch (Exception ex)
             {
                 logger.LogException("Error while capturing images", ex);
                 //In case anything went wrong, there's most probably no use in trying again.
                 //Forget about this session and move on to the next
-                hardware.TriggerControl.Prepare();
+                hardware.TriggerControl.ArmTrigger();
             }
         }
 
@@ -160,17 +160,17 @@ namespace com.prodg.photobooth.domain
             try
             {
                 //Release the trigger to prevent double sessions
-                hardware.TriggerControl.Release();
+                hardware.TriggerControl.ReleaseTrigger();
                 //Take pictures and add to the queue
                 sessionQueue.Enqueue(service.Capture());
                 //Afer capturing we're ready for printing
-                hardware.PrintControl.Prepare();
+                hardware.PrintControl.ArmTrigger();
             }
             catch (Exception ex)
             {
                 logger.LogException("Error while capturing images", ex);
                 //In case anything went wrong, forget about this session and move on to the next
-                hardware.TriggerControl.Prepare();
+                hardware.TriggerControl.ArmTrigger();
             }
         }
 

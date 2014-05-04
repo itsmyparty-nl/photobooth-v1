@@ -31,13 +31,13 @@ namespace com.prodg.photobooth.infrastructure.hardware
 		public string RemoteControlId {get; private set;}
     }
 	
-	public interface ITriggerControl: IDisposable
+	public interface ITriggerControl: IHardwareController
 	{
 		string Id {get;}
 		
-		void Prepare();
+		void ArmTrigger();
 		
-		void Release();
+		void ReleaseTrigger();
 		
 		event EventHandler<TriggerControlEventArgs> Fired;
 	}

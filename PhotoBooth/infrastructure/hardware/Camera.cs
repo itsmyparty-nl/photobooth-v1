@@ -42,7 +42,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
 			initialized = false;
 		}
 
-		public bool Initialize ()
+		public void Initialize ()
 		{
 			logger.LogInfo ("Initializing camera");
 			try {
@@ -70,13 +70,32 @@ namespace com.prodg.photobooth.infrastructure.hardware
 				logger.LogInfo ("operations: " + abilities.operations.ToString ());
 				
 				initialized = true;
-				return true;
 				
 			} catch (Exception exception) {
 				logger.LogException ("Could not initialize camera", exception);
-				return false;
+			    throw;
 			}
 		}
+
+	    public void DeInitialize()
+	    {
+            logger.LogInfo("DeInitializing camera");
+	        
+            if (context != null)
+	        {
+	            if (camera != null)
+	            {
+	                try
+	                {
+	                    camera.Exit(context);
+	                }
+	                catch (Exception)
+	                {
+	                    logger.LogWarning("Could not Exit camera from context");
+	                }
+	            }
+	        }
+	    }
 
 	    public bool Capture(string capturePath)
 	    {
@@ -163,17 +182,13 @@ namespace com.prodg.photobooth.infrastructure.hardware
 		private void DisposeCameraObjects ()
 		{
 			try {
-				if (context != null) {
-					if (camera != null) {
-						try {
-							camera.Exit (context);
-						} catch (Exception) {
-							logger.LogWarning ("Could not Exit camera from context");
-						} finally {
-							camera.Dispose ();
-							
-						}
-					}
+			    if (camera != null)
+			    {
+			        DeInitialize();
+                    camera.Dispose();
+			    }
+                if (context != null)
+                {
 					context.Dispose ();
 				}
 			} catch (Exception) {

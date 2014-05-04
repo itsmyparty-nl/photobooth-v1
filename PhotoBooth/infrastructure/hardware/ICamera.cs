@@ -21,20 +21,12 @@ using System;
 
 namespace com.prodg.photobooth.infrastructure.hardware
 {
-	public interface ICamera: IDisposable
+	public interface ICamera: IHardwareController, IDisposable
 	{
 		/// <summary>
 		/// The identifier (model) of the camera
 		/// </summary>
 		string Id {get;}
-		
-		/// <summary>
-		/// Initialize the camera and retrieve settings
-		/// </summary>
-		/// <returns>
-		/// A <see cref="System.Boolean"/>
-		/// </returns>
-		bool Initialize();
 		
 		/// <summary>
 		/// Capture a single shot

@@ -34,19 +34,15 @@ namespace com.prodg.photobooth.infrastructure.hardware
 		    Id = "Dummy";
 		}
 
-		public bool Initialize ()
+		public void Initialize ()
 		{
-			logger.LogInfo ("Initializing camera");
-			try
-			{
-			    logger.LogInfo("Found: Dummy Camera");
-				return true;
-				
-			} catch (Exception exception) {
-				logger.LogException ("Could not initialize camera", exception);
-				return false;
-			}
+			logger.LogInfo ("Initializing DUMMY camera");
 		}
+
+	    public void DeInitialize()
+	    {
+            logger.LogInfo("DeInitializing DUMMY camera");
+	    }
 
 	    public bool Capture(string capturePath)
 	    {
@@ -59,7 +55,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
 	        logger.LogInfo("Cleaning camera");
 		}
 
-			#region IDisposable Implementation
+	    #region IDisposable Implementation
 
 		bool disposed;
 
@@ -78,8 +74,6 @@ namespace com.prodg.photobooth.infrastructure.hardware
 				}
 				// clean up any unmanaged objects
 				disposed = true;
-			} else {
-				Console.WriteLine ("Saved us from doubly disposing an object!");
 			}
 		}
 

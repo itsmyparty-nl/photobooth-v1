@@ -34,7 +34,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug</OutputPath>
+    <OutputPath>%24%28SolutionDir%29\bin\Debug\</OutputPath>
     <DefineConstants>DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -44,7 +44,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <DebugType>none</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Release</OutputPath>
+    <OutputPath>%24%28SolutionDir%29\bin\Release\</OutputPath>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <PlatformTarget>x86</PlatformTarget>
@@ -71,30 +71,33 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="config\Settings.cs" />
     <Compile Include="domain\CollageImageProcessor.cs" />
     <Compile Include="config\ISettings.cs" />
-    <Compile Include="domain\PhotoBooth.cs" />
+    <Compile Include="domain\IPhotoBoothModel.cs" />
+    <Compile Include="domain\IPhotoBoothService.cs" />
+    <Compile Include="domain\PhotoBoothService.cs" />
+    <Compile Include="domain\PhotoBoothModel.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="infrastructure\command\ConsoleCommandReceiver.cs" />
     <Compile Include="infrastructure\command\CommandMessengerTransceiver.cs" />
-    <Compile Include="infrastructure\command\SerialCommandTransceiver.cs" />
     <Compile Include="infrastructure\hardware\CameraStub.cs" />
     <Compile Include="infrastructure\hardware\HardwareException.cs" />
-    <Compile Include="infrastructure\hardware\HardwareV2.cs" />
     <Compile Include="infrastructure\hardware\ICamera.cs" />
     <Compile Include="infrastructure\hardware\Camera.cs" />
     <Compile Include="common\ILogger.cs" />
     <Compile Include="common\ConsoleLogger.cs" />
     <Compile Include="domain\IImageProcessor.cs" />
     <Compile Include="infrastructure\command\ICommandReceiver.cs" />
-    <Compile Include="infrastructure\hardware\IRemoteControl.cs" />
+    <Compile Include="infrastructure\hardware\ITriggerControl.cs" />
     <Compile Include="domain\PhotoSession.cs" />
-    <Compile Include="infrastructure\hardware\RemoteControl.cs" />
-    <Compile Include="infrastructure\hardware\HardwareV1.cs" />
+    <Compile Include="infrastructure\hardware\RemoteTrigger.cs" />
+    <Compile Include="infrastructure\hardware\Hardware.cs" />
     <Compile Include="infrastructure\hardware\IHardware.cs" />
     <Compile Include="infrastructure\hardware\IHardwareController.cs" />
     <Compile Include="infrastructure\command\ICommandTransmitter.cs" />

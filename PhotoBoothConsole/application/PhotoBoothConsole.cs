@@ -18,31 +18,47 @@
 #endregion
 
 using System;
+using System.Threading;
 using com.prodg.photobooth.common;
 using com.prodg.photobooth.config;
 using com.prodg.photobooth.domain;
+using com.prodg.photobooth.infrastructure.command;
 using com.prodg.photobooth.infrastructure.hardware;
 
 namespace com.prodg.photobooth.application
 {
 	public static class PhotoBoothConsole
 	{
-		public static void Main (string[] args)
+        private static readonly ManualResetEvent ShutdownRequested = new ManualResetEvent(false);
+        
+        public static void Main (string[] args)
 		{
-		    ISettings settings = null;
+		    //Instantiate all classes
+            ISettings settings = new Settings();
             ILogger logger = new ConsoleLogger();
-			IHardware hardware = new HardwareV1(logger);
+
+            var camera = new CameraStub(logger);
+            var commandMessenger = new CommandMessengerTransceiver(logger, settings);
+            var triggerControl = new RemoteTrigger(Command.Trigger, commandMessenger, commandMessenger, logger);
+            var printControl = new RemoteTrigger(Command.Print, commandMessenger, commandMessenger, logger);
+            var powerControl = new RemoteTrigger(Command.Power, commandMessenger, commandMessenger, logger);
+			IHardware hardware = new Hardware(camera,triggerControl,printControl,powerControl,logger);
+
             IImageProcessor imageProcessor = new CollageImageProcessor(logger,settings);
-		 	var photoBooth = new PhotoBoothService(hardware, imageProcessor, logger, settings);
+		 	IPhotoBoothService photoBoothService = new PhotoBoothService(hardware, imageProcessor, logger, settings);
+		    IPhotoBoothModel photoBooth = new PhotoBoothModel(photoBoothService, hardware, logger);
+
+            //Subscribe to the shutdown requested event 
+            photoBooth.ShutdownRequested += (sender, eventArgs) => ShutdownRequested.Set();
 
 			//Start
-			photoBooth.StartUp();
+			photoBooth.Start();
 			//Wait until the photobooth is finished
-			photoBooth.Finished.WaitOne();
+			ShutdownRequested.WaitOne();
 			//Stop
-			photoBooth.ShutDown();
+			photoBooth.Stop();
 
-			//Keep the application open
+			//Keep the application open to view any console logging
 			Console.ReadLine();
 		}
 	}

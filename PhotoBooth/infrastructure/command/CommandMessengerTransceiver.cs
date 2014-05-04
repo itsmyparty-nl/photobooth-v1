@@ -72,11 +72,16 @@ namespace com.prodg.photobooth.infrastructure.command
             subscriptions.Add(command);
         }
 
+        public void UnSubscribe(Command command)
+        {
+            subscriptions.Remove(command);
+        }
+
         #endregion
 
         #region IHardwareController Members
 
-        public void Start()
+        public void Initialize()
         {
             if (running)
             {
@@ -89,7 +94,7 @@ namespace com.prodg.photobooth.infrastructure.command
             running = true;
         }
 
-        public void Stop()
+        public void DeInitialize()
         {
             logger.LogInfo("Stopping serial command transceiver");
 
@@ -116,7 +121,7 @@ namespace com.prodg.photobooth.infrastructure.command
                 if (disposing)
                 {
                     // Clean up managed objects
-                    Stop();
+                    DeInitialize();
                     
                     if (messenger != null)
                     {

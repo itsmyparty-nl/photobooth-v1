@@ -41,7 +41,6 @@ namespace com.prodg.photobooth.infrastructure.hardware
             this.commandTransmitter = commandTransmitter;
             this.logger = logger;
 
-            commandReceiver.Subscribe(command);
             prepared = false;
         }
 
@@ -49,7 +48,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
 
         public string Id { get; private set; }
 
-        public void Prepare()
+        public void ArmTrigger()
         {
             if (prepared)
             {
@@ -62,7 +61,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
             prepared = true;
         }
 
-        public void Release()
+        public void ReleaseTrigger()
         {
             if (!prepared)
             {
@@ -88,35 +87,20 @@ namespace com.prodg.photobooth.infrastructure.hardware
             }
         }
 
-        	#region IDisposable Implementation
+        #region IHardwareController Members
 
-		bool disposed;
+        public void Initialize()
+        {
+            //Subscribe to the specific command handled by this control
+            commandReceiver.Subscribe(command);
+        }
 
-		public void Dispose ()
-		{
-			Dispose (true);
-			GC.SuppressFinalize (this);
-		}
+        public void DeInitialize()
+        {
+            //Do nothing yet
+            commandReceiver.UnSubscribe(command);
+        }
 
-		private void Dispose (bool disposing)
-		{
-			if (!disposed) {
-				if (disposing) {
-					// Clean up managed objects
-					
-				}
-				// clean up any unmanaged objects
-				disposed = true;
-			} else {
-				Console.WriteLine ("Saved us from doubly disposing an object!");
-			}
-		}
-
-		~RemoteTrigger()
-		{
-			Dispose (false);
-		}
-		
-		#endregion
+        #endregion
     }
 }
