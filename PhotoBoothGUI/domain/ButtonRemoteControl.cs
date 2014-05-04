@@ -1,10 +1,29 @@
-﻿using System;
+﻿#region PhotoBooth - MIT - (c) 2014 Patrick Bronneberg
+/*
+  PhotoBooth - an application to control a DIY photobooth
+
+  Permission is hereby granted, free of charge, to any person obtaining
+  a copy of this software and associated documentation files (the
+  "Software"), to deal in the Software without restriction, including
+  without limitation the rights to use, copy, modify, merge, publish,
+  distribute, sublicense, and/or sell copies of the Software, and to
+  permit persons to whom the Software is furnished to do so, subject to
+  the following conditions:
+
+  The above copyright notice and this permission notice shall be
+  included in all copies or substantial portions of the Software.
+  
+  Copyright 2014 Patrick Bronneberg
+*/
+#endregion
+
+using System;
 using Gtk;
 using com.prodg.photobooth.infrastructure.hardware;
 
 namespace com.prodg.photobooth.domain
 {
-	public class ButtonRemoteControl: IRemoteControl
+	public class ButtonRemoteControl: ITriggerControl
 	{
 		private Button button;
 
@@ -18,27 +37,41 @@ namespace com.prodg.photobooth.domain
 
 		void OnButtonClicked (object sender, EventArgs e)
 		{
-			Triggered.BeginInvoke (this, new RemoteControlEventArgs (Id), (a)=>{},null);
+			Fired.BeginInvoke (this, new TriggerControlEventArgs(Id), (a)=>{},null);
 		}
 
 		public string Id { get; private set;}
 
-		public void Prepare()
-		{
-			button.Visible = true;
-		}
+        #region ITriggerControl Members
 
-		public void Release()
-		{
-			button.Visible = false;
-		}
 
-		public event EventHandler<RemoteControlEventArgs> Triggered;
+        public void ArmTrigger()
+        {
+            button.Visible = true;
+        }
 
-		public void Dispose()
-		{
-			//TODO: Implement
-		}
-	}
+        public void ReleaseTrigger()
+        {
+            button.Visible = false;
+        }
+
+        public event EventHandler<TriggerControlEventArgs> Fired;
+
+        #endregion
+
+        #region IHardwareController Members
+
+        public void Initialize()
+        {
+            //Do nothing
+        }
+
+        public void DeInitialize()
+        {
+            //Do nothing
+        }
+
+        #endregion
+    }
 }
 
