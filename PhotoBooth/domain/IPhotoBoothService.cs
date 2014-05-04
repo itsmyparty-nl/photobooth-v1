@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 
 namespace com.prodg.photobooth.domain
 {
@@ -10,7 +11,7 @@ namespace com.prodg.photobooth.domain
         /// Capture a photo sessio
         /// </summary>
         /// <returns>The session containing the captured and processed images</returns>
-        PhotoSession Capture();
+        Task<PhotoSession> Capture();
 
         /// <summary>
         /// Print a photo session

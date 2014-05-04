@@ -20,6 +20,7 @@
 using System;
 using System.Drawing;
 using System.Globalization;
+using System.Threading.Tasks;
 using com.prodg.photobooth.common;
 using com.prodg.photobooth.config;
 using com.prodg.photobooth.infrastructure.hardware;
@@ -83,7 +84,7 @@ namespace com.prodg.photobooth.domain
         /// Capture a photo session
         /// </summary>
         /// <returns>The session containing the captured and processed images</returns>
-        public PhotoSession Capture()
+        public async Task<PhotoSession> Capture()
         {
             logger.LogInfo("Start Capturing images");
             try

@@ -153,7 +153,7 @@ namespace com.prodg.photobooth.domain
             }
         }
 
-        private void OnTriggerControlTriggered(object sender, TriggerControlEventArgs e)
+        private async void OnTriggerControlTriggered(object sender, TriggerControlEventArgs e)
         {
             logger.LogInfo("Trigger control fired");
   
@@ -162,7 +162,7 @@ namespace com.prodg.photobooth.domain
                 //Release the trigger to prevent double sessions
                 hardware.TriggerControl.ReleaseTrigger();
                 //Take pictures and add to the queue
-                sessionQueue.Enqueue(service.Capture());
+                sessionQueue.Enqueue(await service.Capture());
                 //Afer capturing we're ready for printing
                 hardware.PrintControl.ArmTrigger();
             }
