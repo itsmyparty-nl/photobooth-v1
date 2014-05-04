@@ -134,10 +134,15 @@ namespace com.prodg.photobooth.domain
         /// </summary>
         /// <param name="session"></param>
         public void Print(PhotoSession session)
-        {
-            logger.LogInfo(string.Format(CultureInfo.InvariantCulture, "Start Printing images for session {0}", session.StoragePath));
+		{
+			logger.LogInfo (string.Format (CultureInfo.InvariantCulture, "Start Printing result image for session {0}", session.StoragePath));
             
-            //Printing to be implemented
-        }
+			try {
+				hardware.Printer.Print (session.ResultImage);
+			} catch (Exception ex) {
+				logger.LogException ("Error while printing image", ex);
+			}
+
+		}
     }
 }

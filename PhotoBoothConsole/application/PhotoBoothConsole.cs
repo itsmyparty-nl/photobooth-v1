@@ -38,11 +38,12 @@ namespace com.prodg.photobooth.application
 			ISettings settings = new Settings(logger);
 
             var camera = new CameraStub(logger);
+			var printer = new PrinterStub (logger);
             var commandMessenger = new CommandMessengerTransceiver(logger, settings);
             var triggerControl = new RemoteTrigger(Command.Trigger, commandMessenger, commandMessenger, logger);
             var printControl = new RemoteTrigger(Command.Print, commandMessenger, commandMessenger, logger);
             var powerControl = new RemoteTrigger(Command.Power, commandMessenger, commandMessenger, logger);
-			IHardware hardware = new Hardware(camera,triggerControl,printControl,powerControl,logger);
+			IHardware hardware = new Hardware(camera,printer,triggerControl,printControl,powerControl,logger);
 
             IImageProcessor imageProcessor = new CollageImageProcessor(logger,settings);
 		 	IPhotoBoothService photoBoothService = new PhotoBoothService(hardware, imageProcessor, logger, settings);

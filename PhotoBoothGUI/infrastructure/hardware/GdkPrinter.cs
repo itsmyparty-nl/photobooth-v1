@@ -24,12 +24,12 @@ using com.prodg.photobooth.common;
 
 namespace com.prodg.photobooth.infrastructure.hardware
 {
-	public class GtkPrinter: IPrinter
+	public class GdkPrinter: IPrinter
 	{
 		private readonly ISettings settings;
 		private readonly ILogger logger;
 
-		public GtkPrinter (ISettings settings, ILogger logger)
+		public GdkPrinter (ISettings settings, ILogger logger)
 		{
 			this.settings = settings;
 			this.logger = logger;
@@ -71,6 +71,14 @@ namespace com.prodg.photobooth.infrastructure.hardware
 			};
 
 			print.Run (PrintOperationAction.Print, null);
+		}
+
+		public void Initialize (){
+			//Do nothing
+		}
+
+		public void DeInitialize(){
+			//Do nothing
 		}
 	}
 }

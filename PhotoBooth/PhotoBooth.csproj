@@ -102,6 +102,8 @@
     <Compile Include="infrastructure\hardware\IHardwareController.cs" />
     <Compile Include="infrastructure\command\ICommandTransmitter.cs" />
     <Compile Include="infrastructure\command\Command.cs" />
+    <Compile Include="infrastructure\hardware\IPrinter.cs" />
+    <Compile Include="infrastructure\hardware\PrinterStub.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

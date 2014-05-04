@@ -43,6 +43,7 @@ public partial class MainWindow: Gtk.Window
 
 
 		var camera = new Camera (logger);
+		var printer = new GdkPrinter (settings, logger);
 		//var commandMessenger = new CommandMessengerTransceiver(logger, settings);
 		//var triggerControl = new RemoteTrigger(Command.Trigger, commandMessenger, commandMessenger, logger);
 		//var printControl = new RemoteTrigger(Command.Print, commandMessenger, commandMessenger, logger);
@@ -52,12 +53,11 @@ public partial class MainWindow: Gtk.Window
 		var printControl = new ButtonRemoteControl (Command.Print.ToString (), buttonPrint);
 		var powerControl = new ButtonRemoteControl (Command.Power.ToString (), buttonExit);
         
-		hardware = new Hardware (camera, triggerControl, printControl, powerControl, logger);
+		hardware = new Hardware (camera, printer, triggerControl, printControl, powerControl, logger);
 
 		IImageProcessor imageProcessor = new CollageImageProcessor (logger, settings);
-		IPhotographyService photoService = new PhotographyService (hardware, imageProcessor, logger, settings);
-		IPrintingService printingService = new GdkPrintingService (settings,logger);
-		photoBooth = new PhotoBoothModel (photoService, printingService, hardware, logger);
+		IPhotoBoothService photoService = new PhotoBoothService(hardware, imageProcessor, logger, settings);
+		photoBooth = new PhotoBoothModel (photoService, hardware, logger);
 
 		//Subscribe to the shutdown requested event 
 		photoBooth.ShutdownRequested += OnPhotoBoothShutdownRequested; 

@@ -26,7 +26,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
 	/// <summary>
 	/// The Printer interface
 	/// </summary>
-	public interface IPrinter
+	public interface IPrinter: IHardwareController
 	{
 		/// <summary>
 		/// Print a photo session

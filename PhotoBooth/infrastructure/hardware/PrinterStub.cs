@@ -18,22 +18,35 @@
 #endregion
 
 using System;
+using com.prodg.photobooth.common;
+
 namespace com.prodg.photobooth.infrastructure.hardware
 {
-    public interface IHardware
-    {
-        ICamera Camera { get;}
+	public class PrinterStub: IPrinter
+	{
+		private readonly ILogger logger;
 
-		IPrinter Printer { get;}
+		public PrinterStub (ILogger logger)
+		{
+			this.logger = logger;
+		}
 
-        ITriggerControl TriggerControl { get;}
-        
-        ITriggerControl PrintControl { get;}
+		/// <summary>
+		/// Print an image
+		/// </summary>
+		/// <param name="image"></param>
+		public void Print(System.Drawing.Image image)
+		{
+			logger.LogInfo ("Print ignored by STUB");
+		}
 
-        ITriggerControl PowerControl { get;}
+		public void Initialize (){
+			//Do nothing
+		}
 
-        void Acquire();
-
-        void Release();
-    }
+		public void DeInitialize(){
+			//Do nothing
+		}
+	}
 }
+

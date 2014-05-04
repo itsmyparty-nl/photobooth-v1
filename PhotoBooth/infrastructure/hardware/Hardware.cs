@@ -25,10 +25,11 @@ namespace com.prodg.photobooth.infrastructure.hardware
     {
         private readonly ILogger logger;
 
-        public Hardware(ICamera camera, ITriggerControl triggerControl, ITriggerControl printControl,
+		public Hardware(ICamera camera, IPrinter printer, ITriggerControl triggerControl, ITriggerControl printControl,
             ITriggerControl powerControl, ILogger logger)
         {
             Camera = camera;
+			Printer = printer;
             TriggerControl = triggerControl;
             PrintControl = printControl;
             PowerControl = powerControl;
@@ -38,6 +39,8 @@ namespace com.prodg.photobooth.infrastructure.hardware
         #region IHardware Members
 
         public ICamera Camera { get; private set; }
+
+		public IPrinter Printer { get; private set; }
 
         public ITriggerControl TriggerControl { get; private set; }
 
@@ -50,6 +53,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
             logger.LogInfo("Initializing hardware");
 
             Camera.Initialize();
+			Printer.Initialize ();
             TriggerControl.Initialize();
             PrintControl.Initialize();
             PowerControl.Initialize();
@@ -64,7 +68,8 @@ namespace com.prodg.photobooth.infrastructure.hardware
             PrintControl.ReleaseTrigger();
 
             Camera.DeInitialize();
-            TriggerControl.DeInitialize();
+			Printer.DeInitialize ();
+			TriggerControl.DeInitialize();
             PrintControl.DeInitialize();
             PowerControl.DeInitialize();
         }
