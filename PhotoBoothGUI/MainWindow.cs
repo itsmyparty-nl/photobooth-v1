@@ -18,6 +18,7 @@
 #endregion
 
 using System;
+using System.IO;
 using Gtk;
 using com.prodg.photobooth.config;
 using com.prodg.photobooth.infrastructure.command;
@@ -29,49 +30,50 @@ public partial class MainWindow: Gtk.Window
 {
 	private ILogger logger;
 	private IHardware hardware;
-    private readonly IPhotoBoothModel photoBooth;
+	private readonly IPhotoBoothModel photoBooth;
 
 	public MainWindow () : base (Gtk.WindowType.Toplevel)
 	{
 		Build ();
 		
 		//Initialize the photobooth
-        //Instantiate all classes
-		logger = new TextBoxLogger(textview1.Buffer);
-		ISettings settings = new com.prodg.photobooth.config.Settings(logger);
+		//Instantiate all classes
+		logger = new TextBoxLogger (textview1.Buffer);
+		ISettings settings = new com.prodg.photobooth.config.Settings (logger);
 
 
-        var camera = new Camera(logger);
+		var camera = new Camera (logger);
 		//var commandMessenger = new CommandMessengerTransceiver(logger, settings);
-        //var triggerControl = new RemoteTrigger(Command.Trigger, commandMessenger, commandMessenger, logger);
-        //var printControl = new RemoteTrigger(Command.Print, commandMessenger, commandMessenger, logger);
-        //var powerControl = new RemoteTrigger(Command.Power, commandMessenger, commandMessenger, logger);
+		//var triggerControl = new RemoteTrigger(Command.Trigger, commandMessenger, commandMessenger, logger);
+		//var printControl = new RemoteTrigger(Command.Print, commandMessenger, commandMessenger, logger);
+		//var powerControl = new RemoteTrigger(Command.Power, commandMessenger, commandMessenger, logger);
 
-        var triggerControl = new ButtonRemoteControl(Command.Trigger.ToString(), buttonTrigger);
-        var printControl = new ButtonRemoteControl(Command.Print.ToString(), buttonPrint);
-        var powerControl = new ButtonRemoteControl(Command.Power.ToString(), buttonExit);
+		var triggerControl = new ButtonRemoteControl (Command.Trigger.ToString (), buttonTrigger);
+		var printControl = new ButtonRemoteControl (Command.Print.ToString (), buttonPrint);
+		var powerControl = new ButtonRemoteControl (Command.Power.ToString (), buttonExit);
         
-        hardware = new Hardware(camera, triggerControl, printControl, powerControl, logger);
+		hardware = new Hardware (camera, triggerControl, printControl, powerControl, logger);
 
-        IImageProcessor imageProcessor = new CollageImageProcessor(logger, settings);
-        IPhotoBoothService photoBoothService = new PhotoBoothService(hardware, imageProcessor, logger, settings);
-        photoBooth = new PhotoBoothModel(photoBoothService, hardware, logger);
+		IImageProcessor imageProcessor = new CollageImageProcessor (logger, settings);
+		IPhotographyService photoService = new PhotographyService (hardware, imageProcessor, logger, settings);
+		IPrintingService printingService = new GdkPrintingService (settings,logger);
+		photoBooth = new PhotoBoothModel (photoService, printingService, hardware, logger);
 
-        //Subscribe to the shutdown requested event 
-        photoBooth.ShutdownRequested += OnPhotoBoothShutdownRequested; 
-        photoBoothService.PictureAdded += PhotoBoothServiceOnPictureAdded;
+		//Subscribe to the shutdown requested event 
+		photoBooth.ShutdownRequested += OnPhotoBoothShutdownRequested; 
+		photoService.PictureAdded += PhotoBoothServiceOnPictureAdded;
 
-        //Start
-        photoBooth.Start();
+		//Start
+		photoBooth.Start ();
         
-		statusbar1.Push (1,hardware.Camera.Id);
+		statusbar1.Push (1, hardware.Camera.Id);
 		//textview1.Visible = false;
 		this.Fullscreen ();
 	}
 
-	private void PhotoBoothServiceOnPictureAdded(object sender, PictureAddedEventArgs a)
-    {
-        //Dispose any previous image in the buffer
+	private void PhotoBoothServiceOnPictureAdded (object sender, PictureAddedEventArgs a)
+	{
+		//Dispose any previous image in the buffer
 		//if (imagePhoto.Pixbuf != null)
 		//{
 		//    var pixBuf = imagePhoto.Pixbuf;
@@ -89,20 +91,20 @@ public partial class MainWindow: Gtk.Window
 		//imagePhoto.Show ();
 	}
 
-    void OnPhotoBoothShutdownRequested(object sender, System.EventArgs e)
-    {
-        Stop();
-    }
+	void OnPhotoBoothShutdownRequested (object sender, System.EventArgs e)
+	{
+		Stop ();
+	}
 
-    private void Stop()
-    {
-        photoBooth.Stop();
-        Application.Quit();
-    }
+	private void Stop ()
+	{
+		photoBooth.Stop ();
+		Application.Quit ();
+	}
 
 	protected void OnDeleteEvent (object sender, DeleteEventArgs a)
 	{
-        Stop();
+		Stop ();
 		a.RetVal = true;
 	}
 
