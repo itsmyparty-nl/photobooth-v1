@@ -37,7 +37,7 @@ namespace com.prodg.photobooth.domain
 
 		void OnButtonClicked (object sender, EventArgs e)
 		{
-			Fired.BeginInvoke (this, new TriggerControlEventArgs(Id), (a)=>{},null);
+			Fired.Invoke(this, new TriggerControlEventArgs(Id));
 		}
 
 		public string Id { get; private set;}

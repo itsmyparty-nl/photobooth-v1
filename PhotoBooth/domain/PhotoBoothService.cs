@@ -100,7 +100,7 @@ namespace com.prodg.photobooth.domain
                         //Signal that a new picture was added
                         if (PictureAdded != null)
                         {
-                            PictureAdded.Invoke(this, new PictureAddedEventArgs(image, false));
+							PictureAdded.Invoke(this, new PictureAddedEventArgs(image, false));
                         }
                     }
                     else
@@ -112,11 +112,15 @@ namespace com.prodg.photobooth.domain
                 //Signal that a new picture was added
                 if (PictureAdded != null)
                 {
-                    PictureAdded.Invoke(this, new PictureAddedEventArgs(session.ResultImage, false));
+					PictureAdded.Invoke(this, new PictureAddedEventArgs(session.ResultImage, false));
                 }
                 //Return the session
                 return session;
             }
+			catch (Exception ex) {
+				logger.LogException ("Error while capturing images", ex);
+				return null;
+			}
             finally
             {
                 //Clean all images from the camera buffer

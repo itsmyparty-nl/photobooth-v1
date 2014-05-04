@@ -34,8 +34,8 @@ namespace com.prodg.photobooth.application
         public static void Main (string[] args)
 		{
 		    //Instantiate all classes
-            ISettings settings = new Settings();
-            ILogger logger = new ConsoleLogger();
+			ILogger logger = new ConsoleLogger();
+			ISettings settings = new Settings(logger);
 
             var camera = new CameraStub(logger);
             var commandMessenger = new CommandMessengerTransceiver(logger, settings);

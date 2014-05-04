@@ -28,7 +28,7 @@ namespace PhotoBoothGUI
 		{
 			Application.Init ();
 			MainWindow win = new MainWindow ();
-			win.ModifyBg (StateType.Normal, new Gdk.Color (0,0, 0));
+			//win.ModifyBg (StateType.Normal, new Gdk.Color (0,0, 0));
 			win.Show ();
 			Application.Run ();
 		}

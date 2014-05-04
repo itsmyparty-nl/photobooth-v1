@@ -75,7 +75,6 @@
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
-    <None Include="GPhotoWrapper.dll.config" />
     <None Include="check-camera-list.sh.in" />
     <None Include="check-sizes.sh.in" />
     <None Include="libgphoto2-sharp.pc.in" />

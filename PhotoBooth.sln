@@ -117,7 +117,7 @@ Global
 		{E4DCFEAB-A4B4-4EBC-A2AA-E33901C74235}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
-		StartupItem = PhotoBooth\PhotoBooth.csproj
+		StartupItem = PhotoBoothGUI\PhotoBoothGUI.csproj
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

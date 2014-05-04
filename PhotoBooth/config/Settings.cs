@@ -12,14 +12,16 @@
 
   The above copyright notice and this permission notice shall be
   included in all copies or substantial portions of the Software.
-  
+
   Copyright 2014 Patrick Bronneberg
 */
 #endregion
 
 using System;
+using System.IO;
 using System.Collections.Specialized;
 using System.Configuration;
+using com.prodg.photobooth.common;
 
 namespace com.prodg.photobooth.config
 {
@@ -98,7 +100,7 @@ namespace com.prodg.photobooth.config
         /// Reads in all settings from the app config file of the current application
         /// </para>
         /// </summary>
-        public Settings()
+		public Settings(ILogger logger)
         {
             try
             {
@@ -120,6 +122,19 @@ namespace com.prodg.photobooth.config
                 CollageGridHeight = Convert.ToInt32(appSettings.Get(CollageGridHeightKey));
                 CollageScalePercentage = Convert.ToSingle(appSettings.Get(CollageScalePercentageKey));
                 CollagePaddingPixels = Convert.ToInt32(appSettings.Get(CollagePaddingPixelsKey));
+
+				try
+				{
+				if (!Directory.Exists(StoragePath))
+				{
+						Directory.CreateDirectory(StoragePath);
+				}
+				}
+				catch (Exception ex)
+				{
+					logger.LogException(string.Format(@"Error while creating directory {0}",StoragePath),ex);
+				}
+
             }
             catch (ConfigurationErrorsException e)
             {

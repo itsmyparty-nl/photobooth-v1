@@ -37,11 +37,12 @@ public partial class MainWindow: Gtk.Window
 		
 		//Initialize the photobooth
         //Instantiate all classes
-        ISettings settings = new Settings();
-        logger = new TextBoxLogger(textview1.Buffer);
+		logger = new TextBoxLogger(textview1.Buffer);
+		ISettings settings = new com.prodg.photobooth.config.Settings(logger);
 
-        var camera = new CameraStub(logger);
-        var commandMessenger = new CommandMessengerTransceiver(logger, settings);
+
+        var camera = new Camera(logger);
+		//var commandMessenger = new CommandMessengerTransceiver(logger, settings);
         //var triggerControl = new RemoteTrigger(Command.Trigger, commandMessenger, commandMessenger, logger);
         //var printControl = new RemoteTrigger(Command.Print, commandMessenger, commandMessenger, logger);
         //var powerControl = new RemoteTrigger(Command.Power, commandMessenger, commandMessenger, logger);
@@ -63,25 +64,29 @@ public partial class MainWindow: Gtk.Window
         //Start
         photoBooth.Start();
         
-		//Start
-		photoBooth.Start ();
 		statusbar1.Push (1,hardware.Camera.Id);
 		//textview1.Visible = false;
 		this.Fullscreen ();
 	}
 
-    private void PhotoBoothServiceOnPictureAdded(object sender, PictureAddedEventArgs pictureAddedEventArgs)
+	private void PhotoBoothServiceOnPictureAdded(object sender, PictureAddedEventArgs a)
     {
         //Dispose any previous image in the buffer
-        if (imagePhoto.Pixbuf != null)
-        {
-            var pixBuf = imagePhoto.Pixbuf;
-            imagePhoto.Pixbuf = null;
-            pixBuf.Dispose();
-        }
-        //Set the new image
-        imagePhoto.Pixbuf = new Gdk.Pixbuf(a.PicturePath);
-        ShowAll();
+		//if (imagePhoto.Pixbuf != null)
+		//{
+		//    var pixBuf = imagePhoto.Pixbuf;
+		//    imagePhoto.Pixbuf = null;
+		//    pixBuf.Dispose();
+		//}
+
+		//Set the new image
+		using (System.IO.MemoryStream stream = new System.IO.MemoryStream ()) { 
+			a.Picture.Save (stream, System.Drawing.Imaging.ImageFormat.Bmp); 
+			stream.Position = 0; 
+			imagePhoto.Pixbuf = new Gdk.Pixbuf (stream); 
+		} 
+		//ShowAll();
+		//imagePhoto.Show ();
 	}
 
     void OnPhotoBoothShutdownRequested(object sender, System.EventArgs e)

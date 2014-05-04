@@ -56,12 +56,12 @@ namespace com.prodg.photobooth.domain
             Images = new List<Image>();
             this.settings = settings;
 
-            PrepareSession();
+			StoragePath = PrepareSession();
         }
 
         public string GetNextImagePath()
         {
-            return Path.Combine(StoragePath, (ImageCount +1) + ".jpg");
+			return Path.Combine(StoragePath, String.Format("{0}.jpg",ImageCount +1));
         }
 
         public Image AddPicture(string path)
