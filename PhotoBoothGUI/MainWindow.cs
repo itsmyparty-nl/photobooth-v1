@@ -18,7 +18,9 @@
 #endregion
 
 using System;
+using System.Drawing.Imaging;
 using System.IO;
+using System.Threading.Tasks;
 using Gtk;
 using com.prodg.photobooth.config;
 using com.prodg.photobooth.infrastructure.command;
@@ -39,7 +41,7 @@ public partial class MainWindow: Gtk.Window
 		//Initialize the photobooth
 		//Instantiate all classes
 		logger = new TextBoxLogger (textview1.Buffer);
-		ISettings settings = new com.prodg.photobooth.config.Settings (logger);
+		ISettings settings = new Settings (logger);
 
 
 		var camera = new Camera (logger);
@@ -71,27 +73,45 @@ public partial class MainWindow: Gtk.Window
 		this.Fullscreen ();
 	}
 
-	private void PhotoBoothServiceOnPictureAdded (object sender, PictureAddedEventArgs a)
+	private async void PhotoBoothServiceOnPictureAdded (object sender, PictureAddedEventArgs a)
 	{
-		//Dispose any previous image in the buffer
-		//if (imagePhoto.Pixbuf != null)
-		//{
-		//    var pixBuf = imagePhoto.Pixbuf;
-		//    imagePhoto.Pixbuf = null;
-		//    pixBuf.Dispose();
-		//}
+	    Gtk.Application.Invoke(() =>
+	    {
+	        //Dispose any previous image in the buffer
+	        //if (imagePhoto.Pixbuf != null)
+	        //{
+	        //    var pixBuf = imagePhoto.Pixbuf;
+	        //    imagePhoto.Pixbuf = null;
+	        //    pixBuf.Dispose();
+	        //}
 
-		//Set the new image
-		using (System.IO.MemoryStream stream = new System.IO.MemoryStream ()) { 
-			a.Picture.Save (stream, System.Drawing.Imaging.ImageFormat.Bmp); 
-			stream.Position = 0; 
-			imagePhoto.Pixbuf = new Gdk.Pixbuf (stream); 
-		} 
-		//ShowAll();
-		//imagePhoto.Show ();
+	        //Create and scale the pixbuf
+	        Task<PixBuf> result = await CreateAndScalePicture(a.Picture, imagePhoto.Width);
+
+	        //Set the pixbuf on the UI
+	        imagePhoto.PixBuf = result.Result;
+	        ShowAll();
+	        //imagePhoto.Show ();
+	    });
 	}
 
-	void OnPhotoBoothShutdownRequested (object sender, System.EventArgs e)
+    private async Task<PixBuf> CreateAndScalePicture(System.Drawing.Image picture, int width)
+    {
+        await Task.Run(() =>
+	    {
+	        using (var stream = new MemoryStream())
+	        {
+	            picture.Save(stream, ImageFormat.Bmp);
+	            stream.Position = 0;
+                var pixBuf = new Gdk.Pixbuf(stream);
+
+	            double scale = width/(double) pixBuf.Width;
+                return pixBuf.ScaleSimple((int)(scale * pixBuf.Width), (int)(scale * pixBuf.Height), Gdk.InterpType.Bilinear);
+	        }
+	    });
+	}
+
+	void OnPhotoBoothShutdownRequested (object sender, EventArgs e)
 	{
 		Stop ();
 	}

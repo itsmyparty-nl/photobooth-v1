@@ -87,62 +87,72 @@ namespace com.prodg.photobooth.domain
         public async Task<PhotoSession> Capture()
         {
             logger.LogInfo("Start Capturing images");
-            try
+                
+            return await Task.Run(() =>
             {
-                int failureCount = 0;
-                var session = new PhotoSession(settings);
-
-                while (session.ImageCount < imageProcessor.RequiredImages && failureCount < 3)
+                try
                 {
-                    string imagePath = session.GetNextImagePath();
-                    if (hardware.Camera.Capture(imagePath))
+                    int failureCount = 0;
+                    var session = new PhotoSession(settings);
+
+                    while (session.ImageCount < imageProcessor.RequiredImages && failureCount < 3)
                     {
-                        Image image = session.AddPicture(imagePath);
-                        //Signal that a new picture was added
-                        if (PictureAdded != null)
+                        string imagePath = session.GetNextImagePath();
+                        if (hardware.Camera.Capture(imagePath))
                         {
-							PictureAdded.Invoke(this, new PictureAddedEventArgs(image, false));
+                            Image image = session.AddPicture(imagePath);
+                            //Signal that a new picture was added
+                            if (PictureAdded != null)
+                            {
+                                PictureAdded.Invoke(this, new PictureAddedEventArgs(image, false));
+                            }
+                        }
+                        else
+                        {
+                            failureCount++;
                         }
                     }
-                    else
+                    session.ResultImage = imageProcessor.Process(session);
+                    //Signal that a new picture was added
+                    if (PictureAdded != null)
                     {
-                        failureCount++;
+                        PictureAdded.Invoke(this, new PictureAddedEventArgs(session.ResultImage, false));
                     }
+                    //Return the session
+                    return session;
                 }
-                session.ResultImage = imageProcessor.Process(session);
-                //Signal that a new picture was added
-                if (PictureAdded != null)
+                catch (Exception ex)
                 {
-					PictureAdded.Invoke(this, new PictureAddedEventArgs(session.ResultImage, false));
+                    logger.LogException("Error while capturing images", ex);
+                    return null;
                 }
-                //Return the session
-                return session;
-            }
-			catch (Exception ex) {
-				logger.LogException ("Error while capturing images", ex);
-				return null;
-			}
-            finally
-            {
-                //Clean all images from the camera buffer
-                hardware.Camera.Clean();
-            }
+                finally
+                {
+                    //Clean all images from the camera buffer
+                    hardware.Camera.Clean();
+                }
+            });
         }
 
         /// <summary>
         /// Print a photo session
         /// </summary>
         /// <param name="session"></param>
-        public void Print(PhotoSession session)
+        public async Task Print(PhotoSession session)
 		{
 			logger.LogInfo (string.Format (CultureInfo.InvariantCulture, "Start Printing result image for session {0}", session.StoragePath));
-            
-			try {
-				hardware.Printer.Print (session.ResultImage);
-			} catch (Exception ex) {
-				logger.LogException ("Error while printing image", ex);
-			}
 
+            await Task.Run(() =>
+            {
+                try
+                {
+                    hardware.Printer.Print(session.ResultImage);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogException("Error while printing image", ex);
+                }
+            });
 		}
     }
 }

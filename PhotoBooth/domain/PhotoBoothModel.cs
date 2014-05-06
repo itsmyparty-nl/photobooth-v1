@@ -118,7 +118,7 @@ namespace com.prodg.photobooth.domain
             }
         }
 
-        private void OnPrintControlTriggered(object sender, TriggerControlEventArgs e)
+        private async void OnPrintControlTriggered(object sender, TriggerControlEventArgs e)
         {
             logger.LogInfo("Print control fired");
            
@@ -131,7 +131,7 @@ namespace com.prodg.photobooth.domain
                 {
                     //Get the last sesion from the queue and print it
                     var session = sessionQueue.Dequeue();
-                    service.Print(session);
+                    await service.Print(session);
                     
                     //Dispose the session after printing to release the memory
                     session.Dispose();

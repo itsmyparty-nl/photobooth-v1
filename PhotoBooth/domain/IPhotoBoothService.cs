@@ -17,6 +17,6 @@ namespace com.prodg.photobooth.domain
         /// Print a photo session
         /// </summary>
         /// <param name="session"></param>
-        void Print(PhotoSession session);
+        Task Print(PhotoSession session);
     }
 }
