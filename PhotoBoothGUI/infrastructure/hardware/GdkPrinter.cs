@@ -28,12 +28,38 @@ namespace com.prodg.photobooth.infrastructure.hardware
 	{
 		private readonly ISettings settings;
 		private readonly ILogger logger;
-
+		private Printer printer; 
 		public GdkPrinter (ISettings settings, ILogger logger)
 		{
 			this.settings = settings;
 			this.logger = logger;
+
+			Printer.EnumeratePrinters (new PrinterFunc (EnumeratePrinterFunction),true);
+
+			//Gtk.PaperSize[] PapersSizes =  Gtk.PaperSize.GetPaperSizes(false);
+			//foreach(Gtk.PaperSize pz in PapersSizes){
+			//		logger.LogInfo(pz.Name);
+			//}
+
+			//if (printer == null) {
+			//	throw new Exception ("Printer not found");
+			//}
 		}
+
+		//private Gtk.PrintOperationResult Print(Gtk.PrintOperationAction action, string FileName){
+		//	Gtk.PaperSize PaperSize= new Gtk.PaperSize("na_letter");
+		//		Gtk.PageSetup PageSetup = new Gtk.PageSetup();
+		//		PageSetup.PaperSize=PaperSize;
+		//	Gtk.PrintOperation PrintOperation = new Gtk.PrintOperation();
+		//	PrintOperation.DefaultPageSetup=PageSetup;
+		//	PrintOperation.Unit = Gtk.Unit.Mm;
+			//PrintOperation.BeginPrint+= PrintOperationHandleBeginPrint;
+			//PrintOperation.DrawPage+= PrintOperationHandleDrawPage;
+		//	if(action == Gtk.PrintOperationAction.Export){
+		//		PrintOperation.ExportFilename=FileName;
+		//	}
+			//return PrintOperation.Run(action, win);
+	//}
 
 		/// <summary>
 		/// Print an image
@@ -48,10 +74,21 @@ namespace com.prodg.photobooth.infrastructure.hardware
 				imageBit = stream.ToArray ();
 			}
 
+
 			var print = new PrintOperation ();
 			print.BeginPrint += (obj, a) => {
+				Gtk.PaperSize paperSize= new PaperSize("om_small-photo");
+				Gtk.PageSetup pageSetup = new Gtk.PageSetup();
+				pageSetup.PaperSize=paperSize;
+
+
 				print.NPages = 1;
-				//print.DefaultPageSetup.PaperSize = PaperSize.
+				print.PrintSettings.PaperSize = paperSize;
+				//print.PrintSettings.PaperSize = new PaperSize("na_10x15");
+				print.PrintSettings.Printer = printer.Name;
+				print.Unit = Gtk.Unit.Mm;
+				print.DefaultPageSetup = pageSetup;
+
 			};
 
 			print.DrawPage += (obj, a) => {
@@ -79,6 +116,24 @@ namespace com.prodg.photobooth.infrastructure.hardware
 
 		public void DeInitialize(){
 			//Do nothing
+		}
+
+		public bool EnumeratePrinterFunction(Printer foundPrinter)
+		{
+			if (foundPrinter.Name.Contains ("780")) {
+				logger.LogInfo ("Selected printer:" + foundPrinter.Name);
+				printer = foundPrinter;
+				logger.LogInfo ("Printer active: " + foundPrinter.IsActive); 
+				foreach (PageSetup pageSetup in foundPrinter.ListPapers ()) {
+					PaperSize size = pageSetup.PaperSize;
+					logger.LogInfo ("Paper size: " + size.DisplayName);
+				}
+				return true;
+
+			} else {
+				logger.LogInfo ("Ignored printer:" + foundPrinter.Name);
+				return false;
+			}
 		}
 	}
 }

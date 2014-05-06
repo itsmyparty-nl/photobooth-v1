@@ -55,7 +55,9 @@
     </Reference>
     <Reference Include="Mono.Posix" />
     <Reference Include="System.Drawing" />
-    <Reference Include="Mono.Cairo" />
+    <Reference Include="Mono.Cairo">
+      <Private>True</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="gtk-gui\gui.stetic">

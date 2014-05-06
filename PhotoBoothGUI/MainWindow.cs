@@ -41,7 +41,7 @@ public partial class MainWindow: Gtk.Window
 		//Initialize the photobooth
 		//Instantiate all classes
 		logger = new TextBoxLogger (textview1.Buffer);
-		ISettings settings = new Settings (logger);
+		ISettings settings = new com.prodg.photobooth.config.Settings (logger);
 
 
 		var camera = new Camera (logger);
@@ -73,9 +73,9 @@ public partial class MainWindow: Gtk.Window
 		this.Fullscreen ();
 	}
 
-	private async void PhotoBoothServiceOnPictureAdded (object sender, PictureAddedEventArgs a)
+	private void PhotoBoothServiceOnPictureAdded (object sender, PictureAddedEventArgs a)
 	{
-	    Gtk.Application.Invoke(() =>
+		Gtk.Application.Invoke((b,c) =>
 	    {
 	        //Dispose any previous image in the buffer
 	        //if (imagePhoto.Pixbuf != null)
@@ -86,18 +86,18 @@ public partial class MainWindow: Gtk.Window
 	        //}
 
 	        //Create and scale the pixbuf
-	        Task<PixBuf> result = await CreateAndScalePicture(a.Picture, imagePhoto.Width);
+			var result = CreateAndScalePicture(a.Picture, imagePhoto.Allocation.Width);
 
 	        //Set the pixbuf on the UI
-	        imagePhoto.PixBuf = result.Result;
+			imagePhoto.Pixbuf = result.Result;
 	        ShowAll();
 	        //imagePhoto.Show ();
 	    });
 	}
 
-    private async Task<PixBuf> CreateAndScalePicture(System.Drawing.Image picture, int width)
+	private async Task<Gdk.Pixbuf> CreateAndScalePicture(System.Drawing.Image picture, int width)
     {
-        await Task.Run(() =>
+		return await Task.Run(() =>
 	    {
 	        using (var stream = new MemoryStream())
 	        {
