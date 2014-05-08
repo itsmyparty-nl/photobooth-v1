@@ -49,7 +49,7 @@ void OnUnknownCommand()
 void OnSetLed()
 {
   // Read led state argument, interpret string as boolean
-  ledState = cmdMessenger.readBoolArg();
+  //ledState = cmdMessenger.readBoolArg();
   cmdMessenger.sendCmd(kAcknowledge,ledState);
 }
 
@@ -72,6 +72,10 @@ void setup()
   // Listen on serial connection for messages from the PC
   Serial.begin(115200); 
 
+   // while the serial stream is not open, do nothing:
+  while (!Serial) ;
+
+  cmdMessenger = CmdMessenger(Serial);
   // Adds newline to every command
   //cmdMessenger.printLfCr();   
 
@@ -92,6 +96,9 @@ void loop()
 {
   // Process incoming serial data, and perform callbacks
   cmdMessenger.feedinSerialData();
+  //digitalWrite(kBlinkLed, LOW);
+  //delay(100);
+  //digitalWrite(kBlinkLed, HIGH);
   delay(10);
   blinkLed();
 }

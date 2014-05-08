@@ -24,8 +24,6 @@ namespace com.prodg.photobooth.infrastructure.command
 {
     public interface ICommandTransmitter: IHardwareController, IDisposable
     {
-        void SendCommand(Command buttonType, string context, string value);
         void SendCommand(Command buttonType, string context);
-        void SendCommand(Command buttonType);
     }
 }

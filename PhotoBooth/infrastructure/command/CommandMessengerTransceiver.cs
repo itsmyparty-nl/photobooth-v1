@@ -29,6 +29,12 @@ using CommandMessenger.TransportLayer;
 
 namespace com.prodg.photobooth.infrastructure.command
 {
+    /// <summary>
+    /// Command Messenger Transceiver
+    /// <para>
+    /// This class acts as an adapter between the photobooth application and the command messenger
+    /// </para>
+    /// </summary>
     public class CommandMessengerTransceiver : ICommandReceiver, ICommandTransmitter
     {
         private readonly ILogger logger;
@@ -38,6 +44,11 @@ namespace com.prodg.photobooth.infrastructure.command
         private CmdMessenger messenger;
         private ITransport transport;
 
+        /// <summary>
+        /// C'tor
+        /// </summary>
+        /// <param name="logger"></param>
+        /// <param name="settings"></param>
         public CommandMessengerTransceiver(ILogger logger, ISettings settings)
         {
             this.logger = logger;
@@ -58,9 +69,12 @@ namespace com.prodg.photobooth.infrastructure.command
            
             // Attach to NewLinesReceived for logging purposes
             messenger.NewLineReceived += NewLineReceived;
-
             // Attach to NewLineSent for logging purposes
             messenger.NewLineSent += NewLineSent;
+
+            AttachCommandCallBacks();
+
+            messenger.StartListening();
         }
 
         #region ICommandReceiver Members
@@ -181,26 +195,16 @@ namespace com.prodg.photobooth.infrastructure.command
 
         #region ICommandTransmitter Members
 
-        public void SendCommand(Command commandType, string context, string value)
+        public void SendCommand(Command commandType, string context)
         {
             // Create command FloatAddition, which will wait for a return command FloatAdditionResult
-            var command = new SendCommand((int) commandType, new[] {context, value});
+            var command = new SendCommand((int)commandType, context);
 
             // Send command
             messenger.SendCommand(command);
-            
+
             logger.LogInfo(String.Format(CultureInfo.InvariantCulture, "Sent Command: {0}",
                                          commandType));
-        }
-
-        public void SendCommand(Command buttonType, string context)
-        {
-            SendCommand(buttonType, context, string.Empty);
-        }
-
-        public void SendCommand(Command buttonType)
-        {
-            SendCommand(buttonType, string.Empty, string.Empty);
         }
 
         #endregion

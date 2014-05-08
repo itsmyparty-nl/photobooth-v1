@@ -48,7 +48,7 @@ namespace SendAndReceiveBinaryArguments
             // Create Serial Port object
             _serialTransport = new SerialTransport
             {
-                CurrentSerialSettings = { PortName = "COM6", BaudRate = 115200 } // object initializer
+                CurrentSerialSettings = { PortName = "COM7", BaudRate = 115200, DtrEnable = true} // object initializer
             };
 
             // Initialize the command messenger with the Serial Port transport layer

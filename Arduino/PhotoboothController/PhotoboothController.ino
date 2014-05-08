@@ -8,13 +8,9 @@
 #include <SoftTimer.h>
 #include <SoftPwmTask.h>
 
-// Blinking led variables 
-const int kBlinkLed            = 13;  // Pin of internal Led
-bool ledState                  = 1;   // Current state of Led
-float ledFrequency             = 1.0; // Current blink frequency of Led
-unsigned long intervalOn;
-unsigned long intervalOff;
-unsigned long prevBlinkTime = 0;
+// status heartbeat led variables 
+const int ledPin            = 13;  // Pin of internal Led
+bool ledState               = 1;   // Current state of Led
 
 bool triggerBtnPushed = false;
 bool printBtnPushed = false;
@@ -39,14 +35,10 @@ bool powerBtnPushed = false;
 #define powerBtnPin  INPUT_PIN_2
 #define printBtnPin  INPUT_PIN_3
 
-#define TRIGGERBUTTON 60
-#define POWERBUTTON 70
-#define PRINTBUTTON 80
-
-Task buttonTaskTrigger(20, buttonReadTrigger);
-Task buttonTaskPrint(20, buttonReadPrint);
-Task buttonTaskPower(20, buttonReadPower);
-Task commandHandlerTask(20, readSerial);
+Task buttonTaskTrigger(110, buttonReadTrigger);
+Task buttonTaskPrint(80, buttonReadPrint);
+Task buttonTaskPower(90, buttonReadPower);
+Task commandHandlerTask(500, readSerial);
 
 // Attach a new CmdMessenger object to the default Serial port
 CmdMessenger cmdMessenger = CmdMessenger(Serial);
@@ -57,9 +49,9 @@ enum
 {
   kAcknowledge,
   kError,
-  kPower,
   kTrigger,
   kPrint,
+  kPower,
   kPrepareControl,
   kReleaseControl
 };
@@ -87,16 +79,16 @@ void OnPrepareControl()
   control = cmdMessenger.readIntArg();
   switch (control)
   {
-    case TRIGGERBUTTON:
-      SoftTimer.remove(&buttonTaskTrigger);
+    case kTrigger:
+      SoftTimer.add(&buttonTaskTrigger);
       digitalWrite(triggerBtnLed, HIGH);
       break;
-    case POWERBUTTON:
-      SoftTimer.remove(&buttonTaskPower);
+    case kPower:
+      SoftTimer.add(&buttonTaskPower);
       digitalWrite(powerBtnLed, HIGH);
       break;
-    case PRINTBUTTON:
-      SoftTimer.remove(&buttonTaskPrint);
+    case kPrint:
+      SoftTimer.add(&buttonTaskPrint);
       digitalWrite(printBtnLed, HIGH);
       break;
     default:
@@ -114,15 +106,15 @@ void OnReleaseControl()
   control = cmdMessenger.readIntArg();
   switch (control)
   {
-    case TRIGGERBUTTON:
+    case kTrigger:
       SoftTimer.remove(&buttonTaskTrigger);
       digitalWrite(triggerBtnLed, LOW);
       break;
-    case POWERBUTTON:
+    case kPower:
       SoftTimer.remove(&buttonTaskPower);
       digitalWrite(powerBtnLed, LOW);
       break;
-    case PRINTBUTTON:
+    case kPrint:
       SoftTimer.remove(&buttonTaskPrint);
       digitalWrite(printBtnLed, LOW);
       break;
@@ -146,7 +138,8 @@ void setup()
   
   // Listen on serial connection for messages from the PC
   Serial.begin(115200); 
-
+  // Wait until the serial connection is present
+  //while (!Serial) ;
   // Adds newline to every command
   //cmdMessenger.printLfCr();   
 
@@ -159,7 +152,7 @@ void setup()
   cmdMessenger.sendCmd(kAcknowledge,"Arduino has started!");
 
   // set pin for blink LED
-  pinMode(kBlinkLed, OUTPUT);
+  pinMode(ledPin, OUTPUT);
   
   SoftTimer.add(&commandHandlerTask);
 }
@@ -169,7 +162,9 @@ void readSerial(Task* me)
 {
   // Process incoming serial data, and perform callbacks
   cmdMessenger.feedinSerialData();
-  blinkLed();
+  // Show a heartbeat to know that command processing is not frozen
+  ledState = ledState ? LOW :HIGH;
+  digitalWrite(ledPin, ledState);
 }
 
 void buttonReadTrigger(Task* me)
@@ -187,23 +182,11 @@ void buttonReadPower(Task* me)
   readButton(powerBtnPin,kPower, &powerBtnPushed);
 }
 
-// Returns if it has been more than interval (in ms) ago. Used for periodic actions
-bool blinkLed() {
-  if (  millis() - prevBlinkTime > intervalOff ) {
-    // Turn led off during halfway interval
-    prevBlinkTime = millis();
-    digitalWrite(kBlinkLed, LOW);
-  } else if (  millis() - prevBlinkTime > intervalOn ) {
-    // Turn led on at end of interval (if led state is on)
-    digitalWrite(kBlinkLed, ledState?HIGH:LOW);
-  } 
-}
-
 void readButton(int inputPin, int buttonCommand, bool* wasPushed)
 {
   // read the state of the pushbutton value:
   int buttonState = digitalRead(inputPin);
-
+  
   // check if the pushbutton is pressed.
   // if it is, the buttonState is HIGH:
   if (buttonState == HIGH) {

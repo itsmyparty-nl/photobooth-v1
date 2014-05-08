@@ -19,6 +19,13 @@
 
 namespace com.prodg.photobooth.infrastructure.command
 {
+    /// <summary>
+    /// Commands to be sent / received via the command messenger
+    /// </summary>
+    /// <remarks>
+    /// The order of the enum determines the interface, therefore the order should
+    /// never be changed single-sidedly.
+    /// </remarks>
     public enum Command
     {
         #region Generic commands

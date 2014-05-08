@@ -24,18 +24,34 @@ using com.prodg.photobooth.infrastructure.command;
 
 namespace com.prodg.photobooth.infrastructure.hardware
 {
+    /// <summary>
+    /// The remote trigger
+    /// <para>
+    /// This class represents a trigger (e.g. a button) which is present remotely. It passes commands over via
+    /// a transmitter and receives commands via a receiver.
+    /// </para>
+    /// </summary>
     public class RemoteTrigger : ITriggerControl
     {
         private readonly ICommandReceiver commandReceiver;
         private readonly ICommandTransmitter commandTransmitter;
         private readonly ILogger logger;
         private readonly Command command;
+        private string triggerContext;
         private bool prepared;
 
+        /// <summary>
+        /// C'tor
+        /// </summary>
+        /// <param name="command"></param>
+        /// <param name="commandReceiver"></param>
+        /// <param name="commandTransmitter"></param>
+        /// <param name="logger"></param>
         public RemoteTrigger(Command command,
             ICommandReceiver commandReceiver, ICommandTransmitter commandTransmitter, ILogger logger)
         {
             Id = command.ToString();
+            triggerContext = ((int) command).ToString(CultureInfo.InvariantCulture);
             this.command = command;
             this.commandReceiver = commandReceiver;
             this.commandTransmitter = commandTransmitter;
@@ -56,7 +72,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
                                              "RemoteControl.{0}: Not allowed to prepare twice", Id));
             }
             commandReceiver.CommandReceived += OnCommandReceived;
-            commandTransmitter.SendCommand(Command.PrepareControl, Id, string.Empty);
+            commandTransmitter.SendCommand(Command.PrepareControl, triggerContext);
             
             prepared = true;
         }
@@ -69,7 +85,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
                                              "RemoteControl.{0}: Cannot release when not prepared", Id));
             }
             commandReceiver.CommandReceived -= OnCommandReceived;
-            commandTransmitter.SendCommand(Command.ReleaseControl, Id, string.Empty);
+            commandTransmitter.SendCommand(Command.ReleaseControl, triggerContext);
 
             prepared = false;
         }
