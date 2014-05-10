@@ -48,13 +48,17 @@ public partial class MainWindow
 		w2.Fill = false;
 		// Container child vbox1.Gtk.Box+BoxChild
 		this.GtkScrolledWindow = new global::Gtk.ScrolledWindow ();
+		this.GtkScrolledWindow.HeightRequest = 100;
 		this.GtkScrolledWindow.Name = "GtkScrolledWindow";
 		this.GtkScrolledWindow.ShadowType = ((global::Gtk.ShadowType)(1));
 		// Container child GtkScrolledWindow.Gtk.Container+ContainerChild
 		this.textview1 = new global::Gtk.TextView ();
+		this.textview1.WidthRequest = 700;
+		this.textview1.HeightRequest = 100;
 		this.textview1.CanFocus = true;
 		this.textview1.Name = "textview1";
 		this.textview1.Editable = false;
+		this.textview1.CursorVisible = false;
 		this.GtkScrolledWindow.Add (this.textview1);
 		this.vbox1.Add (this.GtkScrolledWindow);
 		global::Gtk.Box.BoxChild w4 = ((global::Gtk.Box.BoxChild)(this.vbox1 [this.GtkScrolledWindow]));
@@ -118,7 +122,7 @@ public partial class MainWindow
 			this.Child.ShowAll ();
 		}
 		this.DefaultWidth = 1026;
-		this.DefaultHeight = 1005;
+		this.DefaultHeight = 1119;
 		this.Show ();
 		this.DeleteEvent += new global::Gtk.DeleteEventHandler (this.OnDeleteEvent);
 		this.KeyPressEvent += new global::Gtk.KeyPressEventHandler (this.OnKeyPress);

@@ -77,5 +77,9 @@ namespace com.prodg.photobooth.config
         int CollagePaddingPixels { get; }
 
         #endregion
+
+		#region Printing
+		string PrinterName { get; }
+		#endregion
     }
 }

@@ -4,9 +4,15 @@
     <Files>
       <File FileName="PhotoBooth/domain/PhotoBoothService.cs" Line="1" Column="1" />
       <File FileName="PhotoBoothGUI/domain/ButtonRemoteControl.cs" Line="1" Column="1" />
-      <File FileName="PhotoBooth/domain/PhotoBoothModel.cs" Line="165" Column="40" />
+      <File FileName="PhotoBooth/domain/PhotoBoothModel.cs" Line="169" Column="42" />
       <File FileName="PhotoBoothGUI/Program.cs" Line="1" Column="1" />
-      <File FileName="PhotoBoothGUI/MainWindow.cs" Line="110" Column="46" />
+      <File FileName="PhotoBoothGUI/MainWindow.cs" Line="74" Column="5" />
+      <File FileName="CommandMessenger/CmdMessenger.cs" Line="1" Column="1" />
+      <File FileName="CommandMessenger/Command.cs" Line="1" Column="1" />
+      <File FileName="PhotoBoothGUI/App.config" Line="13" Column="10" />
+      <File FileName="PhotoBoothConsole/application/App.config" Line="1" Column="1" />
+      <File FileName="PhotoBooth/PhotoBooth.dll.config" Line="1" Column="1" />
+      <File FileName="PhotoBoothConsole/application/PhotoBoothConsole.cs" Line="24" Column="29" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

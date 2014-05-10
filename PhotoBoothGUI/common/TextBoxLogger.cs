@@ -45,23 +45,31 @@ namespace com.prodg.photobooth.common
 
 		public void LogInfo(string logString)
 		{
-			buffer.Insert(ref insertIter, logString+"\n");
+			Gtk.Application.Invoke ((b, c) => {
+				buffer.Insert (ref insertIter, logString + "\n");
+			});
 		}
 
 		public void LogWarning(string logString)
 		{
-			buffer.InsertWithTagsByName(ref insertIter, "WARNING: "+logString+"\n", Warning);
+			Gtk.Application.Invoke ((b, c) => {
+				buffer.InsertWithTagsByName (ref insertIter, "WARNING: " + logString + "\n", Warning);
+			});
 		}
 
 		public void LogError(string logString)
 		{
-			buffer.InsertWithTagsByName(ref insertIter, "Error: "+logString+"\n", Error);
+			Gtk.Application.Invoke ((b, c) => {
+				buffer.InsertWithTagsByName (ref insertIter, "Error: " + logString + "\n", Error);
+			});
 		}
 
 		public void LogException(string logString, Exception exception)
 		{
-			buffer.InsertWithTagsByName(ref insertIter, "EXCEPTION: "+logString+"\n", Error);
-			buffer.InsertWithTagsByName (ref insertIter, exception.ToString()+"\n", Error);
+			Gtk.Application.Invoke ((b, c) => {
+				buffer.InsertWithTagsByName (ref insertIter, "EXCEPTION: " + logString + "\n", Error);
+				buffer.InsertWithTagsByName (ref insertIter, exception.ToString () + "\n", Error);
+			});
 		}
 	}
 }

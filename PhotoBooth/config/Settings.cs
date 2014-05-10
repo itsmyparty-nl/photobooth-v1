@@ -45,6 +45,7 @@ namespace com.prodg.photobooth.config
         private const string CollageGridHeightKey = "CollageGridHeight";
         private const string CollageScalePercentageKey = "CollageScalePercentage";
         private const string CollagePaddingPixelsKey = "CollagePaddingPixels";
+		private const string PrinterNameKey = "PrinterName";
 
         #endregion
 
@@ -92,6 +93,11 @@ namespace com.prodg.photobooth.config
         /// </summary>
         public int CollagePaddingPixels { get; private set; }
 
+		/// <summary>
+		/// The name of the printer
+		/// </summary>
+		public string PrinterName { get; private set; }
+
         #endregion
 
         /// <summary>
@@ -122,6 +128,7 @@ namespace com.prodg.photobooth.config
                 CollageGridHeight = Convert.ToInt32(appSettings.Get(CollageGridHeightKey));
                 CollageScalePercentage = Convert.ToSingle(appSettings.Get(CollageScalePercentageKey));
                 CollagePaddingPixels = Convert.ToInt32(appSettings.Get(CollagePaddingPixelsKey));
+				PrinterName = appSettings.Get(PrinterNameKey);
 
 				try
 				{

@@ -161,10 +161,12 @@ namespace com.prodg.photobooth.domain
             {
                 //Release the trigger to prevent double sessions
                 hardware.TriggerControl.ReleaseTrigger();
+				hardware.PrintControl.ReleaseTrigger();
                 //Take pictures and add to the queue
                 sessionQueue.Enqueue(await service.Capture());
                 //Afer capturing we're ready for printing
                 hardware.PrintControl.ArmTrigger();
+				hardware.TriggerControl.ArmTrigger();
             }
             catch (Exception ex)
             {

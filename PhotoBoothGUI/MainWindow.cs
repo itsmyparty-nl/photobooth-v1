@@ -44,8 +44,10 @@ public partial class MainWindow: Gtk.Window
 		ISettings settings = new com.prodg.photobooth.config.Settings (logger);
 
 
+		//var camera = new CameraStub (logger);
 		var camera = new Camera (logger);
-		var printer = new GdkPrinter (settings, logger);
+		var printer = new NetPrinter(settings, logger);
+		//var printer = new PrinterStub (logger);
 		//var commandMessenger = new CommandMessengerTransceiver(logger, settings);
 		//var triggerControl = new RemoteTrigger(Command.Trigger, commandMessenger, commandMessenger, logger);
 		//var printControl = new RemoteTrigger(Command.Print, commandMessenger, commandMessenger, logger);
@@ -70,6 +72,7 @@ public partial class MainWindow: Gtk.Window
         
 		statusbar1.Push (1, hardware.Camera.Id);
 		//textview1.Visible = false;
+		//GtkScrolledWindow.Visible = false;
 		this.Fullscreen ();
 	}
 
@@ -77,21 +80,12 @@ public partial class MainWindow: Gtk.Window
 	{
 		Gtk.Application.Invoke((b,c) =>
 	    {
-	        //Dispose any previous image in the buffer
-	        //if (imagePhoto.Pixbuf != null)
-	        //{
-	        //    var pixBuf = imagePhoto.Pixbuf;
-	        //    imagePhoto.Pixbuf = null;
-	        //    pixBuf.Dispose();
-	        //}
-
 	        //Create and scale the pixbuf
 			var result = CreateAndScalePicture(a.Picture, imagePhoto.Allocation.Width);
 
 	        //Set the pixbuf on the UI
 			imagePhoto.Pixbuf = result.Result;
 	        ShowAll();
-	        //imagePhoto.Show ();
 	    });
 	}
 
@@ -113,7 +107,9 @@ public partial class MainWindow: Gtk.Window
 
 	void OnPhotoBoothShutdownRequested (object sender, EventArgs e)
 	{
-		Stop ();
+		Gtk.Application.Invoke ((b, c) => {
+			Stop ();
+		});
 	}
 
 	private void Stop ()

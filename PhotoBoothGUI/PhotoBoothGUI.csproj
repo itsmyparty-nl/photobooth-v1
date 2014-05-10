@@ -73,6 +73,7 @@
     <Compile Include="common\TextBoxLogger.cs" />
     <Compile Include="domain\ButtonRemoteControl.cs" />
     <Compile Include="infrastructure\hardware\GdkPrinter.cs" />
+    <Compile Include="infrastructure\hardware\NetPrinter.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

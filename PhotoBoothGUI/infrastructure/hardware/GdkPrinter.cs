@@ -36,30 +36,15 @@ namespace com.prodg.photobooth.infrastructure.hardware
 
 			Printer.EnumeratePrinters (new PrinterFunc (EnumeratePrinterFunction),true);
 
-			//Gtk.PaperSize[] PapersSizes =  Gtk.PaperSize.GetPaperSizes(false);
-			//foreach(Gtk.PaperSize pz in PapersSizes){
-			//		logger.LogInfo(pz.Name);
-			//}
+			Gtk.PaperSize[] PapersSizes =  Gtk.PaperSize.GetPaperSizes(false);
+			foreach(Gtk.PaperSize pz in PapersSizes){
+					logger.LogInfo(pz.Name);
+			}
 
-			//if (printer == null) {
-			//	throw new Exception ("Printer not found");
-			//}
+			if (printer == null) {
+					throw new Exception ("Printer not found");
+			}
 		}
-
-		//private Gtk.PrintOperationResult Print(Gtk.PrintOperationAction action, string FileName){
-		//	Gtk.PaperSize PaperSize= new Gtk.PaperSize("na_letter");
-		//		Gtk.PageSetup PageSetup = new Gtk.PageSetup();
-		//		PageSetup.PaperSize=PaperSize;
-		//	Gtk.PrintOperation PrintOperation = new Gtk.PrintOperation();
-		//	PrintOperation.DefaultPageSetup=PageSetup;
-		//	PrintOperation.Unit = Gtk.Unit.Mm;
-			//PrintOperation.BeginPrint+= PrintOperationHandleBeginPrint;
-			//PrintOperation.DrawPage+= PrintOperationHandleDrawPage;
-		//	if(action == Gtk.PrintOperationAction.Export){
-		//		PrintOperation.ExportFilename=FileName;
-		//	}
-			//return PrintOperation.Run(action, win);
-	//}
 
 		/// <summary>
 		/// Print an image
@@ -67,48 +52,47 @@ namespace com.prodg.photobooth.infrastructure.hardware
 		/// <param name="image"></param>
 		public void Print(System.Drawing.Image image)
 		{
-			var imageBit = default(byte[]);
+			Gtk.Application.Invoke ((b, c) => {
+				var imageBit = default(byte[]);
 
-			using (System.IO.MemoryStream stream = new System.IO.MemoryStream ()) { 
-				image.Save (stream,  System.Drawing.Imaging.ImageFormat.Bmp);
-				imageBit = stream.ToArray ();
-			}
-
-
-			var print = new PrintOperation ();
-			print.BeginPrint += (obj, a) => {
-				Gtk.PaperSize paperSize= new PaperSize("om_small-photo");
-				Gtk.PageSetup pageSetup = new Gtk.PageSetup();
-				pageSetup.PaperSize=paperSize;
-
-
-				print.NPages = 1;
-				print.PrintSettings.PaperSize = paperSize;
-				//print.PrintSettings.PaperSize = new PaperSize("na_10x15");
-				print.PrintSettings.Printer = printer.Name;
-				print.Unit = Gtk.Unit.Mm;
-				print.DefaultPageSetup = pageSetup;
-
-			};
-
-			print.DrawPage += (obj, a) => {
-				using (PrintContext context = a.Context) {
-					using (var pixBuf = new Gdk.Pixbuf (imageBit, image.Width, image.Height)) {
-						Cairo.Context cr = context.CairoContext;
-
-						cr.MoveTo (0, 0);
-						Gdk.CairoHelper.SetSourcePixbuf (cr, pixBuf, image.Width, image.Height);
-						cr.Paint ();
-
-						((IDisposable)cr).Dispose ();
-					}
+				using (System.IO.MemoryStream stream = new System.IO.MemoryStream ()) { 
+					image.Save (stream, System.Drawing.Imaging.ImageFormat.Bmp);
+					imageBit = stream.ToArray ();
 				}
-			};
-			print.EndPrint += (obj, a) => {
-			};
 
-			print.Run (PrintOperationAction.Print, null);
+				var print = new PrintOperation ();
+				print.BeginPrint += (obj, a) => {
+					Gtk.PaperSize paperSize = new PaperSize ("om_small-photo");
+					Gtk.PageSetup pageSetup = new Gtk.PageSetup ();
+					pageSetup.PaperSize = paperSize;
+
+					print.NPages = 1;
+					print.PrintSettings.PaperSize = paperSize;
+					print.PrintSettings.Printer = settings.PrinterName;
+					print.Unit = Gtk.Unit.Mm;
+					print.DefaultPageSetup = pageSetup;
+				};
+
+				print.DrawPage += (obj, a) => {
+					using (PrintContext context = a.Context) {
+						using (var pixBuf = new Gdk.Pixbuf (imageBit, image.Width, image.Height)) {
+							Cairo.Context cr = context.CairoContext;
+
+							cr.MoveTo (0, 0);
+							Gdk.CairoHelper.SetSourcePixbuf (cr, pixBuf, image.Width, image.Height);
+							cr.Paint ();
+
+							((IDisposable)cr).Dispose ();
+						}
+					}
+				};
+				print.EndPrint += (obj, a) => {
+				};
+
+				print.Run (PrintOperationAction.Print, null);
+			});
 		}
+
 
 		public void Initialize (){
 			//Do nothing
@@ -120,7 +104,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
 
 		public bool EnumeratePrinterFunction(Printer foundPrinter)
 		{
-			if (foundPrinter.Name.Contains ("780")) {
+			if (foundPrinter.Name.Contains (settings.PrinterName)) {
 				logger.LogInfo ("Selected printer:" + foundPrinter.Name);
 				printer = foundPrinter;
 				logger.LogInfo ("Printer active: " + foundPrinter.IsActive); 

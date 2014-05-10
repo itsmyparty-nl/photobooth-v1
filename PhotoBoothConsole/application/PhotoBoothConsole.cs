@@ -37,7 +37,7 @@ namespace com.prodg.photobooth.application
 			ILogger logger = new ConsoleLogger();
 			ISettings settings = new Settings(logger);
 
-            var camera = new CameraStub(logger);
+            var camera = new Camera(logger);
 			var printer = new PrinterStub (logger);
             var commandMessenger = new CommandMessengerTransceiver(logger, settings);
             var triggerControl = new RemoteTrigger(Command.Trigger, commandMessenger, commandMessenger, logger);
