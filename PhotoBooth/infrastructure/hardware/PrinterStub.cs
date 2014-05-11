@@ -17,7 +17,6 @@
 */
 #endregion
 
-using System;
 using com.prodg.photobooth.common;
 
 namespace com.prodg.photobooth.infrastructure.hardware

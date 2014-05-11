@@ -49,7 +49,6 @@ namespace com.prodg.photobooth.domain
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="logger"></param>
         /// <param name="settings"></param>
         public PhotoSession(ISettings settings)
         {

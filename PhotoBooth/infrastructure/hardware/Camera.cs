@@ -183,27 +183,32 @@ namespace com.prodg.photobooth.infrastructure.hardware
 			}
 		}
 
-		private void DisposeCameraObjects ()
-		{
-			try {
-			    if (camera != null)
-			    {
-			        DeInitialize();
-                    camera.Dispose();
-			    }
-                if (context != null)
-                {
-					context.Dispose ();
-				}
-			} catch (Exception) {
-				//Do nothing
-			} finally {
-				context = null;
-				camera = null;
-			}
-		}
+	    private void DisposeCameraObjects()
+	    {
+	        try
+	        {
+	            if (camera != null)
+	            {
+	                DeInitialize();
+	                camera.Dispose();
+	            }
+	            if (context != null)
+	            {
+	                context.Dispose();
+	            }
+	        }
+	        catch (Exception ex)
+	        {
+	            logger.LogException("Exception while disposing camera objects", ex);
+	        }
+	        finally
+	        {
+	            context = null;
+	            camera = null;
+	        }
+	    }
 
-		~Camera ()
+	    ~Camera ()
 		{
 			Dispose (false);
 		}

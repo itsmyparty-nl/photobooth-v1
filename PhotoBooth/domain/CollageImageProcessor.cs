@@ -30,14 +30,14 @@ namespace com.prodg.photobooth.domain
     /// <summary>
     /// An image processor processes a collection of images into a single image
     /// </summary>
-    public class CollageImageProcessor : IImageProcessor
+    public class CollageImageProcessor : IImageProcessor, IDisposable
     {
         private readonly ILogger logger;
         private readonly ISettings settings;
 
         private readonly Color backgroundColor = Color.White;
         private const string CollageFilename = "Collage.jpg";
-        private readonly ImageAttributes attributes;
+        private ImageAttributes attributes;
 
         /// <summary>
         /// <see cref="IImageProcessor.RequiredImages"/>
@@ -123,16 +123,52 @@ namespace com.prodg.photobooth.domain
         private Size CalculateOutputImageSize(Image image)
         {
             //Gridwidth - 1 to get the padding in between. +2 to get borders outside the image
-            int width =
+            var width =
                 (int)
                     ((image.Width * settings.CollageGridWidth) * settings.CollageScalePercentage +
                      (settings.CollageGridWidth + 1) * settings.CollagePaddingPixels);
-            int height =
+            var height =
                 (int)
                     ((image.Height * settings.CollageGridHeight) * settings.CollageScalePercentage +
                      (settings.CollageGridHeight + 1) * settings.CollagePaddingPixels);
 
             return new Size(width, height);
         }
+
+        #region IDisposable Implementation
+
+		bool disposed;
+
+		public void Dispose ()
+		{
+			Dispose (true);
+			GC.SuppressFinalize (this);
+		}
+
+		private void Dispose (bool disposing)
+		{
+		    if (!disposed)
+		    {
+		        if (disposing)
+		        {
+		            // Clean up managed objects
+		            if (attributes != null)
+		            {
+		               attributes.Dispose();
+                       attributes = null;
+		            }
+		        }
+		        // clean up any unmanaged objects
+		        disposed = true;
+		    }
+		}
+
+        ~CollageImageProcessor()
+		{
+			Dispose (false);
+		}
+		
+		#endregion
+
     }
 }

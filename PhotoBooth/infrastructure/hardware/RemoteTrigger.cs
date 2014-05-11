@@ -37,7 +37,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
         private readonly ICommandTransmitter commandTransmitter;
         private readonly ILogger logger;
         private readonly Command command;
-        private string triggerContext;
+        private readonly string triggerContext;
         private bool prepared;
 
         /// <summary>

@@ -18,6 +18,7 @@
 #endregion
 
 using System;
+using System.Drawing.Drawing2D;
 using com.prodg.photobooth.config;
 using com.prodg.photobooth.common;
 using System.Drawing.Printing;
@@ -25,140 +26,139 @@ using System.Drawing;
 
 namespace com.prodg.photobooth.infrastructure.hardware
 {
-	public class NetPrinter: IPrinter
-	{
-		private readonly ISettings settings;
-		private readonly ILogger logger;
-	
-		public NetPrinter (ISettings settings, ILogger logger)
-		{
-			this.settings = settings;
-			this.logger = logger;
-		}
+    /// <summary>
+    /// Printer which prints using the system.drawing.printing functionality provided by .Net
+    /// </summary>
+    public class NetPrinter : IPrinter
+    {
+        private readonly ISettings settings;
+        private readonly ILogger logger;
+        private Image storedImage;
 
-		private Image tempImageStore; 
-		//private PaperSize defaultPaperSize;
-		/// <summary>
-		/// Print an image
-		/// </summary>
-		/// <param name="image"></param>
-		public void Print(System.Drawing.Image image)
-		{
-			try
-			{
-				tempImageStore = new Bitmap(image);
+        public NetPrinter(ISettings settings, ILogger logger)
+        {
+            this.settings = settings;
+            this.logger = logger;
+        }
 
-				using (PrintDocument pd = new PrintDocument ()) {
-					pd.PrintPage += PrintPage;
-					pd.PrinterSettings.PrinterName = settings.PrinterName;
-					PageSettings pageSettings = new PageSettings(pd.PrinterSettings); 
-					pageSettings.PrinterResolution = new PrinterResolution(){X=300,Y=300,Kind=PrinterResolutionKind.High}; 
-					pageSettings.PaperSize = pd.PrinterSettings.PaperSizes[0];
-					pageSettings.Landscape = true;
-					pageSettings.Margins = new Margins(0,0,0,0);
-					pd.DefaultPageSettings = pageSettings;
-					//defaultPaperSize = pd.PrinterSettings.PaperSizes[0];
-					pd.Print();
-				}
-			}
-			catch (Exception ex){
-				logger.LogException ("Error while printing", ex);
-			}
-			finally {
-				if (tempImageStore != null) {
-					//tempImageStore.Dispose ();
-					//tempImageStore = null;
-				}
-			}
-		}
+        /// <summary>
+        /// Print an image
+        /// </summary>
+        /// <param name="image"></param>
+        public void Print(Image image)
+        {
+            try
+            {
+                using (var pd = new PrintDocument())
+                {
+                    pd.PrintPage += PrintPage;
+                    pd.PrinterSettings.PrinterName = settings.PrinterName;
+                    //Set the paper settings before calling print in order to get the correct graphics object
+                    var pageSettings = new PageSettings(pd.PrinterSettings)
+                    {
+                        PrinterResolution = new PrinterResolution {X = 300, Y = 300, Kind = PrinterResolutionKind.High},
+                        //Pick the first papersize
+                        PaperSize = pd.PrinterSettings.PaperSizes[0],
+                        Landscape = true,
+                        Margins = new Margins(0, 0, 0, 0)
+                    };
+                    pd.DefaultPageSettings = pageSettings;
+                    pd.Print();
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogException("Error while printing", ex);
+            }
+            finally
+            {
+                storedImage = null;
+            }
+        }
 
-		private void PrintPage(object o, PrintPageEventArgs e)
-		{
-			logger.LogInfo (String.Format("Printing image ({2}x{3}) on {0}, paper size {1}, bounds ({4},{5}), dpi ({6},{7})", 
-				e.PageSettings.PrinterSettings.PrinterName, e.PageSettings.PaperSize.PaperName, tempImageStore.Width,
-				tempImageStore.Height, e.MarginBounds.Width, e.MarginBounds.Height, e.Graphics.DpiX, e.Graphics.DpiY));
-			e.Graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBilinear;
+        private void PrintPage(object o, PrintPageEventArgs e)
+        {
 
-			var i = tempImageStore;
-			// e.MarginBounds.Width = printable width in PrinterResolution ppi
-			// e.MarginBounds.Height = printable height in PrinterResolution ppi
-			float graphicsWidthPx = ((e.MarginBounds.Width * e.Graphics.DpiX) / 100);
-			float graphicsHeightPx = ((e.MarginBounds.Height * e.Graphics.DpiY) / 100);
-			float widthFactor = i.Width /  graphicsWidthPx;  // Convert to same units (100 ppi) as e.MarginBounds.Width
-			float heightFactor = i.Height / graphicsHeightPx;  // Convert to same units (100 ppi) as e.MarginBounds.Height
+            // e.MarginBounds.Width = printable width in PrinterResolution ppi
+            // e.MarginBounds.Height = printable height in PrinterResolution ppi
+            logger.LogInfo(
+                String.Format("Printing image ({2}x{3}) on {0}, paper size {1}, bounds ({4},{5}), dpi ({6},{7})",
+                    e.PageSettings.PrinterSettings.PrinterName, e.PageSettings.PaperSize.PaperName, storedImage.Width,
+                    storedImage.Height, e.MarginBounds.Width, e.MarginBounds.Height, e.Graphics.DpiX, e.Graphics.DpiY));
 
-			logger.LogInfo (String.Format("GraphicsSize {0},{1} - Factors {2}, {3}", graphicsWidthPx, graphicsHeightPx, widthFactor, heightFactor));
-			float newWidth = 0;
-			float newHeight = 0;
+            //Scale the image and draw it on the print event's graphics object
+            ScaleAndCenterToPage(e.Graphics, e.MarginBounds, storedImage);
 
-			//if (widthFactor > 1 | heightFactor > 1) { // if the image is wider or taller than the printable area then adjust...
-				if (widthFactor > heightFactor) {
-					newWidth = i.Width / widthFactor;
-					newHeight = i.Height / widthFactor;
-				} else {
-					newWidth = i.Width  / heightFactor;
-					newHeight = i.Height / heightFactor;
+            //Tell the print method that this the last and only page 
+            e.HasMorePages = false;
+        }
 
-				}
-			//}
-			logger.LogInfo (String.Format("e.Graphics.DrawImage (i, 0, 0, {0}, {1}", (int)newWidth, (int)newHeight));
-			e.Graphics.DrawImage (i, new RectangleF(0f,0f,i.Width, i.Height), new RectangleF(0f,0f,newWidth, newHeight), GraphicsUnit.Pixel);
-			e.HasMorePages = false;
-			throw new Exception ();
-
-			//e.Cancel = true;
-		}
-	
+        /// <summary>
+        /// Scale and center the image to occupy most of the graphics object while maintaining the aspect ratio
+        /// </summary>
+        /// <remarks>This code is based on the assumption that the dpi properties are set correctly on the graphics object</remarks>
+        protected void ScaleAndCenterToPage(Graphics graphics, Rectangle bounds, Image image)
+        {
+            //Calculate the width in pixels from the bounds width.
+            //According to MSDN, the bounds are defined in 100ths of an inch
+            var graphicsWidthPx = ((bounds.Width*graphics.DpiX)/100);
+            var graphicsHeightPx = ((bounds.Height*graphics.DpiY)/100);
 
 
-//		private void PrintPage_OLD(object o, PrintPageEventArgs e)
-//		{
-//			Point loc = new Point(0, 0);
-//			e.PageSettings.Landscape = false;
-//			e.PageSettings.PaperSize = defaultPaperSize;
-//			e.HasMorePages = false;
-//					
-//			logger.LogInfo (String.Format("Printing image ({2}x{3}) on {0}, paper size {1}, bounds ({4},{5})", 
-//				e.PageSettings.PrinterSettings.PrinterName, e.PageSettings.PaperSize.PaperName, tempImageStore.Width,
-//				tempImageStore.Height));
-//
-//			var img = tempImageStore;
-//			int scaleFac = 100;
-//			while ((scaleFac * img.Width / img.HorizontalResolution > e.PageBounds.Width ||
-//				scaleFac * img.Height / img.VerticalResolution > e.PageBounds.Height) && scaleFac > 2) {
-//				scaleFac -= 1;
-//			}
-//			logger.LogInfo ("Calculated scale: " + scaleFac);
-//			var size =  new SizeF(scaleFac * (img.Width / img.HorizontalResolution), scaleFac* (img.Height / img.VerticalResolution)); 
-//
-//			e.Graphics.DrawImage (tempImageStore, 0, 0, 
-//				e.PageBounds.Width, e.PageBounds.Height); 
-//		}
+            //Calculate the scaling factor in both dimensions
+            var widthFactor = image.Width/graphicsWidthPx;
+            var heightFactor = image.Height/graphicsHeightPx;
 
-		public void Initialize (){
-			//Do nothing
-		}
 
-		public void DeInitialize(){
-			//Do nothing
-		}
+            //Determine in which dimension the image fits after scaling
+            RectangleF destRectangle;
+            if (widthFactor > heightFactor)
+            {
+                //Wide images
+                float startY = (graphicsHeightPx - (image.Height/widthFactor))/2;
+                destRectangle = new RectangleF(0, startY, image.Width/widthFactor, image.Height/widthFactor);
+            }
+            else
+            {
+                //Tall images
+                float startX = (graphicsWidthPx - (image.Width/heightFactor))/2;
+                destRectangle = new RectangleF(startX, 0, image.Width/heightFactor, image.Height/heightFactor);
+            }
 
-		private void LogAvailablePaperSizes()
-		{
-			using (PrintDocument pd = new PrintDocument ()) {
-				pd.PrintPage += PrintPage;
-				pd.PrinterSettings.PrinterName = settings.PrinterName;
-				//PaperSize pkSize;
-				for (int i = 0; i < pd.PrinterSettings.PaperSizes.Count; i++) {
-					var pkSize = pd.PrinterSettings.PaperSizes [i];
-					logger.LogInfo ("Paper name: " + pkSize.PaperName);
-					logger.LogInfo ("Paper kind: " + pkSize.Kind.ToString ());
-					logger.LogInfo ("Paper Width (inch): " + pkSize.Width);
-					logger.LogInfo ("Paper Height (inch): " + pkSize.Height);
-				}
+            //Scale with high quality interpolation to achieve the best print
+            graphics.InterpolationMode = InterpolationMode.HighQualityBilinear;
+            graphics.DrawImage(image, destRectangle, new RectangleF(0f, 0f, image.Width, image.Height),
+                GraphicsUnit.Pixel);
+        }
 
-			}
-		}
-	}
+        public void Initialize()
+        {
+            //Do nothing
+        }
+
+        public void DeInitialize()
+        {
+            //Do nothing
+        }
+
+        private void LogAvailablePaperSizes()
+        {
+            using (var pd = new PrintDocument())
+            {
+                pd.PrintPage += PrintPage;
+                pd.PrinterSettings.PrinterName = settings.PrinterName;
+                //PaperSize pkSize;
+                for (int i = 0; i < pd.PrinterSettings.PaperSizes.Count; i++)
+                {
+                    var pkSize = pd.PrinterSettings.PaperSizes[i];
+                    logger.LogInfo("Paper name: " + pkSize.PaperName);
+                    logger.LogInfo("Paper kind: " + pkSize.Kind.ToString());
+                    logger.LogInfo("Paper Width (inch): " + pkSize.Width);
+                    logger.LogInfo("Paper Height (inch): " + pkSize.Height);
+                }
+
+            }
+        }
+    }
 }
 

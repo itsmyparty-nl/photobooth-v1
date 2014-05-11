@@ -17,7 +17,6 @@
 */
 #endregion
 
-using System;
 namespace com.prodg.photobooth.infrastructure.hardware
 {
     public interface IHardware

@@ -17,9 +17,7 @@
 */
 #endregion
 
-using System;
 using System.Drawing;
-using System.Threading.Tasks;
 
 namespace com.prodg.photobooth.infrastructure.hardware
 {
@@ -31,7 +29,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
 		/// <summary>
 		/// Print a photo session
 		/// </summary>
-		/// <param name="session"></param>
+        /// <param name="image"></param>
 		void Print(Image image);
 	}
 }
