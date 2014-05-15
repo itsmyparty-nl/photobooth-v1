@@ -6,7 +6,8 @@
 
 #include <CmdMessenger.h>  // CmdMessenger
 #include <SoftTimer.h>
-#include <SoftPwmTask.h>
+#include <HeartBeat.h>
+#include <BlinkTask.h>
 
 // status heartbeat led variables 
 const int ledPin            = 13;  // Pin of internal Led
@@ -39,6 +40,10 @@ Task buttonTaskTrigger(110, buttonReadTrigger);
 Task buttonTaskPrint(80, buttonReadPrint);
 Task buttonTaskPower(90, buttonReadPower);
 Task commandHandlerTask(500, readSerial);
+
+Heartbeat triggerLedTask(triggerBtnLed);
+BlinkTask printLedTask(printBtnLed);
+BlinkTask powerLedTask(powerBtnLed);
 
 // Attach a new CmdMessenger object to the default Serial port
 CmdMessenger cmdMessenger = CmdMessenger(Serial);
@@ -81,7 +86,7 @@ void OnPrepareControl()
   {
     case kTrigger:
       SoftTimer.add(&buttonTaskTrigger);
-      digitalWrite(triggerBtnLed, HIGH);
+      SoftTimer.add(&triggerLedTask);
       break;
     case kPower:
       SoftTimer.add(&buttonTaskPower);
@@ -89,7 +94,7 @@ void OnPrepareControl()
       break;
     case kPrint:
       SoftTimer.add(&buttonTaskPrint);
-      digitalWrite(printBtnLed, HIGH);
+      SoftTimer.add(&printLedTask);
       break;
     default:
       cmdMessenger.sendCmd(kError,"Unsupported button");
@@ -108,6 +113,7 @@ void OnReleaseControl()
   {
     case kTrigger:
       SoftTimer.remove(&buttonTaskTrigger);
+      SoftTimer.remove(&triggerLedTask);
       digitalWrite(triggerBtnLed, LOW);
       break;
     case kPower:
@@ -116,7 +122,7 @@ void OnReleaseControl()
       break;
     case kPrint:
       SoftTimer.remove(&buttonTaskPrint);
-      digitalWrite(printBtnLed, LOW);
+      SoftTimer.remove(&printLedTask);
       break;
     default:
       cmdMessenger.sendCmd(kError,"Unsupported button");
@@ -204,42 +210,3 @@ void readButton(int inputPin, int buttonCommand, bool* wasPushed)
     } 
   }
 }
-
-////HEARTBEAT BLINKING
-//const int nrOfBlinks = 4;
-//
-//void startHeartbeat(Task* buttonTask, Task* incrementTask)
-//{
-//  // -- Register the increment task.
-//  remainingBlinks = nrOfBlinks;
-//  SoftTimer.remove(&buttonTask);
-//  SoftTimer.add(&incrementTask);
-//}
-//
-//void increment(Task* me) {
-//  pwm.analogWrite(value);
-//  value += 16;
-//  if(value == 0) {
-//    // -- Byte value overflows: 240 + 16 = 0
-//    SoftTimer.remove(&incrementTask);
-//    SoftTimer.add(&decrementTask);
-//  }
-//}
-//
-//void decrement(Task* me) {
-//  value -= 16;
-//  pwm.analogWrite(value);
-//  if(value == 0) {
-//    // -- Floor reached.
-//    SoftTimer.remove(&decrementTask);
-//    remainingBlinks = remainingBlinks -1;
-//    if (remainingBlinks > 0)
-//    {
-//      SoftTimer.add(&incrementTask);
-//    }
-//    else
-//    {
-//      SoftTimer.add(&buttonTask);
-//    }
-//  }
-//}
