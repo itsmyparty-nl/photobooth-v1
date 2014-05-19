@@ -59,9 +59,14 @@ class SoftPwmTask : public Task
     byte _value;
     byte _counter;
     static void step(Task* me);
-    
-    uint8_t _bitMask;
-    volatile uint8_t *_portRegister;
+
+#ifdef __arm__
+	uint32_t _bitMask;
+	volatile RwReg *_portRegister;
+#else  
+	uint8_t _bitMask;
+	volatile uint8_t *_portRegister;
+#endif
 };
 
 #endif

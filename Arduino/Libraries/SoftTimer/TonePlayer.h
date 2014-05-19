@@ -27,6 +27,8 @@
 #ifndef TONEPLAYER_H
 #define TONEPLAYER_H
 
+#ifndef __arm__
+
 #include "Arduino.h"
 #include "Task.h"
 
@@ -67,4 +69,5 @@ class TonePlayer : Task
     static void step(Task* me);
 };
 
+#endif
 #endif

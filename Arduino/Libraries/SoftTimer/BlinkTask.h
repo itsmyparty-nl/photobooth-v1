@@ -112,8 +112,14 @@ class BlinkTask : public Task
     /** Can be STATE_OFF, STATE_ON, STATE_WAIT */
     byte _state;
 
-    uint8_t _bitMask;
-    volatile uint8_t *_portRegister;
+#ifdef __arm__
+	uint32_t _bitMask;
+	volatile RwReg *_portRegister;
+#else  
+	uint8_t _bitMask;
+	volatile uint8_t *_portRegister;
+#endif
+   
 };
 
 #endif

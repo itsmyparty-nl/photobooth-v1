@@ -23,6 +23,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 */
+#ifndef __arm__
 
 #include "TonePlayer.h"
 #include "SoftTimer.h"
@@ -98,3 +99,4 @@ void TonePlayer::step(Task* task) {
   tp->_pos += 2;
 }
 
+#endif

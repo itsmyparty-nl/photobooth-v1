@@ -42,8 +42,8 @@ Task buttonTaskPower(90, buttonReadPower);
 Task commandHandlerTask(500, readSerial);
 
 Heartbeat triggerLedTask(triggerBtnLed);
-BlinkTask printLedTask(printBtnLed);
-BlinkTask powerLedTask(powerBtnLed);
+BlinkTask printLedTask(printBtnLed,1000);
+BlinkTask powerLedTask(powerBtnLed,1000);
 
 // Attach a new CmdMessenger object to the default Serial port
 CmdMessenger cmdMessenger = CmdMessenger(Serial);
