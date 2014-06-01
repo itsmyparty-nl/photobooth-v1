@@ -138,7 +138,7 @@ namespace com.prodg.photobooth.domain
                     await service.Print(session);
                     
                     //Dispose the session after printing to release the memory
-                    session.Dispose();
+                    //session.Dispose();
                 }
                 else
                 {
@@ -175,7 +175,7 @@ namespace com.prodg.photobooth.domain
                     await service.Print(session);
 
                     //Dispose the session after printing to release the memory
-                    session.Dispose();
+                    //session.Dispose();
                 }
                 else
                 {
@@ -208,7 +208,7 @@ namespace com.prodg.photobooth.domain
                 //Clear old pictures from the queue.. to be refactored
                 if (sessionQueue.Count > 0)
                 {
-                    sessionQueue.Dequeue().Dispose();
+                    sessionQueue.Clear();
                 }
 
                 //Take pictures and add to the queue
