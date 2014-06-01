@@ -212,7 +212,7 @@ namespace com.prodg.photobooth.infrastructure.command
         // Callback function that prints that the Arduino has acknowledged
         private void OnAcknowledge(ReceivedCommand arguments)
         {
-            logger.LogInfo("Remote side is ready");
+            logger.LogInfo("Acknowledged: "+arguments.CmdId);
         }
 
         // Callback function that prints that the Arduino has experienced an error

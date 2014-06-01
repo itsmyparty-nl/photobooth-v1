@@ -49,6 +49,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
         {
             try
             {
+                storedImage = image;
                 using (var pd = new PrintDocument())
                 {
                     pd.PrintPage += PrintPage;

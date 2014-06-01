@@ -129,6 +129,7 @@ namespace com.prodg.photobooth.domain
             {
                 //Release the print button to prevent printing twice
                 hardware.PrintControl.ReleaseTrigger();
+                hardware.PrintTwiceControl.ReleaseTrigger();
                 //Print
                 if (sessionQueue.Count > 0)
                 {
