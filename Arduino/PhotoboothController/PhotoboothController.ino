@@ -6,7 +6,7 @@
 
 #include <CmdMessenger.h>  // CmdMessenger
 #include <SoftTimer.h>
-#include <HeartBeat.h>
+#include <Heartbeat.h>
 #include <BlinkTask.h>
 
 // status heartbeat led variables 
@@ -15,6 +15,7 @@ bool ledState               = 1;   // Current state of Led
 
 bool triggerBtnPushed = false;
 bool printBtnPushed = false;
+bool printTwiceBtnPushed = false;
 bool powerBtnPushed = false;
 
 #define INPUT_PIN_1 8
@@ -31,18 +32,22 @@ bool powerBtnPushed = false;
 #define triggerBtnLed  OUT_PIN_1
 #define powerBtnLed  OUT_PIN_2
 #define printBtnLed  OUT_PIN_3
+#define printTwiceBtnLed  OUT_PIN_4
 
 #define triggerBtnPin  INPUT_PIN_1
 #define powerBtnPin  INPUT_PIN_2
 #define printBtnPin  INPUT_PIN_3
+#define printTwiceBtnPin  INPUT_PIN_4
 
 Task buttonTaskTrigger(110, buttonReadTrigger);
 Task buttonTaskPrint(80, buttonReadPrint);
+Task buttonTaskPrintTwice(120, buttonReadPrintTwice);
 Task buttonTaskPower(90, buttonReadPower);
 Task commandHandlerTask(500, readSerial);
 
 Heartbeat triggerLedTask(triggerBtnLed);
 BlinkTask printLedTask(printBtnLed,1000);
+BlinkTask printTwiceLedTask(printTwiceBtnLed,1000);
 BlinkTask powerLedTask(powerBtnLed,1000);
 
 // Attach a new CmdMessenger object to the default Serial port
@@ -58,7 +63,8 @@ enum
   kPrint,
   kPower,
   kPrepareControl,
-  kReleaseControl
+  kReleaseControl,
+  kPrintTwice
 };
 
 // Callbacks define on which received commands we take action
@@ -96,6 +102,10 @@ void OnPrepareControl()
       SoftTimer.add(&buttonTaskPrint);
       SoftTimer.add(&printLedTask);
       break;
+    case kPrintTwice:
+      SoftTimer.add(&buttonTaskPrintTwice);
+      SoftTimer.add(&printTwiceLedTask);
+      break;
     default:
       cmdMessenger.sendCmd(kError,"Unsupported button");
   }
@@ -124,6 +134,10 @@ void OnReleaseControl()
       SoftTimer.remove(&buttonTaskPrint);
       SoftTimer.remove(&printLedTask);
       break;
+    case kPrintTwice:
+      SoftTimer.remove(&buttonTaskPrint);
+      SoftTimer.remove(&printLedTask);
+      break;
     default:
       cmdMessenger.sendCmd(kError,"Unsupported button");
   }
@@ -141,6 +155,11 @@ void setup()
   pinMode(OUT_PIN_2, OUTPUT);
   pinMode(OUT_PIN_3, OUTPUT);
   pinMode(OUT_PIN_4, OUTPUT);
+ 
+  digitalWrite(OUT_PIN_1, LOW);
+  digitalWrite(OUT_PIN_2, LOW);
+  digitalWrite(OUT_PIN_3, LOW);
+  digitalWrite(OUT_PIN_4, LOW);
   
   // Listen on serial connection for messages from the PC
   Serial.begin(115200); 
@@ -181,6 +200,11 @@ void buttonReadTrigger(Task* me)
 void buttonReadPrint(Task* me)
 {
   readButton(printBtnPin,kPrint, &printBtnPushed);
+}
+
+void buttonReadPrintTwice(Task* me)
+{
+  readButton(printTwiceBtnPin,kPrint, &printTwiceBtnPushed);
 }
 
 void buttonReadPower(Task* me)
