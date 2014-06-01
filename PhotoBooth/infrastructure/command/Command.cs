@@ -66,7 +66,12 @@ namespace com.prodg.photobooth.infrastructure.command
         /// <summary>
         /// Release a control
         /// </summary>
-        ReleaseControl
+        ReleaseControl,
         #endregion
+
+        /// <summary>
+        /// Print twice command
+        /// </summary>
+        PrintTwice
     }
 }

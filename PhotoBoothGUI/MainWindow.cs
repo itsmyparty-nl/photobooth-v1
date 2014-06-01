@@ -48,16 +48,17 @@ public partial class MainWindow: Gtk.Window
 		var camera = new Camera (logger);
 		var printer = new NetPrinter(settings, logger);
 		//var printer = new PrinterStub (logger);
-		//var commandMessenger = new CommandMessengerTransceiver(logger, settings);
-		//var triggerControl = new RemoteTrigger(Command.Trigger, commandMessenger, commandMessenger, logger);
-		//var printControl = new RemoteTrigger(Command.Print, commandMessenger, commandMessenger, logger);
-		//var powerControl = new RemoteTrigger(Command.Power, commandMessenger, commandMessenger, logger);
+		var commandMessenger = new CommandMessengerTransceiver(logger, settings);
+		var triggerControl = new RemoteTrigger(Command.Trigger, commandMessenger, commandMessenger, logger);
+		var printControl = new RemoteTrigger(Command.Print, commandMessenger, commandMessenger, logger);
+        var printTwiceControl = new RemoteTrigger(Command.PrintTwice, commandMessenger, commandMessenger, logger);
+        var powerControl = new RemoteTrigger(Command.Power, commandMessenger, commandMessenger, logger);
 
-		var triggerControl = new ButtonRemoteControl (Command.Trigger.ToString (), buttonTrigger);
-		var printControl = new ButtonRemoteControl (Command.Print.ToString (), buttonPrint);
-		var powerControl = new ButtonRemoteControl (Command.Power.ToString (), buttonExit);
+		//var triggerControl = new ButtonRemoteControl (Command.Trigger.ToString (), buttonTrigger);
+		//var printControl = new ButtonRemoteControl (Command.Print.ToString (), buttonPrint);
+		//var powerControl = new ButtonRemoteControl (Command.Power.ToString (), buttonExit);
         
-		hardware = new Hardware (camera, printer, triggerControl, printControl, powerControl, logger);
+		hardware = new Hardware (camera, printer, triggerControl, printControl, printTwiceControl, powerControl, logger);
 
 		IImageProcessor imageProcessor = new CollageImageProcessor (logger, settings);
 		IPhotoBoothService photoService = new PhotoBoothService(hardware, imageProcessor, logger, settings);

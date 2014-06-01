@@ -26,12 +26,13 @@ namespace com.prodg.photobooth.infrastructure.hardware
         private readonly ILogger logger;
 
 		public Hardware(ICamera camera, IPrinter printer, ITriggerControl triggerControl, ITriggerControl printControl,
-            ITriggerControl powerControl, ILogger logger)
+             ITriggerControl printTwiceControl, ITriggerControl powerControl, ILogger logger)
         {
             Camera = camera;
 			Printer = printer;
             TriggerControl = triggerControl;
             PrintControl = printControl;
+            PrintTwiceControl = printTwiceControl;
             PowerControl = powerControl;
             this.logger = logger;
         }
@@ -46,6 +47,8 @@ namespace com.prodg.photobooth.infrastructure.hardware
 
         public ITriggerControl PrintControl { get; private set; }
 
+        public ITriggerControl PrintTwiceControl { get; private set; }
+
         public ITriggerControl PowerControl { get; private set; }
 
         public void Acquire()
@@ -56,6 +59,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
 			Printer.Initialize ();
             TriggerControl.Initialize();
             PrintControl.Initialize();
+            PrintTwiceControl.Initialize();
             PowerControl.Initialize();
         }
 
@@ -66,11 +70,13 @@ namespace com.prodg.photobooth.infrastructure.hardware
             TriggerControl.ReleaseTrigger();
             PowerControl.ReleaseTrigger();
             PrintControl.ReleaseTrigger();
+            PrintTwiceControl.ReleaseTrigger();
 
             Camera.DeInitialize();
 			Printer.DeInitialize ();
 			TriggerControl.DeInitialize();
             PrintControl.DeInitialize();
+            PrintTwiceControl.DeInitialize();
             PowerControl.DeInitialize();
         }
 

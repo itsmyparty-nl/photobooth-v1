@@ -18,6 +18,7 @@ Dimmer dimmer(&pwm, 1500);
 
 void setup() {
   PciManager.registerListener(INPUT_PIN, &debouncer);
+  dimmer.startPulsate();
 }
 
 void onPressed() {

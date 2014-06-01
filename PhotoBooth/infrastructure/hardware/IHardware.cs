@@ -29,7 +29,9 @@ namespace com.prodg.photobooth.infrastructure.hardware
         
         ITriggerControl PrintControl { get;}
 
-        ITriggerControl PowerControl { get;}
+        ITriggerControl PrintTwiceControl { get; }
+
+        ITriggerControl PowerControl { get; }
 
         void Acquire();
 

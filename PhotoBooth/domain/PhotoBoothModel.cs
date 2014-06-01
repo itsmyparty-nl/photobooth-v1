@@ -70,12 +70,14 @@ namespace com.prodg.photobooth.domain
             //
             hardware.TriggerControl.Fired += OnTriggerControlTriggered;
             hardware.PrintControl.Fired += OnPrintControlTriggered;
+            hardware.PrintTwiceControl.Fired += OnPrintTwiceControlTriggered;
             hardware.PowerControl.Fired += OnPowerControlTriggered;
 
             //Start with the trigger control and power control armed
             hardware.TriggerControl.ArmTrigger();
             hardware.PowerControl.ArmTrigger();
             hardware.PrintControl.ReleaseTrigger();
+            hardware.PrintTwiceControl.ReleaseTrigger();
         }
 
         /// <summary>
@@ -93,6 +95,7 @@ namespace com.prodg.photobooth.domain
             //Unsubscribe from all hardware events
             hardware.TriggerControl.Fired += OnTriggerControlTriggered;
             hardware.PrintControl.Fired += OnPrintControlTriggered;
+            hardware.PrintTwiceControl.Fired += OnPrintTwiceControlTriggered;
             hardware.PowerControl.Fired += OnPowerControlTriggered;
 
             //Release the hardware
@@ -153,20 +156,66 @@ namespace com.prodg.photobooth.domain
             }
         }
 
+        private async void OnPrintTwiceControlTriggered(object sender, TriggerControlEventArgs e)
+        {
+            logger.LogInfo("Print twice control fired");
+
+            try
+            {
+                //Release the print button to prevent printing twice
+                hardware.PrintControl.ReleaseTrigger();
+                hardware.PrintTwiceControl.ReleaseTrigger();
+                //Print
+                if (sessionQueue.Count > 0)
+                {
+                    //Get the last sesion from the queue and print it
+                    var session = sessionQueue.Dequeue();
+                    await service.Print(session);
+                    await service.Print(session);
+
+                    //Dispose the session after printing to release the memory
+                    session.Dispose();
+                }
+                else
+                {
+                    logger.LogInfo("Nothing to print");
+                    return;
+                }
+                //After printing we're ready for the next session
+                hardware.TriggerControl.ArmTrigger();
+            }
+            catch (Exception ex)
+            {
+                logger.LogException("Error while printing", ex);
+                //In case anything went wrong, there's most probably no use in trying again.
+                //Forget about this session and move on to the next
+                hardware.TriggerControl.ArmTrigger();
+            }
+        }
+
         private async void OnTriggerControlTriggered(object sender, TriggerControlEventArgs e)
         {
             logger.LogInfo("Trigger control fired");
-  
+
             try
             {
                 //Release the trigger to prevent double sessions
                 hardware.TriggerControl.ReleaseTrigger();
-				hardware.PrintControl.ReleaseTrigger();
+                hardware.PrintControl.ReleaseTrigger();
+                hardware.PrintTwiceControl.ReleaseTrigger();
+
+                //Clear old pictures from the queue.. to be refactored
+                if (sessionQueue.Count > 0)
+                {
+                    sessionQueue.Dequeue().Dispose();
+                }
+
                 //Take pictures and add to the queue
                 sessionQueue.Enqueue(await service.Capture());
                 //Afer capturing we're ready for printing
                 hardware.PrintControl.ArmTrigger();
-				hardware.TriggerControl.ArmTrigger();
+                hardware.PrintTwiceControl.ArmTrigger();
+                hardware.TriggerControl.ArmTrigger();
             }
             catch (Exception ex)
             {
