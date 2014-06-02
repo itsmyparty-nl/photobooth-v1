@@ -7,7 +7,7 @@
     <ProjectGuid>{5D5A94BA-CFF0-4ECF-9971-89AD39E6CE2B}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Test_Photobooth</RootNamespace>
+    <RootNamespace>com.prodg.photobooth</RootNamespace>
     <AssemblyName>Test-Photobooth</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -30,6 +30,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Rhino.Mocks">
+      <HintPath>..\packages\RhinoMocks.3.6.1\lib\net\Rhino.Mocks.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
@@ -50,6 +53,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="domain\TestImageProcessor.cs" />
+    <Compile Include="domain\TestPhotoBoothModel.cs" />
     <Compile Include="infrastructure\hardware\TestNetPrinter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

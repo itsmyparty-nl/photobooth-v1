@@ -59,12 +59,12 @@ namespace com.prodg.photobooth.infrastructure.command
 
         #region Outbound commands
         /// <summary>
-        /// Prepara a control
+        /// Prepare a control so that it can be used and displays this state
         /// </summary>
         PrepareControl,
 
         /// <summary>
-        /// Release a control
+        /// Release a control so that it can no longer be used and displays this state
         /// </summary>
         ReleaseControl,
         #endregion
@@ -72,6 +72,12 @@ namespace com.prodg.photobooth.infrastructure.command
         /// <summary>
         /// Print twice command
         /// </summary>
-        PrintTwice
+        PrintTwice,
+
+        /// <summary>
+        /// Lock a control so that it can not be used temporarily and displays this state
+        /// </summary>
+        /// <remarks>A lock can be unlocked by either a prepare or a release</remarks>
+        LockControl
     }
 }

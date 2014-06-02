@@ -23,7 +23,15 @@ namespace com.prodg.photobooth.common
 {
 	public interface ILogger
 	{
-		/// <summary>
+        /// <summary>
+        /// Log a debug message
+        /// </summary>
+        /// <param name="logString">
+        /// A <see cref="System.String"/>
+        /// </param>
+        void LogDebug(string logString);
+
+        /// <summary>
 		/// Log an info message
 		/// </summary>
 		/// <param name="logString">

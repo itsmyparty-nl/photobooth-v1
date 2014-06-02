@@ -25,6 +25,15 @@ using com.prodg.photobooth.infrastructure.command;
 namespace com.prodg.photobooth.infrastructure.hardware
 {
     /// <summary>
+    /// The states in which the trigger can reside
+    /// </summary>
+    internal enum TriggerState
+    {
+        Released,
+        Armed,
+    }
+    
+    /// <summary>
     /// The remote trigger
     /// <para>
     /// This class represents a trigger (e.g. a button) which is present remotely. It passes commands over via
@@ -38,15 +47,12 @@ namespace com.prodg.photobooth.infrastructure.hardware
         private readonly ILogger logger;
         private readonly Command command;
         private readonly string triggerContext;
-        private bool prepared;
+        private TriggerState currentState;
+        private bool locked;
 
         /// <summary>
         /// C'tor
         /// </summary>
-        /// <param name="command"></param>
-        /// <param name="commandReceiver"></param>
-        /// <param name="commandTransmitter"></param>
-        /// <param name="logger"></param>
         public RemoteTrigger(Command command,
             ICommandReceiver commandReceiver, ICommandTransmitter commandTransmitter, ILogger logger)
         {
@@ -56,38 +62,62 @@ namespace com.prodg.photobooth.infrastructure.hardware
             this.commandReceiver = commandReceiver;
             this.commandTransmitter = commandTransmitter;
             this.logger = logger;
-
-            prepared = false;
         }
 
         #region IRemoteControl Members
 
         public string Id { get; private set; }
 
-        public void ArmTrigger()
+        public void Arm()
         {
-            if (prepared)
-            {
-                logger.LogInfo(String.Format(CultureInfo.InvariantCulture,
-                                             "RemoteControl.{0}: Not allowed to prepare twice", Id));
-            }
+            if (!ChangeState(TriggerState.Armed)) return;
+            
             commandReceiver.CommandReceived += OnCommandReceived;
             commandTransmitter.SendCommand(Command.PrepareControl, triggerContext);
-            
-            prepared = true;
         }
 
-        public void ReleaseTrigger()
+        public void Release()
         {
-            if (!prepared)
-            {
-                logger.LogInfo(String.Format(CultureInfo.InvariantCulture,
-                                             "RemoteControl.{0}: Cannot release when not prepared", Id));
-            }
+            if (!ChangeState(TriggerState.Released)) return;
+            
             commandReceiver.CommandReceived -= OnCommandReceived;
             commandTransmitter.SendCommand(Command.ReleaseControl, triggerContext);
+        }
 
-            prepared = false;
+        public void Lock()
+        {
+            if (locked)
+            {
+                logger.LogDebug(String.Format(CultureInfo.InvariantCulture,
+                                                "RemoteControl.{0}: trying to lock twice, ignored.", Id));
+                return;
+            }
+            
+            commandTransmitter.SendCommand(Command.LockControl, triggerContext);
+            locked = true;
+        }
+
+        public void Unlock()
+        {
+            if (!locked)
+            {
+                logger.LogDebug(String.Format(CultureInfo.InvariantCulture,
+                                                "RemoteControl.{0}: trying to unlock twice, ignored.", Id));
+                return;
+            }
+
+            switch (currentState)
+            {
+                case TriggerState.Released:
+                    commandTransmitter.SendCommand(Command.ReleaseControl, triggerContext);
+                    break;
+                case TriggerState.Armed:
+                    commandTransmitter.SendCommand(Command.PrepareControl, triggerContext);
+                    break;
+                default:
+                    throw new NotSupportedException("TriggerState not supported: " + currentState);
+            }
+            locked = false;
         }
 
         public event EventHandler<TriggerControlEventArgs> Fired;
@@ -97,22 +127,74 @@ namespace com.prodg.photobooth.infrastructure.hardware
         private void OnCommandReceived(object sender, CommandReceivedEventArgs e)
         {
             //Only handle a single button type: the one that's configured
+            if (locked)
+            {
+                logger.LogDebug(String.Format(CultureInfo.InvariantCulture,
+                                            "RemoteControl.{0}: Ignoring received command due to lock", Id));
+                return;
+            }
+
             if (e.Command.Equals(command) && Fired != null)
             {
                Fired.Invoke(this, new TriggerControlEventArgs(Id)); 
             }
         }
 
+        private bool ChangeState(TriggerState newState)
+        {
+            if (newState.Equals(currentState))
+            {
+                 logger.LogDebug(String.Format(CultureInfo.InvariantCulture,
+                                             "RemoteControl.{0}: Ignoring transfer to identical trigger state", Id));
+                return false;
+            }
+
+            switch (currentState)
+            {
+                case TriggerState.Released:
+                    switch (newState)
+                    {
+                        case TriggerState.Armed:
+                            break;
+                        default:
+                            throw new NotSupportedException("TriggerState not supported: " + newState);
+                    }
+                    break;
+                case TriggerState.Armed:
+                    switch (newState)
+                    {
+                        case TriggerState.Armed:
+                            break;
+                        default:
+                            throw new NotSupportedException("TriggerState not supported: " + newState);
+                    }
+                    break;
+                default:
+                    throw new NotSupportedException("TriggerState not supported: " + currentState);
+            }
+
+            //If the state transition is allowed, perform the transition
+            currentState = newState;
+            return true;
+        }
+
+
         #region IHardwareController Members
 
         public void Initialize()
         {
+            currentState = TriggerState.Released;
+            locked = false;
+
             //Subscribe to the specific command handled by this control
             commandReceiver.Subscribe(command);
         }
 
         public void DeInitialize()
         {
+            //First release
+            Release();
+
             //Do nothing yet
             commandReceiver.UnSubscribe(command);
         }

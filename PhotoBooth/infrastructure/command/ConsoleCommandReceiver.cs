@@ -117,7 +117,7 @@ namespace com.prodg.photobooth.infrastructure.command
                     {
                         KeyValuePair<Command, ConsoleKey> commandKey = commandKeyMapping.First(kvp => kvp.Value == consoleKeyInfo.Key);
                         logger.LogInfo(String.Format(CultureInfo.InvariantCulture, "{0}: {1} command received", Id,
-                                                     commandKey.Key.ToString()));
+                                                     commandKey.Key));
 
                         //Only trigger if we have listeners
                         if (CommandReceived != null)

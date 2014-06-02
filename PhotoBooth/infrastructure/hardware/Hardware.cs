@@ -67,10 +67,10 @@ namespace com.prodg.photobooth.infrastructure.hardware
         {
             logger.LogInfo("Releasing hardware");
 
-            TriggerControl.ReleaseTrigger();
-            PowerControl.ReleaseTrigger();
-            PrintControl.ReleaseTrigger();
-            PrintTwiceControl.ReleaseTrigger();
+            TriggerControl.Release();
+            PowerControl.Release();
+            PrintControl.Release();
+            PrintTwiceControl.Release();
 
             Camera.DeInitialize();
 			Printer.DeInitialize ();

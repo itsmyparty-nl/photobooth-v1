@@ -23,7 +23,13 @@ namespace com.prodg.photobooth.common
 {
 	public class ConsoleLogger: ILogger
 	{
-		public void LogInfo(string logString)
+        
+        public void LogDebug(string logString)
+        {
+            Console.WriteLine("DEBUG: " + logString);
+        }
+        
+        public void LogInfo(string logString)
 		{
 			Console.WriteLine(logString);
 		}
@@ -35,7 +41,7 @@ namespace com.prodg.photobooth.common
 
 		public void LogError(string logString)
 		{
-			Console.WriteLine("WARNING: "+logString);
+			Console.WriteLine("ERROR: "+logString);
 		}
 
 		public void LogException(string logString, Exception exception)

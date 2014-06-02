@@ -19,6 +19,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using com.prodg.photobooth.common;
 using com.prodg.photobooth.infrastructure.hardware;
 
@@ -67,17 +68,16 @@ namespace com.prodg.photobooth.domain
             //Acquire the hardware
             hardware.Acquire();
 
-            //
             hardware.TriggerControl.Fired += OnTriggerControlTriggered;
             hardware.PrintControl.Fired += OnPrintControlTriggered;
             hardware.PrintTwiceControl.Fired += OnPrintTwiceControlTriggered;
             hardware.PowerControl.Fired += OnPowerControlTriggered;
 
             //Start with the trigger control and power control armed
-            hardware.TriggerControl.ArmTrigger();
-            hardware.PowerControl.ArmTrigger();
-            hardware.PrintControl.ReleaseTrigger();
-            hardware.PrintTwiceControl.ReleaseTrigger();
+            hardware.TriggerControl.Arm();
+            hardware.PowerControl.Arm();
+            hardware.PrintControl.Release();
+            hardware.PrintTwiceControl.Release();
         }
 
         /// <summary>
@@ -88,9 +88,9 @@ namespace com.prodg.photobooth.domain
             logger.LogInfo("Stopping Photobooth application model");
 
             //Release all controls 
-            hardware.TriggerControl.ReleaseTrigger();
-            hardware.PowerControl.ReleaseTrigger();
-            hardware.PrintControl.ReleaseTrigger();
+            hardware.TriggerControl.Release();
+            hardware.PowerControl.Release();
+            hardware.PrintControl.Release();
 
             //Unsubscribe from all hardware events
             hardware.TriggerControl.Fired += OnTriggerControlTriggered;
@@ -128,32 +128,30 @@ namespace com.prodg.photobooth.domain
             try
             {
                 //Release the print button to prevent printing twice
-                hardware.PrintControl.ReleaseTrigger();
-                hardware.PrintTwiceControl.ReleaseTrigger();
+                hardware.PrintControl.Lock();
+                hardware.PrintTwiceControl.Release();
                 //Print
                 if (sessionQueue.Count > 0)
                 {
                     //Get the last sesion from the queue and print it
                     var session = sessionQueue.Dequeue();
                     await service.Print(session);
-                    
-                    //Dispose the session after printing to release the memory
-                    //session.Dispose();
                 }
                 else
                 {
-                    logger.LogInfo("Print control fired");
-                    return;
+                    logger.LogWarning("Nothing to print");
                 }
-                //After printing we're ready for the next session
-                hardware.TriggerControl.ArmTrigger();
+
+                //Wait until releasing the control to show that printing is busy
+                await Task.Delay(TimeSpan.FromSeconds(45));
+                hardware.PrintTwiceControl.Release();
             }
             catch (Exception ex)
             {
                 logger.LogException("Error while capturing images", ex);
                 //In case anything went wrong, there's most probably no use in trying again.
                 //Forget about this session and move on to the next
-                hardware.TriggerControl.ArmTrigger();
+                hardware.TriggerControl.Arm();
             }
         }
 
@@ -161,11 +159,12 @@ namespace com.prodg.photobooth.domain
         {
             logger.LogInfo("Print twice control fired");
 
+            //Release the print button to prevent printing twice
+            hardware.PrintControl.Release();
+            hardware.PrintTwiceControl.Lock();
+
             try
             {
-                //Release the print button to prevent printing twice
-                hardware.PrintControl.ReleaseTrigger();
-                hardware.PrintTwiceControl.ReleaseTrigger();
                 //Print
                 if (sessionQueue.Count > 0)
                 {
@@ -173,9 +172,6 @@ namespace com.prodg.photobooth.domain
                     var session = sessionQueue.Dequeue();
                     await service.Print(session);
                     await service.Print(session);
-
-                    //Dispose the session after printing to release the memory
-                    //session.Dispose();
                 }
                 else
                 {
@@ -183,14 +179,15 @@ namespace com.prodg.photobooth.domain
                     return;
                 }
                 //After printing we're ready for the next session
-                hardware.TriggerControl.ArmTrigger();
+                hardware.TriggerControl.Arm();
+
+                //Wait until releasing the control to show that printing is busy
+                await Task.Delay(TimeSpan.FromSeconds(90));
+                hardware.PrintTwiceControl.Release();
             }
             catch (Exception ex)
             {
                 logger.LogException("Error while printing", ex);
-                //In case anything went wrong, there's most probably no use in trying again.
-                //Forget about this session and move on to the next
-                hardware.TriggerControl.ArmTrigger();
             }
         }
 
@@ -198,32 +195,35 @@ namespace com.prodg.photobooth.domain
         {
             logger.LogInfo("Trigger control fired");
 
+            //Release the trigger to prevent double sessions
+            hardware.TriggerControl.Lock();
+            hardware.PrintControl.Release();
+            hardware.PrintTwiceControl.Release();
+
             try
             {
-                //Release the trigger to prevent double sessions
-                hardware.TriggerControl.ReleaseTrigger();
-                hardware.PrintControl.ReleaseTrigger();
-                hardware.PrintTwiceControl.ReleaseTrigger();
-
                 //Clear old pictures from the queue.. to be refactored
                 if (sessionQueue.Count > 0)
                 {
+                    logger.LogInfo("Clearing previous sessions from the queue: " + sessionQueue.Count);
                     sessionQueue.Clear();
                 }
 
                 //Take pictures and add to the queue
                 sessionQueue.Enqueue(await service.Capture());
-                //Afer capturing we're ready for printing
-                hardware.PrintControl.ArmTrigger();
-                hardware.PrintTwiceControl.ArmTrigger();
-                hardware.TriggerControl.ArmTrigger();
+
+                //Afer capturing we're ready for printing or for another shoot
+                hardware.PrintControl.Arm();
+                hardware.PrintTwiceControl.Arm();
             }
             catch (Exception ex)
             {
                 logger.LogException("Error while capturing images", ex);
-                //In case anything went wrong, forget about this session and move on to the next
-                hardware.TriggerControl.ArmTrigger();
             }
+
+            //Always re-arm the trigger after shooting
+            hardware.TriggerControl.Release();
+            hardware.TriggerControl.Arm();
         }
 
            #region IDisposable Implementation

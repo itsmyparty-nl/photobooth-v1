@@ -19,43 +19,28 @@
 
 using System.Drawing;
 using System.Drawing.Imaging;
-using System.Net.Mime;
 using com.prodg.photobooth.common;
 using com.prodg.photobooth.config;
-using com.prodg.photobooth.infrastructure.hardware;
 using NUnit.Framework;
 
-namespace Test_Photobooth.infrastructure.hardware
+namespace com.prodg.photobooth.infrastructure.hardware
 {
     [TestFixture]
     public class TestNetPrinter: NetPrinter
     {
-        private static ILogger logger = new ConsoleLogger();
-        private static ISettings settings = null;
+        private static readonly ILogger logger = new ConsoleLogger();
+        private static readonly ISettings settings = null;
         
         public TestNetPrinter(): 
             base(settings, logger)
         { }
 
-        [SetUp]
-        public void Setup()
-        {
-            ConsoleLogger logger = new ConsoleLogger();
-            ISettings settings = null;
-        }
-
-        [TearDown]
-        public void Teardown()
-        {
-           
-        }
-
         [Test]
         public void TestScaleToPageX()
         {
-            Bitmap image = new Bitmap(800,600);
+            var image = new Bitmap(800,600);
             FillWithColor(image, Brushes.Black);
-            Bitmap page = new Bitmap(1281, 720);
+            var page = new Bitmap(1281, 720);
             FillWithColor(page, Brushes.White);
             page.SetResolution(300,300);
             ScaleAndCenterToPage(Graphics.FromImage(page), new Rectangle(0,0,page.Width/3,page.Height/3), image);
@@ -66,8 +51,8 @@ namespace Test_Photobooth.infrastructure.hardware
         [Test]
         public void TestScaleToPageY()
         {
-            Bitmap page = new Bitmap(800, 600);
-            Bitmap image = new Bitmap(1281, 720);
+            var page = new Bitmap(800, 600);
+            var image = new Bitmap(1281, 720);
             FillWithColor(image, Brushes.Black);
             FillWithColor(page, Brushes.White);
             page.SetResolution(300, 300);

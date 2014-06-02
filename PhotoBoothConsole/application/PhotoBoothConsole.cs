@@ -17,7 +17,6 @@
 */
 #endregion
 
-using System;
 using System.Threading;
 using com.prodg.photobooth.common;
 using com.prodg.photobooth.config;
@@ -34,7 +33,7 @@ namespace com.prodg.photobooth.application
         public static void Main (string[] args)
 		{
 		    //Instantiate all classes
-			ILogger logger = new ConsoleLogger();
+			ILogger logger = new NLogger();
 			ISettings settings = new Settings(logger);
 
             var camera = new Camera(logger);
@@ -59,9 +58,6 @@ namespace com.prodg.photobooth.application
 			ShutdownRequested.WaitOne();
 			//Stop
 			photoBooth.Stop();
-
-			//Keep the application open to view any console logging
-			Console.ReadLine();
 		}
 	}
 }

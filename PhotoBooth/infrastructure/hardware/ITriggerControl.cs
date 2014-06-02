@@ -35,9 +35,13 @@ namespace com.prodg.photobooth.infrastructure.hardware
 	{
 		string Id {get;}
 		
-		void ArmTrigger();
+		void Arm();
 		
-		void ReleaseTrigger();
+		void Release();
+
+	    void Lock();
+
+	    void Unlock();
 		
 		event EventHandler<TriggerControlEventArgs> Fired;
 	}

@@ -180,7 +180,12 @@ namespace com.prodg.photobooth.infrastructure.command
                 var command = (Command)arguments.CmdId;
                 if (subscriptions.Contains(command))
                 {
-                    CommandReceived.Invoke(this, new CommandReceivedEventArgs((Command) arguments.CmdId));
+                   
+                    logger.LogDebug(String.Format(CultureInfo.InvariantCulture, "Received Command: {0}",
+                            command));
+
+                    CommandReceived.Invoke(this, new CommandReceivedEventArgs(command));
+
                 }
                 else
                 {
@@ -203,7 +208,7 @@ namespace com.prodg.photobooth.infrastructure.command
             // Send command
             messenger.SendCommand(command);
 
-            logger.LogInfo(String.Format(CultureInfo.InvariantCulture, "Sent Command: {0}",
+            logger.LogDebug(String.Format(CultureInfo.InvariantCulture, "Sent Command: {0}",
                                          commandType));
         }
 
@@ -212,7 +217,7 @@ namespace com.prodg.photobooth.infrastructure.command
         // Callback function that prints that the Arduino has acknowledged
         private void OnAcknowledge(ReceivedCommand arguments)
         {
-            logger.LogInfo("Acknowledged: "+arguments.CmdId);
+            logger.LogDebug("Acknowledged: " + arguments.CmdId);
         }
 
         // Callback function that prints that the Arduino has experienced an error
@@ -224,13 +229,13 @@ namespace com.prodg.photobooth.infrastructure.command
         // Log received line to console
         private void NewLineReceived(object sender, EventArgs e)
         {
-            logger.LogInfo("Received > " + messenger.CurrentReceivedLine);
+            logger.LogDebug("Received > " + messenger.CurrentReceivedLine);
         }
 
         // Log sent line to console
         private void NewLineSent(object sender, EventArgs e)
         {
-            logger.LogInfo("Sent > " + messenger.CurrentSentLine);
+            logger.LogDebug("Sent > " + messenger.CurrentSentLine);
         }
     }
 }
