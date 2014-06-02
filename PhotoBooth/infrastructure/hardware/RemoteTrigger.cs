@@ -165,7 +165,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
                 case TriggerState.Armed:
                     switch (newState)
                     {
-                        case TriggerState.Armed:
+                        case TriggerState.Released:
                             break;
                         default:
                             throw new NotSupportedException("TriggerState not supported: " + newState);
