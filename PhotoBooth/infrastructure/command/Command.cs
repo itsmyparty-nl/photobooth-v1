@@ -77,7 +77,11 @@ namespace com.prodg.photobooth.infrastructure.command
         /// <summary>
         /// Lock a control so that it can not be used temporarily and displays this state
         /// </summary>
-        /// <remarks>A lock can be unlocked by either a prepare or a release</remarks>
-        LockControl
+        LockControl,
+
+        /// <summary>
+        /// Unlock a control so that it can again be used
+        /// </summary>
+        UnlockControl
     }
 }

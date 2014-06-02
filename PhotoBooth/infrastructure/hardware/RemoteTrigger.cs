@@ -93,6 +93,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
                 return;
             }
             
+            commandTransmitter.SendCommand(Command.ReleaseControl, triggerContext);
             commandTransmitter.SendCommand(Command.LockControl, triggerContext);
             locked = true;
         }
@@ -106,6 +107,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
                 return;
             }
 
+            commandTransmitter.SendCommand(Command.UnlockControl, triggerContext);
             switch (currentState)
             {
                 case TriggerState.Released:
