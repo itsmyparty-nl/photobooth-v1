@@ -45,14 +45,24 @@ namespace com.prodg.photobooth.domain
         #region ITriggerControl Members
 
 
-        public void ArmTrigger()
+        public void Arm()
         {
             button.Visible = true;
         }
 
-        public void ReleaseTrigger()
+        public void Release()
         {
             button.Visible = false;
+        }
+
+        public void Lock()
+        {
+            //Nothing
+        }
+
+        public void Unlock()
+        {
+            //Nothing
         }
 
         public event EventHandler<TriggerControlEventArgs> Fired;

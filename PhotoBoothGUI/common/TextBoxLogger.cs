@@ -43,7 +43,16 @@ namespace com.prodg.photobooth.common
 			buffer.TagTable.Add (errorTag);
 		}
 
-		public void LogInfo(string logString)
+        public void LogDebug(string logString)
+        {
+            Gtk.Application.Invoke((b, c) =>
+            {
+                buffer.Insert(ref insertIter, logString + "\n");
+            });
+        }
+
+        
+        public void LogInfo(string logString)
 		{
 			Gtk.Application.Invoke ((b, c) => {
 				buffer.Insert (ref insertIter, logString + "\n");

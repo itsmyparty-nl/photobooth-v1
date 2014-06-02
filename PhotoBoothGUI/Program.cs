@@ -17,10 +17,7 @@
 */
 #endregion
 
-using System;
-using Gtk;
-
-namespace PhotoBoothGUI
+namespace com.prodg.photobooth
 {
 	class MainClass
 	{
