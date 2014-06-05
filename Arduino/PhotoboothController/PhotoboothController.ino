@@ -8,6 +8,8 @@
 #include <SoftTimer.h>
 #include <Heartbeat.h>
 #include <BlinkTask.h>
+#include <SoftPwmTask.h>
+#include <Dimmer.h>
 
 // status heartbeat led variables 
 const int ledPin            = 13;  // Pin of internal Led
@@ -30,14 +32,14 @@ bool powerBtnPushed = false;
 #define OUT_PIN_4  7
 
 #define triggerBtnLed  OUT_PIN_1
-#define powerBtnLed  OUT_PIN_2
-#define printBtnLed  OUT_PIN_3
-#define printTwiceBtnLed  OUT_PIN_4
+#define powerBtnLed  OUT_PIN_4
+#define printBtnLed  OUT_PIN_2
+#define printTwiceBtnLed  OUT_PIN_3
 
 #define triggerBtnPin  INPUT_PIN_1
-#define powerBtnPin  INPUT_PIN_2
-#define printBtnPin  INPUT_PIN_3
-#define printTwiceBtnPin  INPUT_PIN_4
+#define powerBtnPin  INPUT_PIN_4
+#define printBtnPin  INPUT_PIN_2
+#define printTwiceBtnPin  INPUT_PIN_3
 
 Task buttonTaskTrigger(110, buttonReadTrigger);
 Task buttonTaskPrint(80, buttonReadPrint);
@@ -49,6 +51,15 @@ Heartbeat triggerLedTask(triggerBtnLed);
 BlinkTask printLedTask(printBtnLed,1000);
 BlinkTask printTwiceLedTask(printTwiceBtnLed,1000);
 BlinkTask powerLedTask(powerBtnLed,1000);
+
+SoftPwmTask triggerLockedLedTask(triggerBtnLed);
+SoftPwmTask printLockedLedTask(printBtnLed);
+SoftPwmTask printTwiceLockedLedTask(printTwiceBtnLed);
+SoftPwmTask powerLockedLedTask(powerBtnLed);
+Dimmer triggerLockedDimmer(&triggerLockedLedTask, 1500);
+Dimmer printLockedDimmer(&printLockedLedTask, 1500);
+Dimmer printTwiceLockedDimmer(&printTwiceLockedLedTask, 1500);
+Dimmer powerLockedDimmer(&powerLockedLedTask, 1500);
 
 // Attach a new CmdMessenger object to the default Serial port
 CmdMessenger cmdMessenger = CmdMessenger(Serial);
@@ -64,7 +75,9 @@ enum
   kPower,
   kPrepareControl,
   kReleaseControl,
-  kPrintTwice
+  kPrintTwice,
+  kLockControl,
+  kUnlockControl
 };
 
 // Callbacks define on which received commands we take action
@@ -74,12 +87,67 @@ void attachCommandCallbacks()
   cmdMessenger.attach(OnUnknownCommand);
   cmdMessenger.attach(kPrepareControl, OnPrepareControl);
   cmdMessenger.attach(kReleaseControl, OnReleaseControl);
+  cmdMessenger.attach(kLockControl, OnLockControl);
+  cmdMessenger.attach(kUnlockControl, OnLockControl);
 }
 
 // Called when a received command has no attached function
 void OnUnknownCommand()
 {
   cmdMessenger.sendCmd(kError,"Command without attached callback");
+}
+
+// Callback function that sets led on or off
+void OnLockControl()
+{
+  int control;
+  // Read led state argument, interpret string as int
+  control = cmdMessenger.readIntArg();
+  switch (control)
+  {
+    case kTrigger:
+      triggerLockedDimmer.startPulsate();
+      break;
+    case kPower:
+      powerLockedDimmer.startPulsate();
+      break;
+    case kPrint:
+      printLockedDimmer.startPulsate();
+      break;
+    case kPrintTwice:
+      printTwiceLockedDimmer.startPulsate();
+      break;
+    default:
+      cmdMessenger.sendCmd(kError,"Unsupported button");
+  }
+
+  cmdMessenger.sendCmd(kAcknowledge,control);
+}
+
+void OnUnlockControl()
+{
+  int control;
+  // Read led state argument, interpret string as int
+  control = cmdMessenger.readIntArg();
+  switch (control)
+  {
+    case kTrigger:
+      triggerLockedDimmer.hold();
+      break;
+    case kPower:
+      powerLockedDimmer.hold();
+      break;
+    case kPrint:
+      printLockedDimmer.hold();
+      break;
+    case kPrintTwice:
+      printTwiceLockedDimmer.hold();
+      break;
+    default:
+      cmdMessenger.sendCmd(kError,"Unsupported button");
+  }
+
+  cmdMessenger.sendCmd(kAcknowledge,control);
 }
 
 // Callback function that sets led on or off
@@ -133,10 +201,12 @@ void OnReleaseControl()
     case kPrint:
       SoftTimer.remove(&buttonTaskPrint);
       SoftTimer.remove(&printLedTask);
+      digitalWrite(printBtnLed, LOW);
       break;
     case kPrintTwice:
-      SoftTimer.remove(&buttonTaskPrint);
-      SoftTimer.remove(&printLedTask);
+      SoftTimer.remove(&buttonTaskPrintTwice);
+      SoftTimer.remove(&printTwiceLedTask);
+      digitalWrite(printTwiceBtnLed, LOW);
       break;
     default:
       cmdMessenger.sendCmd(kError,"Unsupported button");
@@ -204,7 +274,7 @@ void buttonReadPrint(Task* me)
 
 void buttonReadPrintTwice(Task* me)
 {
-  readButton(printTwiceBtnPin,kPrint, &printTwiceBtnPushed);
+  readButton(printTwiceBtnPin,kPrintTwice, &printTwiceBtnPushed);
 }
 
 void buttonReadPower(Task* me)
