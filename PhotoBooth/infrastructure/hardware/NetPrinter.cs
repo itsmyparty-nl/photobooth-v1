@@ -57,7 +57,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
                     //Set the paper settings before calling print in order to get the correct graphics object
                     var pageSettings = new PageSettings(pd.PrinterSettings)
                     {
-                        PrinterResolution = new PrinterResolution {X = 300, Y = 300, Kind = PrinterResolutionKind.High},
+                        PrinterResolution = new PrinterResolution {X = 300, Y = 300, Kind = PrinterResolutionKind.Custom},
                         //Pick the first papersize
                         PaperSize = pd.PrinterSettings.PaperSizes[0],
                         Landscape = true,
@@ -102,14 +102,12 @@ namespace com.prodg.photobooth.infrastructure.hardware
         {
             //Calculate the width in pixels from the bounds width.
             //According to MSDN, the bounds are defined in 100ths of an inch
-            var graphicsWidthPx = ((bounds.Width*graphics.DpiX)/100);
-            var graphicsHeightPx = ((bounds.Height*graphics.DpiY)/100);
-
+            var graphicsWidthPx = 1800f; //((bounds.Width*graphics.DpiX)/100);
+            var graphicsHeightPx = 1200f; //((bounds.Height*graphics.DpiY)/100);
 
             //Calculate the scaling factor in both dimensions
             var widthFactor = image.Width/graphicsWidthPx;
             var heightFactor = image.Height/graphicsHeightPx;
-
 
             //Determine in which dimension the image fits after scaling
             RectangleF destRectangle;
@@ -128,8 +126,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
 
             //Scale with high quality interpolation to achieve the best print
             graphics.InterpolationMode = InterpolationMode.HighQualityBilinear;
-            graphics.DrawImage(image, destRectangle, new RectangleF(0f, 0f, image.Width, image.Height),
-                GraphicsUnit.Pixel);
+            graphics.DrawImage(image, destRectangle);
         }
 
         public void Initialize()
