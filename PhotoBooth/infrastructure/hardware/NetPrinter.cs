@@ -58,10 +58,6 @@ namespace com.prodg.photobooth.infrastructure.hardware
                 pd.BeginPrint += printDocument_BeginPrint;
                 pd.PrinterSettings.PrinterName = settings.PrinterName;
                 //Set the paper settings before calling print in order to get the correct graphics object
-              
-                // We ALWAYS want true here, as we will implement the 
-                // margin limitations later in code.
-                //pd.OriginAtMargins = true;
 
                 pd.DefaultPageSettings.PrinterResolution = new PrinterResolution
                 {
@@ -72,7 +68,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
                 //Pick the first papersize
                 pd.DefaultPageSettings.PaperSize = pd.PrinterSettings.PaperSizes[0];
                 //pd.DefaultPageSettings.Landscape = true;
-                pd.DefaultPageSettings.Margins = new Margins(12, 0, 12, 0);
+                pd.DefaultPageSettings.Margins = new Margins(0, 0, 0, 0);
 
                 pd.Print();
 
@@ -95,6 +91,43 @@ namespace com.prodg.photobooth.infrastructure.hardware
         public void DeInitialize()
         {
             //Do nothing
+        }
+
+        /// <summary>
+        /// Scale and center the image to occupy most of the graphics object while maintaining the aspect ratio
+        /// </summary>
+        /// <remarks>This code is based on the assumption that the dpi properties are set correctly on the graphics object</remarks>
+        protected void ScaleAndCenterToPage(Graphics graphics, Rectangle bounds, Image image)
+        {
+            ////Calculate the width in pixels from the bounds width.
+            ////According to MSDN, the bounds are defined in 100ths of an inch
+            //var graphicsWidthPx = 1800f; //((bounds.Width*graphics.DpiX)/100);
+            //var graphicsHeightPx = 1200f; //((bounds.Height*graphics.DpiY)/100);
+
+            ////Calculate the scaling factor in both dimensions
+            //var widthFactor = image.Width/graphicsWidthPx;
+            //var heightFactor = image.Height/graphicsHeightPx;
+
+            ////Determine in which dimension the image fits after scaling
+            //RectangleF destRectangle;
+            //if (widthFactor > heightFactor)
+            //{
+            //    //Wide images
+            //    float startY = (graphicsHeightPx - (image.Height/widthFactor))/2;
+            //    destRectangle = new RectangleF(0, startY, image.Width/widthFactor, image.Height/widthFactor);
+            //}
+            //else
+            //{
+            //    //Tall images
+            //    float startX = (graphicsWidthPx - (image.Width/heightFactor))/2;
+            //    destRectangle = new RectangleF(startX, 0, image.Width/heightFactor, image.Height/heightFactor);
+            //}
+
+
+
+            ////Scale with high quality interpolation to achieve the best print
+            //graphics.InterpolationMode = InterpolationMode.HighQualityBilinear;
+            //graphics.DrawImage(image, destRectangle);
         }
 
         private void printDocument_BeginPrint(object sender, PrintEventArgs e)
@@ -178,7 +211,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
             // inside the available width and height.            
 
             g.InterpolationMode = InterpolationMode.HighQualityBicubic;
-            g.DrawImage(storedImage, new Rectangle(0, 0, availableWidth - 13, availableHeight - 13));
+            g.DrawImage(storedImage, new Rectangle(12, 12, availableWidth - 13, availableHeight - 13));
         }
     }
 }
