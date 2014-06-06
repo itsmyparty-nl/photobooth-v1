@@ -103,10 +103,11 @@ namespace com.prodg.photobooth.domain
                     var currentWidth = (int) Math.Floor(currentImage.Width*settings.CollageScalePercentage);
                     var currentHeight = (int) Math.Floor(currentImage.Height*settings.CollageScalePercentage);
 
+                    //Note: Start at double padding
                     var startX = (j%settings.CollageGridWidth)*(currentWidth + settings.CollagePaddingPixels) +
-                                 settings.CollagePaddingPixels;
+                                 2*settings.CollagePaddingPixels;
                     var startY = (j/settings.CollageGridWidth)*(currentHeight + settings.CollagePaddingPixels) +
-                                 settings.CollagePaddingPixels;
+                                 2*settings.CollagePaddingPixels;
 
                     //draw the original image on the new image using the grayscale color matrix
                     g.DrawImage(currentImage, new Rectangle(startX, startY, currentWidth, currentHeight),
@@ -122,15 +123,15 @@ namespace com.prodg.photobooth.domain
 
         private Size CalculateOutputImageSize(Image image)
         {
-            //Gridwidth - 1 to get the padding in between. +2 to get borders outside the image
+            //Gridwidth - 1 to get the padding in between. +4 to get double size borders outside the image
             var width =
                 (int)
                     ((image.Width * settings.CollageGridWidth) * settings.CollageScalePercentage +
-                     (settings.CollageGridWidth + 1) * settings.CollagePaddingPixels);
+                     (settings.CollageGridWidth + 3) * settings.CollagePaddingPixels);
             var height =
                 (int)
                     ((image.Height * settings.CollageGridHeight) * settings.CollageScalePercentage +
-                     (settings.CollageGridHeight + 1) * settings.CollagePaddingPixels);
+                     (settings.CollageGridHeight + 3) * settings.CollagePaddingPixels);
 
             return new Size(width, height);
         }

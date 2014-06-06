@@ -43,7 +43,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
             var page = new Bitmap(1281, 720);
             FillWithColor(page, Brushes.White);
             page.SetResolution(300,300);
-            ScaleAndCenterToPage(Graphics.FromImage(page), new Rectangle(0,0,page.Width/3,page.Height/3), image);
+            //ScaleAndCenterToPage(Graphics.FromImage(page), new Rectangle(0,0,page.Width/3,page.Height/3), image);
 
             page.Save(@"c:\temp\testx.png", ImageFormat.Png);
         }
@@ -57,7 +57,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
             FillWithColor(page, Brushes.White);
             page.SetResolution(300, 300);
             
-            ScaleAndCenterToPage(Graphics.FromImage(page), new Rectangle(0, 0, page.Width / 3, page.Height / 3), image);
+            //ScaleAndCenterToPage(Graphics.FromImage(page), new Rectangle(0, 0, page.Width / 3, page.Height / 3), image);
 
             page.Save(@"c:\temp\testy.png", ImageFormat.Png);
         }
