@@ -58,7 +58,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
                 pd.BeginPrint += printDocument_BeginPrint2;
                 pd.PrinterSettings.PrinterName = settings.PrinterName;
                 //Set the paper settings before calling print in order to get the correct graphics object
-
+              
                 // We ALWAYS want true here, as we will implement the 
                 // margin limitations later in code.
                 //pd.OriginAtMargins = true;
@@ -263,7 +263,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
             // Set some preferences, our method should print a box with any 
             // combination of these properties being true/false.
             pd.OriginAtMargins = true;   //true = soft margins, false = hard margins
-            pd.DefaultPageSettings.Landscape = true;
+            pd.DefaultPageSettings.Landscape = false;
         }
 
         private void printDocument_PrintPage2(object sender, PrintPageEventArgs e)
@@ -320,13 +320,15 @@ namespace com.prodg.photobooth.infrastructure.hardware
                         ? marginBounds.Height
                         : (e.PageSettings.Landscape ? printableArea.Width : printableArea.Height));
 
+            storedImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
+
             logger.LogInfo(
                 String.Format("Printing image ({2}x{3}) on {0}, printable area ({1}), bounds ({4}), dpi ({5},{6})",
                     e.PageSettings.PrinterSettings.PrinterName, printableArea, storedImage.Width,
                     storedImage.Height, e.MarginBounds, e.Graphics.DpiX, e.Graphics.DpiY));
 
 
-            throw new Exception("dummy");
+            //throw new Exception("dummy");
             // Draw our rectangle which will either be the soft margin rectangle 
             // or the hard margin (printer capabilities) rectangle.
             // ----------
@@ -334,6 +336,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
             // zero based co-ordinates system. This will put the rectangle just 
             // inside the available width and height.
             //g.DrawRectangle(Pens.Red, 0, 0, availableWidth - 1, availableHeight - 1);
+            
 
             g.InterpolationMode = InterpolationMode.HighQualityBicubic;
             g.DrawImage(storedImage, new Rectangle(0, 0, availableWidth - 1, availableHeight - 1));
