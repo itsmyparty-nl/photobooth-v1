@@ -31,6 +31,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
     /// </summary>
     public class NetPrinter : IPrinter
     {
+        private PrintAction printAction = PrintAction.PrintToPrinter;
         private readonly ISettings settings;
         private readonly ILogger logger;
         private Image storedImage;
@@ -219,10 +220,10 @@ namespace com.prodg.photobooth.infrastructure.hardware
             // hard margins.
             // ----------
             // Otherwise if we really are printing, just use the soft margins.
-            //g.TranslateTransform(
-            //    ((printAction == PrintAction.PrintToPreview) ? realPrintableArea.X : 0) - e.MarginBounds.X,
-            //    ((printAction == PrintAction.PrintToPreview) ? realPrintableArea.Y : 0) - e.MarginBounds.Y
-            //);
+            g.TranslateTransform(
+                ((printAction == PrintAction.PrintToPreview) ? realPrintableArea.X : 0) - e.MarginBounds.X,
+                ((printAction == PrintAction.PrintToPreview) ? realPrintableArea.Y : 0) - e.MarginBounds.Y
+            );
 
             // Draw the printable area rectangle in PURPLE
             Rectangle printedPrintableArea = Rectangle.Truncate(realPrintableArea);
@@ -247,8 +248,8 @@ namespace com.prodg.photobooth.infrastructure.hardware
             printedMarginArea.Height--;
             g.DrawRectangle(Pens.Red, printedMarginArea);
 
-            //e.Graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
-            //e.Graphics.DrawImage(storedImage, new Rectangle());
+            e.Graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+            e.Graphics.DrawImage(storedImage, printedPrintableArea);
         }
     }
 }
