@@ -61,7 +61,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
 
                 // We ALWAYS want true here, as we will implement the 
                 // margin limitations later in code.
-                pd.OriginAtMargins = true;
+                //pd.OriginAtMargins = true;
 
                 pd.DefaultPageSettings.PrinterResolution = new PrinterResolution
                 {
@@ -72,7 +72,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
                 //Pick the first papersize
                 pd.DefaultPageSettings.PaperSize = pd.PrinterSettings.PaperSizes[0];
                 //pd.DefaultPageSettings.Landscape = true;
-                //pd.DefaultPageSettings.Margins = new Margins(0, 0, 0, 0);
+                pd.DefaultPageSettings.Margins = new Margins(0, 0, 0, 0);
 
                 pd.Print();
 
@@ -262,7 +262,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
 
             // Set some preferences, our method should print a box with any 
             // combination of these properties being true/false.
-            pd.OriginAtMargins = false;   //true = soft margins, false = hard margins
+            pd.OriginAtMargins = true;   //true = soft margins, false = hard margins
             pd.DefaultPageSettings.Landscape = true;
         }
 
