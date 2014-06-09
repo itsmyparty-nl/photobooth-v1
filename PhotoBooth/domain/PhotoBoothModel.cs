@@ -166,6 +166,7 @@ namespace com.prodg.photobooth.domain
             hardware.PrintControl.Release();
         }
 
+        //TODO: printing twice results in object disposed exceptions --> garbagecollector when rotated image is set to null
         private async void OnPrintTwiceControlTriggered(object sender, TriggerControlEventArgs e)
         {
             logger.LogInfo("Print twice control fired");
