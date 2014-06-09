@@ -21,9 +21,29 @@ using System;
 
 namespace com.prodg.photobooth.infrastructure.hardware
 {
-	public interface ICamera: IHardwareController, IDisposable
-	{
-		/// <summary>
+    public class CameraBatteryWarningEventArgs : EventArgs
+    {
+        public CameraBatteryWarningEventArgs(int level)
+        {
+            Level = level;
+        }
+
+        public int Level { get; private set; }
+    }
+
+    public interface ICamera: IHardwareController, IDisposable
+    {
+        /// <summary>
+        /// Emits an event when the camera is ready
+        /// </summary>
+        event EventHandler Ready;
+   
+        /// <summary>
+        /// Emits a warning if the battery level is at or below the warning level
+        /// </summary>
+        event EventHandler<CameraBatteryWarningEventArgs> BatteryWarning;
+        
+        /// <summary>
 		/// The identifier (model) of the camera
 		/// </summary>
 		string Id {get;}

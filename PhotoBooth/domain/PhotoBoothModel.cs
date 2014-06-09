@@ -18,7 +18,6 @@
 #endregion
 
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using com.prodg.photobooth.common;
 using com.prodg.photobooth.infrastructure.hardware;
@@ -34,7 +33,7 @@ namespace com.prodg.photobooth.domain
         private readonly ILogger logger;
         private readonly IHardware hardware;
         private readonly IPhotoBoothService service;
-        private Queue<PhotoSession> sessionQueue; 
+        private PhotoSession currentSession; 
 
         /// <summary>
         /// Event to signal that shutdown is requested
@@ -55,7 +54,7 @@ namespace com.prodg.photobooth.domain
             this.logger = logger;
             this.service = service;
 
-            sessionQueue = new Queue<PhotoSession>();
+            currentSession = null;
         }
 
         /// <summary>
@@ -68,16 +67,18 @@ namespace com.prodg.photobooth.domain
             //Acquire the hardware
             hardware.Acquire();
 
+            //Start with only the power control armed
+            hardware.TriggerControl.Release();
+            hardware.PowerControl.Arm();
+            hardware.PrintControl.Release();
+            hardware.PrintTwiceControl.Release();
+
+            //Register events
+            hardware.Camera.Ready += OnCameraReady;
             hardware.TriggerControl.Fired += OnTriggerControlTriggered;
             hardware.PrintControl.Fired += OnPrintControlTriggered;
             hardware.PrintTwiceControl.Fired += OnPrintTwiceControlTriggered;
             hardware.PowerControl.Fired += OnPowerControlTriggered;
-
-            //Start with the trigger control and power control armed
-            hardware.TriggerControl.Arm();
-            hardware.PowerControl.Arm();
-            hardware.PrintControl.Release();
-            hardware.PrintTwiceControl.Release();
         }
 
         /// <summary>
@@ -88,6 +89,7 @@ namespace com.prodg.photobooth.domain
             logger.LogInfo("Stopping Photobooth application model");
 
             //Unsubscribe from all hardware events
+            hardware.Camera.Ready -= OnCameraReady;
             hardware.TriggerControl.Fired -= OnTriggerControlTriggered;
             hardware.PrintControl.Fired -= OnPrintControlTriggered;
             hardware.PrintTwiceControl.Fired -= OnPrintTwiceControlTriggered;
@@ -95,6 +97,11 @@ namespace com.prodg.photobooth.domain
 
             //Release the hardware
             hardware.Release();
+        }
+
+        void OnCameraReady(object sender, EventArgs e)
+        {
+            Task.Run(() => hardware.TriggerControl.Arm());
         }
 
         private void OnPowerControlTriggered(object sender, TriggerControlEventArgs e)
@@ -126,11 +133,10 @@ namespace com.prodg.photobooth.domain
                 hardware.PrintControl.Lock();
                 hardware.PrintTwiceControl.Release();
                 //Print
-                if (sessionQueue.Count > 0)
+                if (currentSession != null)
                 {
                     //Get the last sesion from the queue and print it
-                    var session = sessionQueue.Dequeue();
-                    await service.Print(session);
+                    await service.Print(currentSession);
                 }
                 else
                 {
@@ -161,12 +167,11 @@ namespace com.prodg.photobooth.domain
             try
             {
                 //Print
-                if (sessionQueue.Count > 0)
+                if (currentSession != null)
                 {
                     //Get the last sesion from the queue and print it
-                    var session = sessionQueue.Dequeue();
-                    await service.Print(session);
-                    await service.Print(session);
+                    await service.Print(currentSession);
+                    await service.Print(currentSession);
                 }
                 else
                 {
@@ -199,17 +204,10 @@ namespace com.prodg.photobooth.domain
 
             try
             {
-                //Clear old pictures from the queue.. to be refactored
-                if (sessionQueue.Count > 0)
-                {
-                    logger.LogInfo("Clearing previous sessions from the queue: " + sessionQueue.Count);
-                    sessionQueue.Clear();
-                }
-
                 await Task.Delay(TimeSpan.FromSeconds(5));
 
                 //Take pictures and add to the queue
-                sessionQueue.Enqueue(await service.Capture());
+                currentSession = await service.Capture();
 
                 //Afer capturing we're ready for printing or for another shoot
                 hardware.PrintControl.Arm();
@@ -226,7 +224,7 @@ namespace com.prodg.photobooth.domain
             hardware.TriggerControl.Arm();
         }
 
-           #region IDisposable Implementation
+        #region IDisposable Implementation
 
 		bool disposed;
 
@@ -243,16 +241,8 @@ namespace com.prodg.photobooth.domain
 		        if (disposing)
 		        {
 		            // Clean up managed objects
-		            if (sessionQueue != null)
-		            {
-		                logger.LogDebug("Cleaning session queue on dispose");
-                        while (sessionQueue.Count > 0)
-		                {
-		                    sessionQueue.Dequeue().Dispose();
-		                }
-		                sessionQueue = null;
-		            }
 		        }
+                currentSession = null;
 		        // clean up any unmanaged objects
 		        disposed = true;
 		    }

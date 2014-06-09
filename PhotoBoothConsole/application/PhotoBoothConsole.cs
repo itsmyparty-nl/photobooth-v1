@@ -17,6 +17,8 @@
 */
 #endregion
 
+using System;
+using System.Globalization;
 using System.Threading;
 using com.prodg.photobooth.common;
 using com.prodg.photobooth.config;
@@ -43,6 +45,7 @@ namespace com.prodg.photobooth.application
             using (var commandMessenger = new CommandMessengerTransceiver(logger, settings))
             using (var consoleCommandReceiver = new ConsoleCommandReceiver(logger))
             {
+                camera.BatteryWarning += OnCameraBatteryWarning;
                 var printer = new NetPrinter(settings, logger);
                 var triggerControl = new RemoteTrigger(Command.Trigger, commandMessenger, commandMessenger, logger);
                 var printControl = new RemoteTrigger(Command.Print, commandMessenger, commandMessenger, logger);
@@ -72,5 +75,10 @@ namespace com.prodg.photobooth.application
                 commandMessenger.DeInitialize();
             }
 		}
+
+        static void OnCameraBatteryWarning(object sender, CameraBatteryWarningEventArgs e)
+        {
+            Console.WriteLine(string.Format(CultureInfo.InvariantCulture,"WARNING BATTERY LOW: {0}%",e.Level));
+        }
 	}
 }

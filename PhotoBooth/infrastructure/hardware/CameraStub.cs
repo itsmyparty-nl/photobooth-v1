@@ -26,7 +26,9 @@ namespace com.prodg.photobooth.infrastructure.hardware
 	{
 		private readonly ILogger logger;
 
-		public string Id { get; private set; }
+	    public event EventHandler Ready;
+	    public event EventHandler<CameraBatteryWarningEventArgs> BatteryWarning;
+	    public string Id { get; private set; }
 
 		public CameraStub (ILogger logger)
 		{

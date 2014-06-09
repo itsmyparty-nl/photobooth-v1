@@ -23,6 +23,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using com.prodg.photobooth.common;
 using LibGPhoto2;
+using NLog;
 
 namespace com.prodg.photobooth.infrastructure.hardware
 {
@@ -32,8 +33,11 @@ namespace com.prodg.photobooth.infrastructure.hardware
 		private LibGPhoto2.ICamera camera;
 		private readonly ILogger logger;
 		private bool initialized;
+	    private bool deinitRequested;
+	    private Thread initializeThread;
 	    private const string CameraBaseFolder = @"/";
 	    private const int DefaultBatteryLevel = 99;
+	    private const int WarningBatteryLevel = 25;
 
 
 		public string Id { get; private set; }
@@ -42,40 +46,55 @@ namespace com.prodg.photobooth.infrastructure.hardware
 		{
 			this.logger = logger;
 			initialized = false;
+            deinitRequested = false;
 		}
 
 		public void Initialize ()
 		{
-			logger.LogInfo ("Initializing camera");
-			try {
-				//Initialize GPhoto2
-				context = new LibGPhoto2.Context ();
-				camera = new LibGPhoto2.Camera ();
-				camera.Init (context);
-				
-				//Get the ID of the camera
-				LibGPhoto2.CameraAbilities abilities = camera.GetAbilities ();
-				Id = abilities.model;
-			
-				LibGPhoto2.ICameraWidget widget = camera.GetConfig (context);
-				logger.LogDebug ("Children: " + widget.ChildCount);
-				
-				//Log the ID
-				logger.LogInfo ("Found: " + Id);
-                logger.LogInfo("Battery Level: " + GetBatteryLevel());
-				logger.LogDebug ("Status: " + abilities.status);
-				logger.LogDebug ("Id: " + abilities.id);
+		    if (initialized) return;
 
-				//System.Console.WriteLine ("about: "+ camera.GetAbout(context).Text);
-				logger.LogDebug ("operations: " + abilities.operations.ToString ());
-				
-				initialized = true;
-				
-			} catch (Exception exception) {
-				logger.LogException ("Could not initialize camera", exception);
-			    throw;
-			}
+            logger.LogInfo ("Initializing camera");
+		    deinitRequested = false;
+            initializeThread = new Thread(InitializeCameraAsync);
+		    initializeThread.Start();
 		}
+
+	    private void InitializeCameraAsync()
+	    {
+	        while (!initialized && !deinitRequested)
+	        {
+	            Thread.Sleep(500);
+                try
+	            {
+	                //Initialize GPhoto2
+	                context = new LibGPhoto2.Context();
+	                camera = new LibGPhoto2.Camera();
+	                camera.Init(context);
+
+	                //Get the ID of the camera
+	                LibGPhoto2.CameraAbilities abilities = camera.GetAbilities();
+	                Id = abilities.model;
+
+	                //Log the ID
+	                logger.LogInfo("Found: " + Id);
+	                logger.LogInfo("Battery Level: " + GetBatteryLevel());
+	                logger.LogDebug("Status: " + abilities.status);
+	                logger.LogDebug("Id: " + abilities.id);
+
+	                initialized = true;
+
+	                //Signal that the camera is ready
+                    if (Ready != null)
+	                {
+	                    Ready.Invoke(this, EventArgs.Empty);
+	                }
+	            }
+	            catch (Exception exception)
+	            {
+	                logger.LogDebug("Could not initialize camera: " + exception.Message);
+	            }
+	        }
+	    }
 
 	    /// <remarks>In all cases that no value can be retrieved a default battery level is returned which
 	    /// indicates a full battery. rationale is that in this case manual checking is needed, and the
@@ -90,7 +109,6 @@ namespace com.prodg.photobooth.infrastructure.hardware
 	            {
 	                if (!line.Contains("Battery")) continue;
 
-	                logger.LogDebug(line);
 	                Regex regex = new Regex(@"^.+value\: (?<level>\d+)\%.*");
 	                Match match = regex.Match(line);
 
@@ -98,7 +116,14 @@ namespace com.prodg.photobooth.infrastructure.hardware
 
 	                try
 	                {
-	                    return Convert.ToInt32(match.Groups["level"].Value);
+	                    var level = Convert.ToInt32(match.Groups["level"].Value);
+	                    if (level <= WarningBatteryLevel)
+	                    {
+	                        if (BatteryWarning != null)
+	                        {
+	                            BatteryWarning.Invoke(this, new CameraBatteryWarningEventArgs(level));
+	                        }
+	                    }
 	                }
 	                catch (Exception ex)
 	                {
@@ -113,6 +138,16 @@ namespace com.prodg.photobooth.infrastructure.hardware
 	    public void DeInitialize()
 	    {
             logger.LogInfo("DeInitializing camera");
+	        deinitRequested = true;
+
+	        if (initializeThread != null && !Thread.CurrentThread.Equals(initializeThread))
+	        {
+	            if (!initializeThread.Join(5000))
+	            {
+	                logger.LogError("Cancel initialize failed, aborting thread");
+                    initializeThread.Abort();
+	            }
+	        }
 
 	        if (context == null) return;
 	        if (camera == null) return;
@@ -125,11 +160,13 @@ namespace com.prodg.photobooth.infrastructure.hardware
 	        {
 	            logger.LogWarning("Could not Exit camera from context");
 	        }
+
+            DisposeCameraObjects();
 	    }
 
 	    public bool Capture(string capturePath)
 	    {
-	        logger.LogInfo("Starting capture");
+	        logger.LogDebug("Starting capture");
 	        if (!CheckInitialized())
 	        {
 	            return false;
@@ -137,8 +174,12 @@ namespace com.prodg.photobooth.infrastructure.hardware
 
 	        try
 	        {
-	            LibGPhoto2.ICameraFilePath path = camera.Capture(LibGPhoto2.CameraCaptureType.Image, context);
-	            logger.LogInfo("Capture finished. File: " + Path.Combine(path.folder, path.name));
+	            //Always get the battery level to make sure the battery warning is signaled timely
+                logger.LogDebug("Battery Level: "+GetBatteryLevel());
+
+	            //Capture and download
+                LibGPhoto2.ICameraFilePath path = camera.Capture(LibGPhoto2.CameraCaptureType.Image, context);
+	            logger.LogDebug("Capture finished. File: " + Path.Combine(path.folder, path.name));
 	            LibGPhoto2.ICameraFile cameraFile = camera.GetFile(path.folder, path.name, LibGPhoto2.CameraFileType.Normal,
 	                                                               context);
 
@@ -173,11 +214,9 @@ namespace com.prodg.photobooth.infrastructure.hardware
 
 		private void ResetCameraOnFailure ()
 		{
-			if (!CheckInitialized ())
-				return;
 			logger.LogInfo ("Releasing camera");
 			
-			DisposeCameraObjects ();
+			DeInitialize();
 			
 			Thread.Sleep (500);
 			//ReInitialize after releasing camera
@@ -202,10 +241,8 @@ namespace com.prodg.photobooth.infrastructure.hardware
 					
 				}
 				// clean up any unmanaged objects
-				DisposeCameraObjects ();
+				DisposeCameraObjects();
 				disposed = true;
-			} else {
-				Console.WriteLine ("Saved us from doubly disposing an object!");
 			}
 		}
 
@@ -215,7 +252,6 @@ namespace com.prodg.photobooth.infrastructure.hardware
 	        {
 	            if (camera != null)
 	            {
-	                DeInitialize();
 	                camera.Dispose();
 	            }
 	            if (context != null)
@@ -240,6 +276,14 @@ namespace com.prodg.photobooth.infrastructure.hardware
 		}
 		
 		#endregion
-		
-	}
+
+
+        #region ICamera Members
+
+        public event EventHandler Ready;
+
+        public event EventHandler<CameraBatteryWarningEventArgs> BatteryWarning;
+
+        #endregion
+    }
 }
