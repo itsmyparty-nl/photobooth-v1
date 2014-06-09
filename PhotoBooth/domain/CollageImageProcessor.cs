@@ -159,7 +159,7 @@ namespace com.prodg.photobooth.domain
             //height = (totalHeight - padpx*(n + 3))/(n*scale)
             var croppedImageHeight =
                 (int) ((desiredCollageHeight - settings.CollagePaddingPixels*(settings.CollageGridHeight + 3))/
-                       (settings.CollageGridHeight*1f));
+                       (settings.CollageGridHeight*settings.CollageScalePercentage));
             return croppedImageHeight;
         }
 

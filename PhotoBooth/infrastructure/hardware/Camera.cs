@@ -19,10 +19,11 @@
 
 
 using System;
-using System.Collections.Generic;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Threading;
 using com.prodg.photobooth.common;
+using LibGPhoto2;
 
 namespace com.prodg.photobooth.infrastructure.hardware
 {
@@ -33,6 +34,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
 		private readonly ILogger logger;
 		private bool initialized;
 	    private const string CameraBaseFolder = @"/";
+	    private const int DefaultBatteryLevel = 99;
 
 
 		public string Id { get; private set; }
@@ -58,22 +60,9 @@ namespace com.prodg.photobooth.infrastructure.hardware
 			
 				LibGPhoto2.ICameraWidget widget = camera.GetConfig (context);
 				logger.LogDebug ("Children: " + widget.ChildCount);
+                logger.LogDebug ("Battery Level: " + GetBatteryLevel());
 
-			    string summary = camera.GetSummary(context).Text;
-                logger.LogDebug(summary);
-                using (var reader = new StringReader(summary))
-                {
-                    string line;
-                    while ((line = reader.ReadLine()) != null)
-                    {
-                        if (line.Contains("battery"))
-                        {
-                            logger.LogInfo(line);
-                        }
-                    }
-                }
-
-				//	LibGPhoto2.CameraWidget childWidget = widget.GetChild(0);
+			    //	LibGPhoto2.CameraWidget childWidget = widget.GetChild(0);
 				//	logger.LogInfo (childWidget.GetInfo());
 				
 				//LibGPhoto2.CameraWidget battLevelWidget = widget.GetChild("batterylevel");
@@ -94,6 +83,43 @@ namespace com.prodg.photobooth.infrastructure.hardware
 			    throw;
 			}
 		}
+
+	    private int GetBatteryLevel()
+	    {
+	        string summary = camera.GetSummary(context).Text;
+	        logger.LogDebug(summary);
+	        using (var reader = new StringReader(summary))
+	        {
+	            string line;
+	            while ((line = reader.ReadLine()) != null)
+	            {
+	                if (line.Contains("Battery"))
+	                {
+	                    logger.LogInfo(line);
+	                    {
+                            
+                            Regex regex = new Regex(@"^.+value: <level>\%.*");
+
+                            Match match = regex.Match(line);
+
+                            if (match.Success)
+                            {
+                                try
+                                {
+                                    return Convert.ToInt32(match.Groups["level"].Value);
+                                }
+                                catch (Exception)
+                                {
+                                    return DefaultBatteryLevel;
+                                }
+                            }
+                            return DefaultBatteryLevel;
+	                    }
+	                }
+	            }
+	        }
+            return DefaultBatteryLevel;
+	    }
 
 	    public void DeInitialize()
 	    {
