@@ -53,11 +53,13 @@ namespace com.prodg.photobooth.application
             photoBooth.ShutdownRequested += (sender, eventArgs) => ShutdownRequested.Set();
 
 			//Start
+            commandMessenger.Initialize();
 			photoBooth.Start();
 			//Wait until the photobooth is finished
 			ShutdownRequested.WaitOne();
 			//Stop
 			photoBooth.Stop();
+            commandMessenger.DeInitialize();
 		}
 	}
 }
