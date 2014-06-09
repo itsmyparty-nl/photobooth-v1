@@ -64,7 +64,7 @@ namespace com.prodg.photobooth.application
 			ShutdownRequested.WaitOne();
 			//Stop
 			photoBooth.Stop();
-            consoleCommandReceiver.Initialize();
+            consoleCommandReceiver.DeInitialize();
             commandMessenger.DeInitialize();
 		}
 	}
