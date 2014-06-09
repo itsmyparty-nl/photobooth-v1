@@ -52,14 +52,14 @@ BlinkTask printLedTask(printBtnLed,1000);
 BlinkTask printTwiceLedTask(printTwiceBtnLed,1000);
 BlinkTask powerLedTask(powerBtnLed,1000);
 
-SoftPwmTask triggerLockedLedTask(triggerBtnLed);
-SoftPwmTask printLockedLedTask(printBtnLed);
-SoftPwmTask printTwiceLockedLedTask(printTwiceBtnLed);
-SoftPwmTask powerLockedLedTask(powerBtnLed);
-Dimmer triggerLockedDimmer(&triggerLockedLedTask, 1500);
-Dimmer printLockedDimmer(&printLockedLedTask, 1500);
-Dimmer printTwiceLockedDimmer(&printTwiceLockedLedTask, 1500);
-Dimmer powerLockedDimmer(&powerLockedLedTask, 1500);
+//SoftPwmTask triggerLockedLedTask(triggerBtnLed);
+//SoftPwmTask printLockedLedTask(printBtnLed);
+//SoftPwmTask printTwiceLockedLedTask(printTwiceBtnLed);
+//SoftPwmTask powerLockedLedTask(powerBtnLed);
+//Dimmer triggerLockedDimmer(&triggerLockedLedTask, 1500);
+//Dimmer printLockedDimmer(&printLockedLedTask, 1500);
+//Dimmer printTwiceLockedDimmer(&printTwiceLockedLedTask, 1500);
+//Dimmer powerLockedDimmer(&powerLockedLedTask, 1500);
 
 // Attach a new CmdMessenger object to the default Serial port
 CmdMessenger cmdMessenger = CmdMessenger(Serial);
@@ -112,10 +112,10 @@ void Initialize()
   SoftTimer.remove(&buttonTaskPower);
   
   // Also stop all dimmers
-  triggerLockedDimmer.off();
-  powerLockedDimmer.off();
-  printLockedDimmer.off();
-  printTwiceLockedDimmer.off();
+  //triggerLockedDimmer.off();
+  //powerLockedDimmer.off();
+  //printLockedDimmer.off();
+  //printTwiceLockedDimmer.off();
  
   //Set all pins low to check connections
   digitalWrite(OUT_PIN_1, LOW);
@@ -134,19 +134,23 @@ void OnLockControl()
   {
     case kTrigger:
       digitalWrite(triggerBtnLed, LOW);
-      triggerLockedDimmer.startPulsate();
+      //triggerLockedDimmer.startPulsate();
+      digitalWrite(triggerBtnLed, HIGH);
       break;
     case kPower:
       digitalWrite(powerBtnLed, LOW);
-      powerLockedDimmer.startPulsate();
+      //powerLockedDimmer.startPulsate();
+      digitalWrite(powerBtnLed, HIGH); 
       break;
     case kPrint:
       digitalWrite(printBtnLed, LOW);
-      printLockedDimmer.startPulsate();
+      //printLockedDimmer.startPulsate();
+      digitalWrite(printBtnLed, HIGH);
       break;
     case kPrintTwice:
       digitalWrite(printTwiceBtnLed, LOW);
-      printTwiceLockedDimmer.startPulsate();
+      //printTwiceLockedDimmer.startPulsate();
+      digitalWrite(printBtnLed, HIGH);
       break;
     default:
       cmdMessenger.sendCmd(kError,"Unsupported button");
@@ -163,19 +167,19 @@ void OnUnlockControl()
   switch (control)
   {
     case kTrigger:
-      triggerLockedDimmer.off();
+      //triggerLockedDimmer.off();
       digitalWrite(triggerBtnLed, LOW);
       break;
     case kPower:
-      powerLockedDimmer.off();
+      //powerLockedDimmer.off();
       digitalWrite(powerBtnLed, LOW);
       break;
     case kPrint:
-      printLockedDimmer.off();
+      //printLockedDimmer.off();
       digitalWrite(printBtnLed, LOW);
       break;
     case kPrintTwice:
-      printTwiceLockedDimmer.off();
+      //printTwiceLockedDimmer.off();
       digitalWrite(printTwiceBtnLed, LOW);
       break;
     default:
