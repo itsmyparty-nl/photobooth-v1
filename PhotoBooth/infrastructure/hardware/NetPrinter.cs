@@ -160,7 +160,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
                         ? marginBounds.Height
                         : (e.PageSettings.Landscape ? printableArea.Width : printableArea.Height));
 
-            var rotatedImage = (Image) storedImage.Clone())
+            var rotatedImage = (Image) storedImage.Clone();
             rotatedImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
 
             logger.LogInfo(
