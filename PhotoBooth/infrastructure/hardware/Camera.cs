@@ -56,7 +56,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
 				Id = abilities.model;
 			
 				LibGPhoto2.ICameraWidget widget = camera.GetConfig (context);
-				logger.LogInfo ("Children: " + widget.ChildCount);
+				logger.LogDebug ("Children: " + widget.ChildCount);
 				
 				//logger.LogInfo ("Summary: " + camera.GetSummary(context).Text);
 				//	LibGPhoto2.CameraWidget childWidget = widget.GetChild(0);
@@ -67,11 +67,11 @@ namespace com.prodg.photobooth.infrastructure.hardware
 				
 				//Log the ID
 				logger.LogInfo ("Found: " + Id);
-				//logger.LogInfo ("Status: " + abilities.status);
-				//logger.LogInfo ("Id: " + abilities.id);
+				logger.LogDebug ("Status: " + abilities.status);
+				logger.LogDebug ("Id: " + abilities.id);
 
 				//System.Console.WriteLine ("about: "+ camera.GetAbout(context).Text);
-				logger.LogInfo ("operations: " + abilities.operations.ToString ());
+				logger.LogDebug ("operations: " + abilities.operations.ToString ());
 				
 				initialized = true;
 				
