@@ -78,12 +78,12 @@ namespace com.prodg.photobooth.infrastructure.hardware
                     MonitorCameraPresence();
                     pollingIndex = 0;
 	            }
-	        }
-
-	        //Sleep until the next poll
-	        if (!deinitRequested)
-	        {
-	            Thread.Sleep(1000);
+                
+                //Sleep until the next poll
+                if (!deinitRequested)
+                {
+                    Thread.Sleep(1000);
+                }
 	        }
 	    }
 
