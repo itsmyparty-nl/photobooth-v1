@@ -60,7 +60,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
 			
 				LibGPhoto2.ICameraWidget widget = camera.GetConfig (context);
 				logger.LogDebug ("Children: " + widget.ChildCount);
-                logger.LogDebug ("Battery Level: " + GetBatteryLevel());
+                logger.LogInfo ("Battery Level: " + GetBatteryLevel());
 
 			    //	LibGPhoto2.CameraWidget childWidget = widget.GetChild(0);
 				//	logger.LogInfo (childWidget.GetInfo());
@@ -87,7 +87,6 @@ namespace com.prodg.photobooth.infrastructure.hardware
 	    private int GetBatteryLevel()
 	    {
 	        string summary = camera.GetSummary(context).Text;
-	        logger.LogDebug(summary);
 	        using (var reader = new StringReader(summary))
 	        {
 	            string line;
@@ -95,7 +94,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
 	            {
 	                if (line.Contains("Battery"))
 	                {
-	                    logger.LogInfo(line);
+	                    logger.LogDebug(line);
 	                    {
                             
                             Regex regex = new Regex(@"^.+value: <level>\%.*");
