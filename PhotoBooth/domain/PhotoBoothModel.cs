@@ -68,11 +68,8 @@ namespace com.prodg.photobooth.domain
             hardware.Acquire();
 
             //Start with only the power control armed
-            hardware.TriggerControl.Release();
             hardware.PowerControl.Arm();
-            hardware.PrintControl.Release();
-            hardware.PrintTwiceControl.Release();
-
+   
             //Register events
             hardware.Camera.StateChanged += OnCameraStateChanged;
             hardware.TriggerControl.Fired += OnTriggerControlTriggered;
@@ -99,6 +96,12 @@ namespace com.prodg.photobooth.domain
             hardware.Release();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        /// <remarks>This should be the only location where release/arm of the trigger is performed</remarks>
         void OnCameraStateChanged(object sender, CameraStateChangedEventArgs e)
         {
             if (e.NewState)
@@ -185,9 +188,7 @@ namespace com.prodg.photobooth.domain
                     logger.LogInfo("Nothing to print");
                     return;
                 }
-                //After printing we're ready for the next session
-                hardware.TriggerControl.Arm();
-
+               
                 //Wait until releasing the control to show that printing is busy
                 await Task.Delay(TimeSpan.FromSeconds(90));
             }
@@ -230,8 +231,6 @@ namespace com.prodg.photobooth.domain
 
             //Always re-arm the trigger after shooting
             hardware.TriggerControl.Unlock();
-            hardware.TriggerControl.Release();
-            hardware.TriggerControl.Arm();
         }
 
         #region IDisposable Implementation
