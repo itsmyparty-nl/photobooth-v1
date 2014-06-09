@@ -95,7 +95,7 @@ namespace com.prodg.photobooth.domain
                     int failureCount = 0;
                     var session = new PhotoSession(settings);
 
-                    while (session.ImageCount < imageProcessor.RequiredImages && failureCount < 3)
+                    while (session.ImageCount < imageProcessor.RequiredImages && failureCount < 10)
                     {
                         string imagePath = session.GetNextImagePath();
                         if (hardware.Camera.Capture(imagePath))

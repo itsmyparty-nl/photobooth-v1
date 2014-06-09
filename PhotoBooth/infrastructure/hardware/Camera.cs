@@ -62,7 +62,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
 
 	    private void MonitorCameraAsync()
 	    {
-	        int pollingIndex = 1;
+	        int pollingIndex = 0;
 	        while (!deinitRequested)
 	        {
 	            if (!initialized)
@@ -71,11 +71,12 @@ namespace com.prodg.photobooth.infrastructure.hardware
 	            }
 	            else
 	            {
+	                pollingIndex++;
 	                //Check with a reduced frequency
-	                if (pollingIndex%10 != 0) continue;
+	                if (pollingIndex%5 != 0) continue;
 
-                    pollingIndex = 1;
-	                MonitorCameraPresence();
+                    MonitorCameraPresence();
+                    pollingIndex = 0;
 	            }
 	        }
 
@@ -109,6 +110,12 @@ namespace com.prodg.photobooth.infrastructure.hardware
 	            logger.LogWarning("Connection with camera lost");
 	            DisposeCameraObjects();
 	            initialized = false;
+
+                //Signal that the camera is lost (not within the lock)
+                if (StateChanged != null)
+                {
+                    StateChanged.Invoke(this, new CameraStateChangedEventArgs(false));
+                }
 	        }
 	    }
 
@@ -129,7 +136,6 @@ namespace com.prodg.photobooth.infrastructure.hardware
 
 	                //Log the ID
 	                logger.LogInfo("Found: " + Id);
-	                logger.LogInfo("Battery Level: " + GetBatteryLevel());
 	                logger.LogDebug("Status: " + abilities.status);
 	                logger.LogDebug("Id: " + abilities.id);
 
@@ -137,9 +143,9 @@ namespace com.prodg.photobooth.infrastructure.hardware
 	            }
 
 	            //Signal that the camera is ready (not within the lock)
-	            if (Ready != null)
+	            if (StateChanged != null)
 	            {
-	                Ready.Invoke(this, EventArgs.Empty);
+	                StateChanged.Invoke(this, new CameraStateChangedEventArgs(true) );
 	            }
 	        }
 	        catch (Exception exception)
@@ -336,7 +342,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
 
         #region ICamera Members
 
-        public event EventHandler Ready;
+        public event EventHandler<CameraStateChangedEventArgs> StateChanged;
 
         public event EventHandler<CameraBatteryWarningEventArgs> BatteryWarning;
 

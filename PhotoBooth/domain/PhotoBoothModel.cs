@@ -74,7 +74,7 @@ namespace com.prodg.photobooth.domain
             hardware.PrintTwiceControl.Release();
 
             //Register events
-            hardware.Camera.Ready += OnCameraReady;
+            hardware.Camera.StateChanged += OnCameraStateChanged;
             hardware.TriggerControl.Fired += OnTriggerControlTriggered;
             hardware.PrintControl.Fired += OnPrintControlTriggered;
             hardware.PrintTwiceControl.Fired += OnPrintTwiceControlTriggered;
@@ -89,7 +89,7 @@ namespace com.prodg.photobooth.domain
             logger.LogInfo("Stopping Photobooth application model");
 
             //Unsubscribe from all hardware events
-            hardware.Camera.Ready -= OnCameraReady;
+            hardware.Camera.StateChanged -= OnCameraStateChanged;
             hardware.TriggerControl.Fired -= OnTriggerControlTriggered;
             hardware.PrintControl.Fired -= OnPrintControlTriggered;
             hardware.PrintTwiceControl.Fired -= OnPrintTwiceControlTriggered;
@@ -99,9 +99,16 @@ namespace com.prodg.photobooth.domain
             hardware.Release();
         }
 
-        void OnCameraReady(object sender, EventArgs e)
+        void OnCameraStateChanged(object sender, CameraStateChangedEventArgs e)
         {
-            Task.Run(() => hardware.TriggerControl.Arm());
+            if (e.NewState)
+            {
+                Task.Run(() => hardware.TriggerControl.Arm());
+            }
+            else
+            {
+                Task.Run(() => hardware.TriggerControl.Release());
+            }
         }
 
         private void OnPowerControlTriggered(object sender, TriggerControlEventArgs e)
@@ -209,9 +216,12 @@ namespace com.prodg.photobooth.domain
                 //Take pictures and add to the queue
                 currentSession = await service.Capture();
 
-                //Afer capturing we're ready for printing or for another shoot
-                hardware.PrintControl.Arm();
-                hardware.PrintTwiceControl.Arm();
+                if (currentSession != null && currentSession.ResultImage != null)
+                {
+                    //Afer capturing we're ready for printing or for another shoot
+                    hardware.PrintControl.Arm();
+                    hardware.PrintTwiceControl.Arm();
+                }
             }
             catch (Exception ex)
             {

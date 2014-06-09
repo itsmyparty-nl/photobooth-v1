@@ -31,12 +31,22 @@ namespace com.prodg.photobooth.infrastructure.hardware
         public int Level { get; private set; }
     }
 
+    public class CameraStateChangedEventArgs : EventArgs
+    {
+        public CameraStateChangedEventArgs(bool newState)
+        {
+            NewState = newState;
+        }
+
+        public bool NewState { get; private set; }
+    }
+
     public interface ICamera: IHardwareController, IDisposable
     {
         /// <summary>
-        /// Emits an event when the camera is ready
+        /// Emits an event when the camera state changed (from ready to connection lost and vice versa)
         /// </summary>
-        event EventHandler Ready;
+        event EventHandler<CameraStateChangedEventArgs> StateChanged;
    
         /// <summary>
         /// Emits a warning if the battery level is at or below the warning level
