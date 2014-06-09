@@ -60,16 +60,10 @@ namespace com.prodg.photobooth.infrastructure.hardware
 			
 				LibGPhoto2.ICameraWidget widget = camera.GetConfig (context);
 				logger.LogDebug ("Children: " + widget.ChildCount);
-                logger.LogInfo ("Battery Level: " + GetBatteryLevel());
-
-			    //	LibGPhoto2.CameraWidget childWidget = widget.GetChild(0);
-				//	logger.LogInfo (childWidget.GetInfo());
-				
-				//LibGPhoto2.CameraWidget battLevelWidget = widget.GetChild("batterylevel");
-				//logger.LogInfo ("Battery: " + battLevelWidget.GetInfo());
 				
 				//Log the ID
 				logger.LogInfo ("Found: " + Id);
+                logger.LogInfo("Battery Level: " + GetBatteryLevel());
 				logger.LogDebug ("Status: " + abilities.status);
 				logger.LogDebug ("Id: " + abilities.id);
 
@@ -97,7 +91,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
 	                    logger.LogDebug(line);
 	                    {
                             
-                            Regex regex = new Regex(@"^.+value: <level>\%.*");
+                            Regex regex = new Regex(@"^.+value\: <level>\%.*");
 
                             Match match = regex.Match(line);
 
