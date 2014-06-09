@@ -60,7 +60,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
 				logger.LogDebug ("Children: " + widget.ChildCount);
 
 			    string summary = camera.GetSummary(context).Text;
-                //logger.LogDebug(summary);
+                logger.LogDebug(summary);
                 using (var reader = new StringReader(summary))
                 {
                     string line;
