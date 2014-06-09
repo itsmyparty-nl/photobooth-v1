@@ -160,22 +160,26 @@ namespace com.prodg.photobooth.infrastructure.hardware
                         ? marginBounds.Height
                         : (e.PageSettings.Landscape ? printableArea.Width : printableArea.Height));
 
-            storedImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
+            using (var rotatedImage = (Image) storedImage.Clone())
+            {
+                rotatedImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
 
-            logger.LogInfo(
-                String.Format("Printing image ({2}x{3}) on {0}, printable area ({1}), bounds ({4}), dpi ({5},{6})",
-                    e.PageSettings.PrinterSettings.PrinterName, printableArea, storedImage.Width,
-                    storedImage.Height, e.MarginBounds, e.Graphics.DpiX, e.Graphics.DpiY));
+                logger.LogInfo(
+                    String.Format("Printing image ({2}x{3}) on {0}, printable area ({1}), bounds ({4}), dpi ({5},{6})",
+                        e.PageSettings.PrinterSettings.PrinterName, printableArea, rotatedImage.Width,
+                        rotatedImage.Height, e.MarginBounds, e.Graphics.DpiX, e.Graphics.DpiY));
 
-            // Draw our rectangle which will either be the soft margin rectangle 
-            // or the hard margin (printer capabilities) rectangle.
-            // ----------
-            // Note: we adjust the width and height minus one as it is a zero, 
-            // zero based co-ordinates system. This will put the rectangle just 
-            // inside the available width and height.            
+                // Draw our rectangle which will either be the soft margin rectangle 
+                // or the hard margin (printer capabilities) rectangle.
+                // ----------
+                // Note: we adjust the width and height minus one as it is a zero, 
+                // zero based co-ordinates system. This will put the rectangle just 
+                // inside the available width and height.            
 
-            g.InterpolationMode = InterpolationMode.HighQualityBicubic;
-            g.DrawImage(storedImage, new Rectangle(0, 0, availableWidth, availableHeight));
+                g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                g.SmoothingMode = SmoothingMode.HighQuality;
+                g.DrawImage(rotatedImage, new Rectangle(0, 0, availableWidth, availableHeight));
+            }
         }
     }
 }

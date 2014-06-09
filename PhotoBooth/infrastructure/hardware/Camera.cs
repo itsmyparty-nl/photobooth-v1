@@ -19,6 +19,7 @@
 
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using com.prodg.photobooth.common;
@@ -57,8 +58,21 @@ namespace com.prodg.photobooth.infrastructure.hardware
 			
 				LibGPhoto2.ICameraWidget widget = camera.GetConfig (context);
 				logger.LogDebug ("Children: " + widget.ChildCount);
-				
-				//logger.LogInfo ("Summary: " + camera.GetSummary(context).Text);
+
+			    string summary = camera.GetSummary(context).Text;
+                //logger.LogDebug(summary);
+                using (var reader = new StringReader(summary))
+                {
+                    string line;
+                    while ((line = reader.ReadLine()) != null)
+                    {
+                        if (line.Contains("battery"))
+                        {
+                            logger.LogInfo(line);
+                        }
+                    }
+                }
+
 				//	LibGPhoto2.CameraWidget childWidget = widget.GetChild(0);
 				//	logger.LogInfo (childWidget.GetInfo());
 				
