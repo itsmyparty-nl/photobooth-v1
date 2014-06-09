@@ -144,15 +144,15 @@ namespace com.prodg.photobooth.domain
 
                 //Wait until releasing the control to show that printing is busy
                 await Task.Delay(TimeSpan.FromSeconds(45));
-                hardware.PrintTwiceControl.Release();
             }
             catch (Exception ex)
             {
                 logger.LogException("Error while capturing images", ex);
                 //In case anything went wrong, there's most probably no use in trying again.
-                //Forget about this session and move on to the next
-                hardware.TriggerControl.Arm();
             }
+            //always reset the control to its initial state
+            hardware.PrintControl.Unlock();
+            hardware.PrintControl.Release();
         }
 
         private async void OnPrintTwiceControlTriggered(object sender, TriggerControlEventArgs e)
@@ -183,12 +183,14 @@ namespace com.prodg.photobooth.domain
 
                 //Wait until releasing the control to show that printing is busy
                 await Task.Delay(TimeSpan.FromSeconds(90));
-                hardware.PrintTwiceControl.Release();
             }
             catch (Exception ex)
             {
                 logger.LogException("Error while printing", ex);
             }
+            //always reset the control to its initial state
+            hardware.PrintTwiceControl.Unlock();
+            hardware.PrintTwiceControl.Release();
         }
 
         private async void OnTriggerControlTriggered(object sender, TriggerControlEventArgs e)
@@ -222,6 +224,7 @@ namespace com.prodg.photobooth.domain
             }
 
             //Always re-arm the trigger after shooting
+            hardware.TriggerControl.Unlock();
             hardware.TriggerControl.Release();
             hardware.TriggerControl.Arm();
         }
