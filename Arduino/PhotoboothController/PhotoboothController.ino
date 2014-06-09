@@ -133,15 +133,19 @@ void OnLockControl()
   switch (control)
   {
     case kTrigger:
+      digitalWrite(triggerBtnLed, LOW);
       triggerLockedDimmer.startPulsate();
       break;
     case kPower:
+      digitalWrite(powerBtnLed, LOW);
       powerLockedDimmer.startPulsate();
       break;
     case kPrint:
+      digitalWrite(printBtnLed, LOW);
       printLockedDimmer.startPulsate();
       break;
     case kPrintTwice:
+      digitalWrite(printTwiceBtnLed, LOW);
       printTwiceLockedDimmer.startPulsate();
       break;
     default:
@@ -160,15 +164,19 @@ void OnUnlockControl()
   {
     case kTrigger:
       triggerLockedDimmer.off();
+      digitalWrite(triggerBtnLed, LOW);
       break;
     case kPower:
       powerLockedDimmer.off();
+      digitalWrite(powerBtnLed, LOW);
       break;
     case kPrint:
       printLockedDimmer.off();
+      digitalWrite(printBtnLed, LOW);
       break;
     case kPrintTwice:
       printTwiceLockedDimmer.off();
+      digitalWrite(printTwiceBtnLed, LOW);
       break;
     default:
       cmdMessenger.sendCmd(kError,"Unsupported button");
