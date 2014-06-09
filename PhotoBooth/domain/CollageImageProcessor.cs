@@ -17,6 +17,7 @@
 */
 #endregion
 
+using System.Drawing.Drawing2D;
 using com.prodg.photobooth.common;
 using System.Drawing;
 using System;
@@ -85,35 +86,25 @@ namespace com.prodg.photobooth.domain
                     "Expected exactly {0} images to process", RequiredImages));
             }
 
-            Size size = CalculateOutputImageSize(session.Images[0]);
+            //Calculate output width & height while maintaining aspect ratio
+            var collageWidth = CalculateCollageWidth(session.Images[0].Width);
+            var croppedImageHeight = CalculateCroppedImageHeight(collageWidth);
+            var collageHeight = CalculateCollageHeight(croppedImageHeight);
 
             //create a bitmap to hold the combined image
-            Image finalImage = new Bitmap(size.Width, size.Height);
+            Image finalImage = new Bitmap(collageWidth, collageHeight);
             //get a graphics object from the image so we can draw on it
-            using (var g = Graphics.FromImage(finalImage))
+            using (var graphics = Graphics.FromImage(finalImage))
             {
                 //set background color
-                g.Clear(backgroundColor);
+                graphics.Clear(backgroundColor);
 
                 //go through each image and draw it on the final image
-
-                int j = 0;
+                var imageIndex = 0;
                 foreach (var currentImage in session.Images)
                 {
-                    var currentWidth = (int) Math.Floor(currentImage.Width*settings.CollageScalePercentage);
-                    var currentHeight = (int) Math.Floor(currentImage.Height*settings.CollageScalePercentage);
-
-                    //Note: Start at double padding
-                    var startX = (j%settings.CollageGridWidth)*(currentWidth + settings.CollagePaddingPixels) +
-                                 2*settings.CollagePaddingPixels;
-                    var startY = (j/settings.CollageGridWidth)*(currentHeight + settings.CollagePaddingPixels) +
-                                 2*settings.CollagePaddingPixels;
-
-                    //draw the original image on the new image using the grayscale color matrix
-                    g.DrawImage(currentImage, new Rectangle(startX, startY, currentWidth, currentHeight),
-                        0, 0, currentImage.Width, currentImage.Height, GraphicsUnit.Pixel, attributes);
-
-                    j++;
+                    DrawCroppedImageOnCollage(currentImage, croppedImageHeight, imageIndex, graphics);
+                    imageIndex++;
                 }
             }
 
@@ -121,19 +112,55 @@ namespace com.prodg.photobooth.domain
             return finalImage;
         }
 
-        private Size CalculateOutputImageSize(Image image)
+        private void DrawCroppedImageOnCollage(Image image, int croppedImageHeight, int imageIndex, Graphics g)
+        {
+            var srcStartY = image.Height == croppedImageHeight ? 0 : image.Height - croppedImageHeight - 1;
+            var dstWidth = (int)Math.Floor(image.Width * settings.CollageScalePercentage);
+            var dstHeight = (int)Math.Floor((image.Height - srcStartY) * settings.CollageScalePercentage);
+
+            //Note: Start at double padding
+            var dstStartX = (imageIndex%settings.CollageGridWidth)*(dstWidth + settings.CollagePaddingPixels) +
+                         2*settings.CollagePaddingPixels;
+            var dstStartY = (imageIndex / settings.CollageGridWidth) * (dstHeight + settings.CollagePaddingPixels) +
+                         2*settings.CollagePaddingPixels;
+
+            //draw the original image on the new image using the grayscale color matrix
+            g.SmoothingMode = SmoothingMode.HighQuality;
+            g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+            g.DrawImage(image, new Rectangle(dstStartX, dstStartY, dstWidth, dstHeight),
+                0, srcStartY, image.Width, image.Height, GraphicsUnit.Pixel, attributes);
+        }
+
+        private int CalculateCollageHeight(int croppedImageHeight)
         {
             //Gridwidth - 1 to get the padding in between. +4 to get double size borders outside the image
-            var width =
+            var collageHeight =
                 (int)
-                    ((image.Width * settings.CollageGridWidth) * settings.CollageScalePercentage +
-                     (settings.CollageGridWidth + 3) * settings.CollagePaddingPixels);
-            var height =
-                (int)
-                    ((image.Height * settings.CollageGridHeight) * settings.CollageScalePercentage +
-                     (settings.CollageGridHeight + 3) * settings.CollagePaddingPixels);
+                    ((croppedImageHeight*settings.CollageGridHeight*settings.CollageScalePercentage) +
+                     (settings.CollageGridHeight + 3)*settings.CollagePaddingPixels);
+            return collageHeight;
+        }
 
-            return new Size(width, height);
+        private int CalculateCollageWidth(int imageWidth)
+        {
+            //Gridwidth - 1 to get the padding in between. +4 to get double size borders outside the image
+            return
+                (int)
+                    ((imageWidth*settings.CollageGridWidth*settings.CollageScalePercentage) +
+                     (settings.CollageGridWidth + 3)*settings.CollagePaddingPixels);
+        }
+
+        private int CalculateCroppedImageHeight(int collageWidth)
+        {
+            //Calculate the desired height according to the aspect ratio
+            var desiredCollageHeight = (int) (collageWidth/settings.CollageAspectRatio);
+
+            //totalHeight = (height*n*scale) + (n+3)*padpx
+            //height = (totalHeight - padpx*(n + 3))/(n*scale)
+            var croppedImageHeight =
+                (int) ((desiredCollageHeight - settings.CollagePaddingPixels*(settings.CollageGridHeight + 3))/
+                       (settings.CollageGridHeight*1f));
+            return croppedImageHeight;
         }
 
         #region IDisposable Implementation

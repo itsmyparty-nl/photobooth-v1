@@ -26,7 +26,10 @@ using com.prodg.photobooth.infrastructure.hardware;
 
 namespace com.prodg.photobooth.application
 {
-	public static class PhotoBoothConsole
+	/// <summary>
+	/// Simple console application to run the photobooth without a display connected to it
+	/// </summary>
+    public static class PhotoBoothConsole
 	{
         private static readonly ManualResetEvent ShutdownRequested = new ManualResetEvent(false);
         
@@ -39,10 +42,11 @@ namespace com.prodg.photobooth.application
             var camera = new Camera(logger);
 			var printer = new NetPrinter(settings,logger);
             var commandMessenger = new CommandMessengerTransceiver(logger, settings);
+            var consoleCommandReceiver = new ConsoleCommandReceiver(logger);
             var triggerControl = new RemoteTrigger(Command.Trigger, commandMessenger, commandMessenger, logger);
             var printControl = new RemoteTrigger(Command.Print, commandMessenger, commandMessenger, logger);
             var printTwiceControl = new RemoteTrigger(Command.PrintTwice, commandMessenger, commandMessenger, logger);
-            var powerControl = new RemoteTrigger(Command.Power, commandMessenger, commandMessenger, logger);
+            var powerControl = new RemoteTrigger(Command.Power, consoleCommandReceiver, commandMessenger, logger);
 			IHardware hardware = new Hardware(camera,printer,triggerControl,printControl,printTwiceControl,powerControl,logger);
 
             IImageProcessor imageProcessor = new CollageImageProcessor(logger,settings);
@@ -54,11 +58,13 @@ namespace com.prodg.photobooth.application
 
 			//Start
             commandMessenger.Initialize();
+            consoleCommandReceiver.Initialize();
 			photoBooth.Start();
 			//Wait until the photobooth is finished
 			ShutdownRequested.WaitOne();
 			//Stop
 			photoBooth.Stop();
+            consoleCommandReceiver.Initialize();
             commandMessenger.DeInitialize();
 		}
 	}

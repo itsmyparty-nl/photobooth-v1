@@ -150,7 +150,7 @@ void OnLockControl()
     case kPrintTwice:
       digitalWrite(printTwiceBtnLed, LOW);
       //printTwiceLockedDimmer.startPulsate();
-      digitalWrite(printBtnLed, HIGH);
+      digitalWrite(printTwiceBtnLed, HIGH);
       break;
     default:
       cmdMessenger.sendCmd(kError,"Unsupported button");

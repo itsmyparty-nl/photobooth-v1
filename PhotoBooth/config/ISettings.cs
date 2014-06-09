@@ -67,19 +67,29 @@ namespace com.prodg.photobooth.config
         int CollageGridHeight { get; }
 
         /// <summary>
-        /// The scaling percentage for input images to be used in the collageby the collage image processer (default: 0.25) 
+        /// The scaling percentage for input images to be used in the collageby the collage image processer (default: 0.50) 
         /// </summary>
         float CollageScalePercentage { get; }
 
         /// <summary>
-        /// The number of pixels to pad outside of images in the collageby the collage image processer (default: 30) 
+        /// The number of pixels to pad outside of images in the collageby the collage image processer (default: 20) 
         /// </summary>
         int CollagePaddingPixels { get; }
+
+        /// <summary>
+        /// The aspect ratio of the collage (width divided by height) (default: 3:2)
+        /// </summary>
+        double CollageAspectRatio { get; }
 
         #endregion
 
 		#region Printing
 		string PrinterName { get; }
+
+        int PrintMarginTop { get; }
+        int PrintMarginLeft { get; }
+        int PrintMarginBottom { get; }
+        int PrintMarginRight { get; }
 		#endregion
     }
 }

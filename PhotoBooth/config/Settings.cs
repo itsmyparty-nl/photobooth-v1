@@ -45,58 +45,31 @@ namespace com.prodg.photobooth.config
         private const string CollageGridHeightKey = "CollageGridHeight";
         private const string CollageScalePercentageKey = "CollageScalePercentage";
         private const string CollagePaddingPixelsKey = "CollagePaddingPixels";
+        private const string CollageAspectRatioKey = "CollageAspectRatio";
 		private const string PrinterNameKey = "PrinterName";
+        private const string PrintMarginTopKey = "PrintMarginTop";
+        private const string PrintMarginLeftKey = "PrintMarginLeft";
+        private const string PrintMarginBottomKey = "PrintMarginBottom";
+        private const string PrintMarginRightKey = "PrintMarginRight";
 
         #endregion
 
         #region ISettings Members
 
-        /// <summary>
-        /// The name of the serial port connection to the hardware e.g. COM1 on Windows or /dev/tty0 on linux
-        /// </summary>
         public string SerialPortName { get; private set; }
-
-        /// <summary>
-        /// The baud rate of the serial port connection to the hardware e.g. 9600
-        /// </summary>
         public int SerialPortBaudRate { get; private set; }
-
-        /// <summary>
-        /// Enable / disable the Data Terminal Ready (DTR) signal of the serial port connection to the hardware
-        /// </summary>
-        /// <remarks>Data Terminal Ready (DTR) is typically enabled during XON/XOFF software handshaking and
-        ///  Request to Send/Clear to Send (RTS/CTS) hardware handshaking, and modem communications.</remarks>
         public bool SerialPortDtrEnable { get; private set; }
-
-        /// <summary>
-        /// The base path for storing images and other related data
-        /// </summary>
         public string StoragePath { get; private set; }
-
-        /// <summary>
-        /// The grid Width of the collage created by the collage image processer (default: 2)
-        /// </summary>
         public int CollageGridWidth { get; private set; }
-
-        /// <summary>
-        /// The grid Height of the collage created by the collage image processer (default: 2)
-        /// </summary>
         public int CollageGridHeight { get; private set; }
-
-        /// <summary>
-        /// The scaling percentage for input images to be used in the collageby the collage image processer (default: 0.25) 
-        /// </summary>
         public float CollageScalePercentage { get; private set; }
-
-        /// <summary>
-        /// The number of pixels to pad outside of images in the collageby the collage image processer (default: 30) 
-        /// </summary>
         public int CollagePaddingPixels { get; private set; }
-
-		/// <summary>
-		/// The name of the printer
-		/// </summary>
+        public double CollageAspectRatio { get; private set; }
 		public string PrinterName { get; private set; }
+        public int PrintMarginTop { get; private set; }
+        public int PrintMarginLeft { get; private set; }
+        public int PrintMarginBottom { get; private set; }
+        public int PrintMarginRight { get; private set; }
 
         #endregion
 
@@ -128,7 +101,12 @@ namespace com.prodg.photobooth.config
                 CollageGridHeight = Convert.ToInt32(appSettings.Get(CollageGridHeightKey));
                 CollageScalePercentage = Convert.ToSingle(appSettings.Get(CollageScalePercentageKey));
                 CollagePaddingPixels = Convert.ToInt32(appSettings.Get(CollagePaddingPixelsKey));
+                CollageAspectRatio = Convert.ToDouble(appSettings.Get(CollageAspectRatioKey));
 				PrinterName = appSettings.Get(PrinterNameKey);
+                PrintMarginTop = Convert.ToInt32(appSettings.Get(PrintMarginTopKey));
+                PrintMarginLeft = Convert.ToInt32(appSettings.Get(PrintMarginLeftKey));
+                PrintMarginBottom = Convert.ToInt32(appSettings.Get(PrintMarginBottomKey));
+                PrintMarginRight = Convert.ToInt32(appSettings.Get(PrintMarginRightKey));
 
 				try
 				{
