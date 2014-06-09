@@ -23,7 +23,6 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using com.prodg.photobooth.common;
 using LibGPhoto2;
-using NLog;
 
 namespace com.prodg.photobooth.infrastructure.hardware
 {
@@ -34,10 +33,12 @@ namespace com.prodg.photobooth.infrastructure.hardware
 		private readonly ILogger logger;
 		private bool initialized;
 	    private bool deinitRequested;
-	    private Thread initializeThread;
+	    private Thread monitoringThread;
 	    private const string CameraBaseFolder = @"/";
 	    private const int DefaultBatteryLevel = 99;
 	    private const int WarningBatteryLevel = 25;
+
+        private readonly object cameraLock = new object();
 
 
 		public string Id { get; private set; }
@@ -55,16 +56,67 @@ namespace com.prodg.photobooth.infrastructure.hardware
 
             logger.LogInfo ("Initializing camera");
 		    deinitRequested = false;
-            initializeThread = new Thread(InitializeCameraAsync);
-		    initializeThread.Start();
+            monitoringThread = new Thread(MonitorCameraAsync);
+		    monitoringThread.Start();
 		}
 
-	    private void InitializeCameraAsync()
+	    private void MonitorCameraAsync()
 	    {
-	        while (!initialized && !deinitRequested)
+	        int pollingIndex = 1;
+	        while (!deinitRequested)
 	        {
-	            Thread.Sleep(500);
-                try
+	            if (!initialized)
+	            {
+	                TryInitialize();
+	            }
+	            else
+	            {
+	                //Check with a reduced frequency
+	                if (pollingIndex%10 != 0) continue;
+
+                    pollingIndex = 1;
+	                MonitorCameraPresence();
+	            }
+	        }
+
+	        //Sleep until the next poll
+	        if (!deinitRequested)
+	        {
+	            Thread.Sleep(1000);
+	        }
+	    }
+
+	    private void MonitorCameraPresence()
+	    {
+	        try
+	        {
+	            int level = 0;
+	            lock (cameraLock)
+	            {
+	                level = GetBatteryLevel();
+	            }
+	            //Notify users if the battery level is at a warning level
+	            if (level <= WarningBatteryLevel)
+	            {
+	                if (BatteryWarning != null)
+	                {
+	                    BatteryWarning.Invoke(this, new CameraBatteryWarningEventArgs(level));
+	                }
+	            }
+	        }
+	        catch (Exception)
+	        {
+	            logger.LogWarning("Connection with camera lost");
+	            DisposeCameraObjects();
+	            initialized = false;
+	        }
+	    }
+
+	    private void TryInitialize()
+	    {
+	        try
+	        {
+	            lock (cameraLock)
 	            {
 	                //Initialize GPhoto2
 	                context = new LibGPhoto2.Context();
@@ -82,26 +134,34 @@ namespace com.prodg.photobooth.infrastructure.hardware
 	                logger.LogDebug("Id: " + abilities.id);
 
 	                initialized = true;
-
-	                //Signal that the camera is ready
-                    if (Ready != null)
-	                {
-	                    Ready.Invoke(this, EventArgs.Empty);
-	                }
 	            }
-	            catch (Exception exception)
+
+	            //Signal that the camera is ready (not within the lock)
+	            if (Ready != null)
 	            {
-	                logger.LogDebug("Could not initialize camera: " + exception.Message);
+	                Ready.Invoke(this, EventArgs.Empty);
 	            }
 	        }
+	        catch (Exception exception)
+	        {
+	            logger.LogDebug("Could not initialize camera: " + exception.Message);
+	        }
 	    }
+
 
 	    /// <remarks>In all cases that no value can be retrieved a default battery level is returned which
 	    /// indicates a full battery. rationale is that in this case manual checking is needed, and the
 	    /// software should work without issues</remarks>
         private int GetBatteryLevel()
 	    {
-	        var summary = camera.GetSummary(context).Text;
+	        string summary = null;
+            lock (cameraLock)
+            {
+                if (!CheckInitialized()) return DefaultBatteryLevel;
+
+	            summary = camera.GetSummary(context).Text;
+	        }
+
 	        using (var reader = new StringReader(summary))
 	        {
 	            string line;
@@ -116,14 +176,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
 
 	                try
 	                {
-	                    var level = Convert.ToInt32(match.Groups["level"].Value);
-	                    if (level <= WarningBatteryLevel)
-	                    {
-	                        if (BatteryWarning != null)
-	                        {
-	                            BatteryWarning.Invoke(this, new CameraBatteryWarningEventArgs(level));
-	                        }
-	                    }
+	                    return Convert.ToInt32(match.Groups["level"].Value);
 	                }
 	                catch (Exception ex)
 	                {
@@ -140,67 +193,78 @@ namespace com.prodg.photobooth.infrastructure.hardware
             logger.LogInfo("DeInitializing camera");
 	        deinitRequested = true;
 
-	        if (initializeThread != null && !Thread.CurrentThread.Equals(initializeThread))
+	        if (monitoringThread != null && !Thread.CurrentThread.Equals(monitoringThread))
 	        {
-	            if (!initializeThread.Join(5000))
+	            if (!monitoringThread.Join(5000))
 	            {
 	                logger.LogError("Cancel initialize failed, aborting thread");
-                    initializeThread.Abort();
+                    monitoringThread.Abort();
 	            }
 	        }
 
-	        if (context == null) return;
-	        if (camera == null) return;
-	        
-            try
+	        lock (cameraLock)
 	        {
-	            camera.Exit(context);
-	        }
-	        catch (Exception)
-	        {
-	            logger.LogWarning("Could not Exit camera from context");
-	        }
+	            if (context == null) return;
+	            if (camera == null) return;
 
-            DisposeCameraObjects();
+	            try
+	            {
+	                camera.Exit(context);
+	            }
+	            catch (Exception)
+	            {
+	                logger.LogWarning("Could not Exit camera from context");
+	            }
+
+	            DisposeCameraObjects();
+	        }
 	    }
 
 	    public bool Capture(string capturePath)
 	    {
 	        logger.LogDebug("Starting capture");
-	        if (!CheckInitialized())
+	        lock (cameraLock)
 	        {
-	            return false;
-	        }
+	            if (!CheckInitialized())
+	            {
+	                return false;
+	            }
 
-	        try
-	        {
-	            //Always get the battery level to make sure the battery warning is signaled timely
-                logger.LogDebug("Battery Level: "+GetBatteryLevel());
+	            try
+	            {
+	                //Always get the battery level to make sure the battery warning is signaled timely
+	                logger.LogDebug("Battery Level: " + GetBatteryLevel());
 
-	            //Capture and download
-                LibGPhoto2.ICameraFilePath path = camera.Capture(LibGPhoto2.CameraCaptureType.Image, context);
-	            logger.LogDebug("Capture finished. File: " + Path.Combine(path.folder, path.name));
-	            LibGPhoto2.ICameraFile cameraFile = camera.GetFile(path.folder, path.name, LibGPhoto2.CameraFileType.Normal,
-	                                                               context);
+	                //Capture and download
+	                LibGPhoto2.ICameraFilePath path = camera.Capture(LibGPhoto2.CameraCaptureType.Image, context);
+	                logger.LogDebug("Capture finished. File: " + Path.Combine(path.folder, path.name));
+	                LibGPhoto2.ICameraFile cameraFile = camera.GetFile(path.folder, path.name,
+	                    LibGPhoto2.CameraFileType.Normal,
+	                    context);
 
-                logger.LogInfo("Saving file to: "+capturePath);
-                cameraFile.Save(capturePath);
+	                logger.LogInfo("Saving file to: " + capturePath);
+	                cameraFile.Save(capturePath);
 
-                //Remove the file from the camera buffer
-                camera.DeleteFile(path.folder, path.name, context);
-	            return true;
-	        }
-	        catch (Exception exception)
-	        {
-	            logger.LogException("Camera capture failed, starting camera re-init", exception);
-	            ResetCameraOnFailure();
-	            return false;
+	                //Remove the file from the camera buffer
+	                camera.DeleteFile(path.folder, path.name, context);
+	                return true;
+	            }
+	            catch (Exception exception)
+	            {
+	                logger.LogError("Camera capture failed: "+ exception.Message);
+	                return false;
+	            }
 	        }
 	    }
 
 	    public void Clean ()
 		{
-            camera.DeleteAll(CameraBaseFolder, context);
+	        lock (cameraLock)
+	        {
+                if (!CheckInitialized()) return;
+
+	            camera.DeleteAll(CameraBaseFolder, context);
+	        }
 		}
 
 		private bool CheckInitialized ()
@@ -210,17 +274,6 @@ namespace com.prodg.photobooth.infrastructure.hardware
 				return false;
 			}
 			return true;
-		}
-
-		private void ResetCameraOnFailure ()
-		{
-			logger.LogInfo ("Releasing camera");
-			
-			DeInitialize();
-			
-			Thread.Sleep (500);
-			//ReInitialize after releasing camera
-			Initialize ();
 		}
 
 		#region IDisposable Implementation
@@ -250,13 +303,16 @@ namespace com.prodg.photobooth.infrastructure.hardware
 	    {
 	        try
 	        {
-	            if (camera != null)
+	            lock (cameraLock)
 	            {
-	                camera.Dispose();
-	            }
-	            if (context != null)
-	            {
-	                context.Dispose();
+	                if (camera != null)
+	                {
+	                    camera.Dispose();
+	                }
+	                if (context != null)
+	                {
+	                    context.Dispose();
+	                }
 	            }
 	        }
 	        catch (Exception ex)
