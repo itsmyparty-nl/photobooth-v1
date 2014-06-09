@@ -39,33 +39,38 @@ namespace com.prodg.photobooth.application
 			ILogger logger = new NLogger();
 			ISettings settings = new Settings(logger);
 
-            var camera = new Camera(logger);
-			var printer = new NetPrinter(settings,logger);
-            var commandMessenger = new CommandMessengerTransceiver(logger, settings);
-            var consoleCommandReceiver = new ConsoleCommandReceiver(logger);
-            var triggerControl = new RemoteTrigger(Command.Trigger, commandMessenger, commandMessenger, logger);
-            var printControl = new RemoteTrigger(Command.Print, commandMessenger, commandMessenger, logger);
-            var printTwiceControl = new RemoteTrigger(Command.PrintTwice, commandMessenger, commandMessenger, logger);
-            var powerControl = new RemoteTrigger(Command.Power, consoleCommandReceiver, commandMessenger, logger);
-			IHardware hardware = new Hardware(camera,printer,triggerControl,printControl,printTwiceControl,powerControl,logger);
+            using (var camera = new Camera(logger))
+            using (var commandMessenger = new CommandMessengerTransceiver(logger, settings))
+            using (var consoleCommandReceiver = new ConsoleCommandReceiver(logger))
+            {
+                var printer = new NetPrinter(settings, logger);
+                var triggerControl = new RemoteTrigger(Command.Trigger, commandMessenger, commandMessenger, logger);
+                var printControl = new RemoteTrigger(Command.Print, commandMessenger, commandMessenger, logger);
+                var printTwiceControl = new RemoteTrigger(Command.PrintTwice, commandMessenger, commandMessenger, logger);
+                var powerControl = new RemoteTrigger(Command.Power, consoleCommandReceiver, commandMessenger, logger);
+                IHardware hardware = new Hardware(camera, printer, triggerControl, printControl, printTwiceControl,
+                    powerControl, logger);
 
-            IImageProcessor imageProcessor = new CollageImageProcessor(logger,settings);
-		 	IPhotoBoothService photoBoothService = new PhotoBoothService(hardware, imageProcessor, logger, settings);
-		    IPhotoBoothModel photoBooth = new PhotoBoothModel(photoBoothService, hardware, logger);
+                IImageProcessor imageProcessor = new CollageImageProcessor(logger, settings);
+                IPhotoBoothService photoBoothService = new PhotoBoothService(hardware, imageProcessor, logger, settings);
+                IPhotoBoothModel photoBooth = new PhotoBoothModel(photoBoothService, hardware, logger);
 
-            //Subscribe to the shutdown requested event 
-            photoBooth.ShutdownRequested += (sender, eventArgs) => ShutdownRequested.Set();
+                //Subscribe to the shutdown requested event 
+                photoBooth.ShutdownRequested += (sender, eventArgs) => ShutdownRequested.Set();
 
-			//Start
-            commandMessenger.Initialize();
-            consoleCommandReceiver.Initialize();
-			photoBooth.Start();
-			//Wait until the photobooth is finished
-			ShutdownRequested.WaitOne();
-			//Stop
-			photoBooth.Stop();
-            consoleCommandReceiver.DeInitialize();
-            commandMessenger.DeInitialize();
+                //Start
+                commandMessenger.Initialize();
+                consoleCommandReceiver.Initialize();
+                photoBooth.Start();
+                
+                //Wait until the photobooth is finished
+                ShutdownRequested.WaitOne();
+                
+                //Stop
+                photoBooth.Stop();
+                consoleCommandReceiver.DeInitialize();
+                commandMessenger.DeInitialize();
+            }
 		}
 	}
 }

@@ -87,16 +87,11 @@ namespace com.prodg.photobooth.domain
         {
             logger.LogInfo("Stopping Photobooth application model");
 
-            //Release all controls 
-            hardware.TriggerControl.Release();
-            hardware.PowerControl.Release();
-            hardware.PrintControl.Release();
-
             //Unsubscribe from all hardware events
-            hardware.TriggerControl.Fired += OnTriggerControlTriggered;
-            hardware.PrintControl.Fired += OnPrintControlTriggered;
-            hardware.PrintTwiceControl.Fired += OnPrintTwiceControlTriggered;
-            hardware.PowerControl.Fired += OnPowerControlTriggered;
+            hardware.TriggerControl.Fired -= OnTriggerControlTriggered;
+            hardware.PrintControl.Fired -= OnPrintControlTriggered;
+            hardware.PrintTwiceControl.Fired -= OnPrintTwiceControlTriggered;
+            hardware.PowerControl.Fired -= OnPowerControlTriggered;
 
             //Release the hardware
             hardware.Release();
@@ -250,7 +245,8 @@ namespace com.prodg.photobooth.domain
 		            // Clean up managed objects
 		            if (sessionQueue != null)
 		            {
-		                while (sessionQueue.Count > 0)
+		                logger.LogDebug("Cleaning session queue on dispose");
+                        while (sessionQueue.Count > 0)
 		                {
 		                    sessionQueue.Dequeue().Dispose();
 		                }

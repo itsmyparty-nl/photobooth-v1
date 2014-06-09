@@ -17,7 +17,6 @@
 */
 #endregion
 
-
 using System;
 using System.IO;
 using System.Text.RegularExpressions;
@@ -78,59 +77,53 @@ namespace com.prodg.photobooth.infrastructure.hardware
 			}
 		}
 
-	    private int GetBatteryLevel()
+	    /// <remarks>In all cases that no value can be retrieved a default battery level is returned which
+	    /// indicates a full battery. rationale is that in this case manual checking is needed, and the
+	    /// software should work without issues</remarks>
+        private int GetBatteryLevel()
 	    {
-	        string summary = camera.GetSummary(context).Text;
+	        var summary = camera.GetSummary(context).Text;
 	        using (var reader = new StringReader(summary))
 	        {
 	            string line;
 	            while ((line = reader.ReadLine()) != null)
 	            {
-	                if (line.Contains("Battery"))
+	                if (!line.Contains("Battery")) continue;
+
+	                logger.LogDebug(line);
+	                Regex regex = new Regex(@"^.+value\: (?<level>\d+)\%.*");
+	                Match match = regex.Match(line);
+
+	                if (!match.Success) return DefaultBatteryLevel;
+
+	                try
 	                {
-	                    logger.LogDebug(line);
-	                    {
-                            
-                            Regex regex = new Regex(@"^.+value\: <level>\%.*");
-
-                            Match match = regex.Match(line);
-
-                            if (match.Success)
-                            {
-                                try
-                                {
-                                    return Convert.ToInt32(match.Groups["level"].Value);
-                                }
-                                catch (Exception)
-                                {
-                                    return DefaultBatteryLevel;
-                                }
-                            }
-                            return DefaultBatteryLevel;
-	                    }
+	                    return Convert.ToInt32(match.Groups["level"].Value);
+	                }
+	                catch (Exception ex)
+	                {
+	                    logger.LogDebug("no match found for battery level: " + ex.Message);
+	                    return DefaultBatteryLevel;
 	                }
 	            }
 	        }
-            return DefaultBatteryLevel;
+	        return DefaultBatteryLevel;
 	    }
 
 	    public void DeInitialize()
 	    {
             logger.LogInfo("DeInitializing camera");
+
+	        if (context == null) return;
+	        if (camera == null) return;
 	        
-            if (context != null)
+            try
 	        {
-	            if (camera != null)
-	            {
-	                try
-	                {
-	                    camera.Exit(context);
-	                }
-	                catch (Exception)
-	                {
-	                    logger.LogWarning("Could not Exit camera from context");
-	                }
-	            }
+	            camera.Exit(context);
+	        }
+	        catch (Exception)
+	        {
+	            logger.LogWarning("Could not Exit camera from context");
 	        }
 	    }
 

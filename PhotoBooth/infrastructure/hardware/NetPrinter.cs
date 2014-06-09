@@ -83,12 +83,14 @@ namespace com.prodg.photobooth.infrastructure.hardware
 
         public void Initialize()
         {
+            pd = null;
             storedImage = null;
             rotatedImage = null;
         }
 
         public void DeInitialize()
         {
+            pd = null;
             storedImage = null;
             rotatedImage = null;
         }
