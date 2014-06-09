@@ -68,7 +68,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
                 //Pick the first papersize
                 pd.DefaultPageSettings.PaperSize = pd.PrinterSettings.PaperSizes[0];
                 //pd.DefaultPageSettings.Landscape = true;
-                pd.DefaultPageSettings.Margins = new Margins(0, 0, 0, 0);
+                pd.DefaultPageSettings.Margins = new Margins(0, 12, 12, 0);
 
                 pd.Print();
 

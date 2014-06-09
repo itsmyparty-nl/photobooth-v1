@@ -105,12 +105,16 @@ namespace com.prodg.photobooth.infrastructure.command
             logger.LogInfo("Starting serial command transceiver");
             // Start listening
             messenger.StartListening();
+
+            SendCommand(Command.Initialize, "Initialize");
             running = true;
         }
 
         public void DeInitialize()
         {
             logger.LogInfo("Stopping serial command transceiver");
+
+            SendCommand(Command.Initialize, "DeInitialize");
 
             messenger.StopListening();
             running = false;

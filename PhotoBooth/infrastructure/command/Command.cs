@@ -82,6 +82,11 @@ namespace com.prodg.photobooth.infrastructure.command
         /// <summary>
         /// Unlock a control so that it can again be used
         /// </summary>
-        UnlockControl
+        UnlockControl,
+
+        /// <summary>
+        /// Initialize the hardware to its initial state
+        /// </summary>
+        Initialize
     }
 }

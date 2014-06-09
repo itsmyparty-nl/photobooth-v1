@@ -77,7 +77,8 @@ enum
   kReleaseControl,
   kPrintTwice,
   kLockControl,
-  kUnlockControl
+  kUnlockControl,
+  kInitialize
 };
 
 // Callbacks define on which received commands we take action
@@ -89,12 +90,38 @@ void attachCommandCallbacks()
   cmdMessenger.attach(kReleaseControl, OnReleaseControl);
   cmdMessenger.attach(kLockControl, OnLockControl);
   cmdMessenger.attach(kUnlockControl, OnLockControl);
+  cmdMessenger.attach(kInitialize, Initialize);
 }
 
 // Called when a received command has no attached function
 void OnUnknownCommand()
 {
   cmdMessenger.sendCmd(kError,"Command without attached callback");
+}
+
+// Initialize all controls to a ready state
+void Initialize()
+{
+  // Remove all tasks, since the UDOO arduino has persistent state
+  SoftTimer.remove(&buttonTaskPrintTwice);
+  SoftTimer.remove(&printTwiceLedTask);
+  SoftTimer.remove(&buttonTaskPrint);
+  SoftTimer.remove(&printLedTask);
+  SoftTimer.remove(&buttonTaskTrigger);
+  SoftTimer.remove(&triggerLedTask);
+  SoftTimer.remove(&buttonTaskPower);
+  
+  // Also stop all dimmers
+  triggerLockedDimmer.off();
+  powerLockedDimmer.off();
+  printLockedDimmer.off();
+  printTwiceLockedDimmer.off();
+ 
+  //Set all pins low to check connections
+  digitalWrite(OUT_PIN_1, LOW);
+  digitalWrite(OUT_PIN_2, LOW);
+  digitalWrite(OUT_PIN_3, LOW);
+  digitalWrite(OUT_PIN_4, LOW);
 }
 
 // Callback function that sets led on or off
@@ -132,16 +159,16 @@ void OnUnlockControl()
   switch (control)
   {
     case kTrigger:
-      triggerLockedDimmer.hold();
+      triggerLockedDimmer.off();
       break;
     case kPower:
-      powerLockedDimmer.hold();
+      powerLockedDimmer.off();
       break;
     case kPrint:
-      printLockedDimmer.hold();
+      printLockedDimmer.off();
       break;
     case kPrintTwice:
-      printTwiceLockedDimmer.hold();
+      printTwiceLockedDimmer.off();
       break;
     default:
       cmdMessenger.sendCmd(kError,"Unsupported button");
@@ -217,6 +244,7 @@ void OnReleaseControl()
 // Setup function
 void setup() 
 {
+  //Set all pins to their correct mode
   pinMode(INPUT_PIN_1, INPUT);
   pinMode(INPUT_PIN_2, INPUT);
   pinMode(INPUT_PIN_3, INPUT);
@@ -225,11 +253,15 @@ void setup()
   pinMode(OUT_PIN_2, OUTPUT);
   pinMode(OUT_PIN_3, OUTPUT);
   pinMode(OUT_PIN_4, OUTPUT);
- 
-  digitalWrite(OUT_PIN_1, LOW);
-  digitalWrite(OUT_PIN_2, LOW);
-  digitalWrite(OUT_PIN_3, LOW);
-  digitalWrite(OUT_PIN_4, LOW);
+  
+  //Set all controls to their default state
+  Initialize();  
+  
+  //Set all pins high to check connections
+  digitalWrite(OUT_PIN_1, HIGH);
+  digitalWrite(OUT_PIN_2, HIGH);
+  digitalWrite(OUT_PIN_3, HIGH);
+  digitalWrite(OUT_PIN_4, HIGH);
   
   // Listen on serial connection for messages from the PC
   Serial.begin(115200); 
