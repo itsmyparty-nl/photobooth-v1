@@ -35,6 +35,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
         private readonly ISettings settings;
         private readonly ILogger logger;
         private Image storedImage;
+        private Image rotatedImage;
         private PrintDocument pd;
 
         public NetPrinter(ISettings settings, ILogger logger)
@@ -78,20 +79,18 @@ namespace com.prodg.photobooth.infrastructure.hardware
             {
                 logger.LogException("Error while printing", ex);
             }
-            finally
-            {
-                storedImage = null;
-            }
         }
 
         public void Initialize()
         {
-            //Do nothing
+            storedImage = null;
+            rotatedImage = null;
         }
 
         public void DeInitialize()
         {
-            //Do nothing
+            storedImage = null;
+            rotatedImage = null;
         }
 
         private void printDocument_BeginPrint(object sender, PrintEventArgs e)
@@ -160,7 +159,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
                         ? marginBounds.Height
                         : (e.PageSettings.Landscape ? printableArea.Width : printableArea.Height));
 
-            var rotatedImage = (Image) storedImage.Clone();
+            rotatedImage = (Image) storedImage.Clone();
             rotatedImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
 
             logger.LogInfo(

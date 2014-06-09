@@ -211,6 +211,8 @@ namespace com.prodg.photobooth.domain
                     sessionQueue.Clear();
                 }
 
+                await Task.Delay(TimeSpan.FromSeconds(5));
+
                 //Take pictures and add to the queue
                 sessionQueue.Enqueue(await service.Capture());
 
