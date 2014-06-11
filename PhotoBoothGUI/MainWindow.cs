@@ -21,6 +21,7 @@ using System;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Threading.Tasks;
+using System.Globalization;
 using Gtk;
 using com.prodg.photobooth.config;
 using com.prodg.photobooth.infrastructure.command;
@@ -28,50 +29,52 @@ using com.prodg.photobooth.common;
 using com.prodg.photobooth.domain;
 using com.prodg.photobooth.infrastructure.hardware;
 
+
 public partial class MainWindow: Gtk.Window
 {
 	private ILogger logger;
 	private IHardware hardware;
 	private readonly IPhotoBoothModel photoBooth;
+	private CommandMessengerTransceiver commandMessenger;
+	private ConsoleCommandReceiver consoleCommandReceiver;
 
 	public MainWindow () : base (Gtk.WindowType.Toplevel)
 	{
 		Build ();
-		
-		//Initialize the photobooth
+
 		//Instantiate all classes
-		logger = new TextBoxLogger (textview1.Buffer);
+		logger = new NLogger ();
 		ISettings settings = new com.prodg.photobooth.config.Settings (logger);
 
-
-		//var camera = new CameraStub (logger);
 		var camera = new Camera (logger);
-		var printer = new NetPrinter(settings, logger);
-		//var printer = new PrinterStub (logger);
-		var commandMessenger = new CommandMessengerTransceiver(logger, settings);
-		var triggerControl = new RemoteTrigger(Command.Trigger, commandMessenger, commandMessenger, logger);
-		var printControl = new RemoteTrigger(Command.Print, commandMessenger, commandMessenger, logger);
-        var printTwiceControl = new RemoteTrigger(Command.PrintTwice, commandMessenger, commandMessenger, logger);
-        var powerControl = new RemoteTrigger(Command.Power, commandMessenger, commandMessenger, logger);
+		var commandMessenger = new CommandMessengerTransceiver (logger, settings);
+		var consoleCommandReceiver = new ConsoleCommandReceiver (logger);
 
-		//var triggerControl = new ButtonRemoteControl (Command.Trigger.ToString (), buttonTrigger);
-		//var printControl = new ButtonRemoteControl (Command.Print.ToString (), buttonPrint);
-		//var powerControl = new ButtonRemoteControl (Command.Power.ToString (), buttonExit);
-        
-		hardware = new Hardware (camera, printer, triggerControl, printControl, printTwiceControl, powerControl, logger);
+		camera.StateChanged += OnCameraStateChanged;
+		camera.BatteryWarning += OnCameraBatteryWarning;
+		var printer = new NetPrinter (settings, logger);
+		var triggerControl = new RemoteTrigger (Command.Trigger, commandMessenger, commandMessenger, logger);
+		var printControl = new RemoteTrigger (Command.Print, commandMessenger, commandMessenger, logger);
+		var printTwiceControl = new RemoteTrigger (Command.PrintTwice, commandMessenger, commandMessenger, logger);
+		var powerControl = new RemoteTrigger (Command.Power, commandMessenger, commandMessenger, logger);
+		hardware = new Hardware (camera, printer, triggerControl, printControl, printTwiceControl,
+			                      powerControl, logger);
 
 		IImageProcessor imageProcessor = new CollageImageProcessor (logger, settings);
-		IPhotoBoothService photoService = new PhotoBoothService(hardware, imageProcessor, logger, settings);
-		photoBooth = new PhotoBoothModel (photoService, hardware, logger);
+		IPhotoBoothService photoBoothService = new PhotoBoothService (hardware, imageProcessor, logger, settings);
+		IPhotoBoothModel photoBooth = new PhotoBoothModel (photoBoothService, hardware, logger);
 
 		//Subscribe to the shutdown requested event 
 		photoBooth.ShutdownRequested += OnPhotoBoothShutdownRequested; 
-		photoService.PictureAdded += PhotoBoothServiceOnPictureAdded;
+		photoBoothService.PictureAdded += PhotoBoothServiceOnPictureAdded;
+
+		statusbar1.Push (1, "Waiting for camera");
 
 		//Start
+		commandMessenger.Initialize ();
+		consoleCommandReceiver.Initialize ();
 		photoBooth.Start ();
-        
-		statusbar1.Push (1, hardware.Camera.Id);
+
 		//textview1.Visible = false;
 		//GtkScrolledWindow.Visible = false;
 		this.Fullscreen ();
@@ -113,9 +116,35 @@ public partial class MainWindow: Gtk.Window
 		});
 	}
 
+	void OnCameraBatteryWarning(object sender, CameraBatteryWarningEventArgs e)
+	{
+		string logString = string.Format (CultureInfo.InvariantCulture, "WARNING BATTERY LOW: {0}%", e.Level);
+		logger.LogWarning(logString);
+		statusbar1.Push (1, logString);
+	}
+
+	void OnCameraStateChanged(object sender, CameraStateChangedEventArgs e)
+	{
+		if (e.NewState)
+		{
+			Gtk.Application.Invoke ((b, c) => {
+				statusbar1.Push (1, hardware.Camera.Id);
+			});
+		}
+		else
+		{
+			Gtk.Application.Invoke ((b, c) => {
+				statusbar1.Push (1, "Check camera connection");
+			});
+		}
+	}
+
 	private void Stop ()
 	{
-		photoBooth.Stop ();
+		//Stop
+		photoBooth.Stop();
+		consoleCommandReceiver.DeInitialize();
+		commandMessenger.DeInitialize();
 		Application.Quit ();
 	}
 

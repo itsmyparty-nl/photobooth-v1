@@ -16,6 +16,7 @@
   Copyright 2014 Patrick Bronneberg
 */
 #endregion
+using Gtk;
 
 namespace com.prodg.photobooth
 {
