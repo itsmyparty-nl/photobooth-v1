@@ -54,15 +54,16 @@ namespace com.prodg.photobooth.infrastructure.command
             this.logger = logger;
             // Create Serial Port object
             // Note that for some boards (e.g. Sparkfun Pro Micro) DtrEnable may need to be true.
-            transport = new SerialTransport
-            {
-                CurrentSerialSettings =
-                {
-                    PortName = settings.SerialPortName,
-                    BaudRate = settings.SerialPortBaudRate,
-                    DtrEnable = settings.SerialPortDtrEnable
-                }
-            };
+			//transport = new SerialTransport
+			//{
+			//    CurrentSerialSettings =
+			//    {
+			//        PortName = settings.SerialPortName,
+			//        BaudRate = settings.SerialPortBaudRate,
+			//        DtrEnable = settings.SerialPortDtrEnable
+			//    }
+			//};
+			transport = new StubbedTransport ();
             
             // Initialize the command messenger with the Serial Port transport layer
             messenger = new CmdMessenger(transport);

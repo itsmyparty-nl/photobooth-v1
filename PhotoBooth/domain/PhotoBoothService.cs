@@ -36,14 +36,17 @@ namespace com.prodg.photobooth.domain
     /// they can be disposed at will by the model</remarks>
     public class PictureAddedEventArgs : EventArgs
     {
-        public PictureAddedEventArgs(Image picture, bool isFinal)
+		public PictureAddedEventArgs(Image picture, int index, int sessionSize)
         {
             Picture = picture;
-            IsFinal = isFinal;
+			Index = index;
+			SessionSize = sessionSize;
         }
 
         public Image Picture { get; private set; }
-        public bool IsFinal { get; private set; }
+		public bool IsFinal { get { return Index >= SessionSize; } }
+		public int Index { get; private set; }
+		public int SessionSize { get; private set; }
     }
 
     #endregion
@@ -85,54 +88,44 @@ namespace com.prodg.photobooth.domain
         /// </summary>
         /// <returns>The session containing the captured and processed images</returns>
         public async Task<PhotoSession> Capture()
-        {
-            logger.LogInfo("Start Capturing images");
+		{
+			logger.LogInfo ("Start Capturing images");
                 
-            return await Task.Run(() =>
-            {
-                try
-                {
-                    int failureCount = 0;
-                    var session = new PhotoSession(settings);
+			return await Task.Run (() => {
+				try {
+					int failureCount = 0;
+					var session = new PhotoSession (settings);
 
-                    while (session.ImageCount < imageProcessor.RequiredImages && failureCount < 10)
-                    {
-                        string imagePath = session.GetNextImagePath();
-                        if (hardware.Camera.Capture(imagePath))
-                        {
-                            Image image = session.AddPicture(imagePath);
-                            //Signal that a new picture was added
-                            if (PictureAdded != null)
-                            {
-                                PictureAdded.Invoke(this, new PictureAddedEventArgs(image, false));
-                            }
-                        }
-                        else
-                        {
-                            failureCount++;
-                        }
-                    }
-                    session.ResultImage = imageProcessor.Process(session);
-                    //Signal that a new picture was added
-                    if (PictureAdded != null)
-                    {
-                        PictureAdded.Invoke(this, new PictureAddedEventArgs(session.ResultImage, false));
-                    }
-                    //Return the session
-                    return session;
-                }
-                catch (Exception ex)
-                {
-                    logger.LogException("Error while capturing images", ex);
-                    return null;
-                }
-                finally
-                {
-                    //Clean all images from the camera buffer
-                    hardware.Camera.Clean();
-                }
-            });
-        }
+					while (session.ImageCount < imageProcessor.RequiredImages && failureCount < 10) {
+						string imagePath = session.GetNextImagePath ();
+						if (hardware.Camera.Capture (imagePath)) {
+							Image image = session.AddPicture (imagePath);
+							//Signal that a new picture was added
+							if (PictureAdded != null) {
+								PictureAdded.Invoke (this, new PictureAddedEventArgs (image, session.ImageCount - 1, 
+									imageProcessor.RequiredImages));
+							}
+						} else {
+							failureCount++;
+						}
+					}
+					session.ResultImage = imageProcessor.Process (session);
+					//Signal that a new picture was added
+					if (PictureAdded != null) {
+						PictureAdded.Invoke (this, new PictureAddedEventArgs (session.ResultImage, session.ImageCount - 1, 
+							imageProcessor.RequiredImages));
+					}
+					//Return the session
+					return session;
+				} catch (Exception ex) {
+					logger.LogException ("Error while capturing images", ex);
+					return null;
+				} finally {
+					//Clean all images from the camera buffer
+					hardware.Camera.Clean ();
+				}
+			});
+		}
 
         /// <summary>
         /// Print a photo session

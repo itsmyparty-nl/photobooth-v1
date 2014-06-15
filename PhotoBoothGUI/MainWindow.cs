@@ -78,6 +78,8 @@ public partial class MainWindow: Gtk.Window
 		statusbar1.Push (1, "Waiting for camera");
 		SetInstructionStyle ();
 
+		labelInstruction.Text = "Druk op de rode knop om te starten!";
+
 		//textview1.Visible = false;
 		//GtkScrolledWindow.Visible = false;
 		this.Fullscreen ();
@@ -144,7 +146,7 @@ public partial class MainWindow: Gtk.Window
 	{
 		Pango.FontDescription fontdesc = new Pango.FontDescription();
 		fontdesc.Family = "Sans";
-		fontdesc.Size = (int)(12*Pango.Scale.PangoScale);
+		fontdesc.Size = (int)(32*Pango.Scale.PangoScale);
 		fontdesc.Weight = Pango.Weight.Semibold;
 		labelInstruction.ModifyFont(fontdesc);
 		Gdk.Color fontcolor = new Gdk.Color(255,255,255);
@@ -155,7 +157,16 @@ public partial class MainWindow: Gtk.Window
 	{
 		Gtk.Application.Invoke((b,c) =>
 	    {
-	        //Create and scale the pixbuf
+				if (a.IsFinal)
+				{
+					labelInstruction.Text = "Klaar! Druk op de knoppen aan de zijkant om te printen, of op de grote knop om een nieuwe sessie te starten.";
+				}
+				else
+				{
+					labelInstruction.Text = String.Format(CultureInfo.InvariantCulture, 
+						"Foto {0} van {1}", a.Index, a.SessionSize);
+				}
+				//Create and scale the pixbuf
 			var result = CreateAndScalePicture(a.Picture, imagePhoto.Allocation.Width);
 
 	        //Set the pixbuf on the UI
