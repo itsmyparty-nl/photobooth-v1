@@ -4,8 +4,11 @@
 public partial class MainWindow
 {
 	private global::Gtk.VBox vbox1;
+	
 	private global::Gtk.Image imagePhoto;
+	
 	private global::Gtk.Statusbar statusbar1;
+	
 	private global::Gtk.Label labelInstruction;
 
 	protected virtual void Build ()
@@ -21,8 +24,8 @@ public partial class MainWindow
 		this.vbox1.Spacing = 6;
 		// Container child vbox1.Gtk.Box+BoxChild
 		this.imagePhoto = new global::Gtk.Image ();
-		this.imagePhoto.WidthRequest = 800;
-		this.imagePhoto.HeightRequest = 600;
+		this.imagePhoto.WidthRequest = 1200;
+		this.imagePhoto.HeightRequest = 800;
 		this.imagePhoto.Name = "imagePhoto";
 		this.vbox1.Add (this.imagePhoto);
 		global::Gtk.Box.BoxChild w1 = ((global::Gtk.Box.BoxChild)(this.vbox1 [this.imagePhoto]));
@@ -30,6 +33,7 @@ public partial class MainWindow
 		w1.Expand = false;
 		// Container child vbox1.Gtk.Box+BoxChild
 		this.statusbar1 = new global::Gtk.Statusbar ();
+		this.statusbar1.HeightRequest = 25;
 		this.statusbar1.Name = "statusbar1";
 		this.statusbar1.Spacing = 6;
 		this.vbox1.Add (this.statusbar1);
@@ -40,6 +44,7 @@ public partial class MainWindow
 		w2.Fill = false;
 		// Container child vbox1.Gtk.Box+BoxChild
 		this.labelInstruction = new global::Gtk.Label ();
+		this.labelInstruction.HeightRequest = 190;
 		this.labelInstruction.Name = "labelInstruction";
 		this.labelInstruction.LabelProp = global::Mono.Unix.Catalog.GetString ("Instructions");
 		this.labelInstruction.UseMarkup = true;
@@ -54,10 +59,9 @@ public partial class MainWindow
 		if ((this.Child != null)) {
 			this.Child.ShowAll ();
 		}
-		this.DefaultWidth = 1026;
-		this.DefaultHeight = 715;
+		this.DefaultWidth = 1282;
+		this.DefaultHeight = 1069;
 		this.Show ();
 		this.DeleteEvent += new global::Gtk.DeleteEventHandler (this.OnDeleteEvent);
-		this.KeyPressEvent += new global::Gtk.KeyPressEventHandler (this.OnKeyPress);
 	}
 }

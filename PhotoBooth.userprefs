@@ -1,26 +1,20 @@
 ﻿<Properties GitUserInfo="UsingGIT">
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|Mixed Platforms" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="PhotoBooth/infrastructure/hardware/NetPrinter.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="PhotoBoothGUI/MainWindow.cs">
     <Files>
-      <File FileName="PhotoBooth/domain/PhotoBoothService.cs" Line="1" Column="1" />
-      <File FileName="PhotoBoothGUI/domain/ButtonRemoteControl.cs" Line="1" Column="1" />
-      <File FileName="PhotoBooth/domain/PhotoBoothModel.cs" Line="1" Column="1" />
+      <File FileName="PhotoBoothGUI/MainWindow.cs" Line="198" Column="6" />
       <File FileName="PhotoBoothGUI/Program.cs" Line="1" Column="1" />
-      <File FileName="PhotoBoothGUI/MainWindow.cs" Line="57" Column="9" />
-      <File FileName="CommandMessenger/CmdMessenger.cs" Line="1" Column="1" />
-      <File FileName="CommandMessenger/Command.cs" Line="1" Column="1" />
-      <File FileName="PhotoBoothGUI/App.config" Line="1" Column="1" />
-      <File FileName="PhotoBoothConsole/application/App.config" Line="1" Column="1" />
-      <File FileName="PhotoBooth/PhotoBooth.dll.config" Line="1" Column="1" />
       <File FileName="PhotoBoothConsole/application/PhotoBoothConsole.cs" Line="1" Column="1" />
-      <File FileName="PhotoBooth/infrastructure/hardware/NetPrinter.cs" Line="131" Column="85" />
+      <File FileName="PhotoBooth/domain/PhotoBoothModel.cs" Line="1" Column="1" />
+      <File FileName="PhotoBoothConsole/application/App.config" Line="1" Column="1" />
+      <File FileName="PhotoBoothGUI/App.config" Line="1" Column="1" />
+      <File FileName="PhotoBooth/infrastructure/hardware/NetPrinter.cs" Line="1" Column="1" />
+      <File FileName="PhotoBoothGUI/NLog.config" Line="1" Column="1" />
+      <File FileName="CommandMessenger/TransportLayer/SerialTransport.cs" Line="37" Column="19" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
-    <BreakpointStore>
-      <Breakpoint file="/home/user/projects/photobooth/PhotoBooth/infrastructure/hardware/NetPrinter.cs" line="85" column="1" />
-      <Breakpoint file="/home/user/projects/photobooth/PhotoBooth/infrastructure/hardware/NetPrinter.cs" line="66" column="1" />
-    </BreakpointStore>
+    <BreakpointStore />
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MonoDevelop.Ide.DebuggingService.PinnedWatches>
     <Watch file="PhotoBooth/infrastructure/hardware/Camera.cs" line="112" offsetX="1054" offsetY="1998" expression="cameraFile" liveUpdate="False" />

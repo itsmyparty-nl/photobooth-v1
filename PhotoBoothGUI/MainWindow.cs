@@ -23,6 +23,7 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Globalization;
 using Gtk;
+using Pango;
 using com.prodg.photobooth.config;
 using com.prodg.photobooth.infrastructure.command;
 using com.prodg.photobooth.common;
@@ -44,6 +45,12 @@ public partial class MainWindow: Gtk.Window
 
 		//Instantiate all classes
 		logger = new NLogger ();
+		//Register all unhandled exception handlers
+		AppDomain.CurrentDomain.UnhandledException += HandleUnhandledAppdomainException;
+		GLib.ExceptionManager.UnhandledException += HandleUnhandledGlibException;
+		TaskScheduler.UnobservedTaskException += HandleUnobservedTaskException;
+
+		//Initialize
 		ISettings settings = new com.prodg.photobooth.config.Settings (logger);
 
 		var camera = new Camera (logger);
@@ -56,7 +63,7 @@ public partial class MainWindow: Gtk.Window
 		var triggerControl = new RemoteTrigger (Command.Trigger, commandMessenger, commandMessenger, logger);
 		var printControl = new RemoteTrigger (Command.Print, commandMessenger, commandMessenger, logger);
 		var printTwiceControl = new RemoteTrigger (Command.PrintTwice, commandMessenger, commandMessenger, logger);
-		var powerControl = new RemoteTrigger (Command.Power, commandMessenger, commandMessenger, logger);
+		var powerControl = new RemoteTrigger (Command.Power, consoleCommandReceiver, commandMessenger, logger);
 		hardware = new Hardware (camera, printer, triggerControl, printControl, printTwiceControl,
 			                      powerControl, logger);
 
@@ -69,15 +76,79 @@ public partial class MainWindow: Gtk.Window
 		photoBoothService.PictureAdded += PhotoBoothServiceOnPictureAdded;
 
 		statusbar1.Push (1, "Waiting for camera");
-
-		//Start
-		commandMessenger.Initialize ();
-		consoleCommandReceiver.Initialize ();
-		photoBooth.Start ();
+		SetInstructionStyle ();
 
 		//textview1.Visible = false;
 		//GtkScrolledWindow.Visible = false;
 		this.Fullscreen ();
+	}
+
+	private void Start()
+	{
+		//Start
+		commandMessenger.Initialize ();
+		consoleCommandReceiver.Initialize ();
+		photoBooth.Start ();
+	}
+
+	private void Stop ()
+	{
+		//Stop
+		photoBooth.Stop();
+		consoleCommandReceiver.DeInitialize();
+		commandMessenger.DeInitialize();
+	}
+
+	private void Shutdown()
+	{	
+		Stop ();
+		Application.Quit ();
+	}
+
+	void HandleUnobservedTaskException (object sender, UnobservedTaskExceptionEventArgs e)
+	{
+		if (HandleUnhandledException (e.Exception, true)) {
+			e.SetObserved ();
+		}
+	}
+
+	void HandleUnhandledGlibException (GLib.UnhandledExceptionArgs args)
+	{
+		if (HandleUnhandledException ((Exception)args.ExceptionObject, true)) {
+			args.ExitApplication = false;
+		}
+	}
+
+	void HandleUnhandledAppdomainException (object sender, UnhandledExceptionEventArgs e)
+	{
+		HandleUnhandledException((Exception)e.ExceptionObject, false);	
+	}
+
+	private bool HandleUnhandledException(Exception exception, bool tryToRecover)
+	{
+		logger.LogException ("Caught unhandled exception", exception);
+		if (tryToRecover) {
+			try {
+				Stop ();
+				Start ();
+				return true;
+			} catch (Exception) {
+				logger.LogException ("Unable to restore application, quitting", exception);
+				return false;
+			}
+		}
+		return false;
+	}
+
+	private void SetInstructionStyle()
+	{
+		Pango.FontDescription fontdesc = new Pango.FontDescription();
+		fontdesc.Family = "Sans";
+		fontdesc.Size = (int)(12*Pango.Scale.PangoScale);
+		fontdesc.Weight = Pango.Weight.Semibold;
+		labelInstruction.ModifyFont(fontdesc);
+		Gdk.Color fontcolor = new Gdk.Color(255,255,255);
+		labelInstruction.ModifyFg(StateType.Normal, fontcolor);
 	}
 
 	private void PhotoBoothServiceOnPictureAdded (object sender, PictureAddedEventArgs a)
@@ -112,15 +183,17 @@ public partial class MainWindow: Gtk.Window
 	void OnPhotoBoothShutdownRequested (object sender, EventArgs e)
 	{
 		Gtk.Application.Invoke ((b, c) => {
-			Stop ();
+			Shutdown ();
 		});
 	}
 
 	void OnCameraBatteryWarning(object sender, CameraBatteryWarningEventArgs e)
 	{
-		string logString = string.Format (CultureInfo.InvariantCulture, "WARNING BATTERY LOW: {0}%", e.Level);
-		logger.LogWarning(logString);
-		statusbar1.Push (1, logString);
+		Gtk.Application.Invoke ((b, c) => {
+			string logString = string.Format (CultureInfo.InvariantCulture, "WARNING BATTERY LOW: {0}%", e.Level);
+			logger.LogWarning (logString);
+			statusbar1.Push (1, logString);
+		});
 	}
 
 	void OnCameraStateChanged(object sender, CameraStateChangedEventArgs e)
@@ -138,16 +211,7 @@ public partial class MainWindow: Gtk.Window
 			});
 		}
 	}
-
-	private void Stop ()
-	{
-		//Stop
-		photoBooth.Stop();
-		consoleCommandReceiver.DeInitialize();
-		commandMessenger.DeInitialize();
-		Application.Quit ();
-	}
-
+		
 	protected void OnDeleteEvent (object sender, DeleteEventArgs a)
 	{
 		Stop ();
