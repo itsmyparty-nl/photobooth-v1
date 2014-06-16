@@ -37,7 +37,6 @@ public partial class MainWindow: Gtk.Window
 	private IHardware hardware;
 	private readonly IPhotoBoothModel photoBooth;
 	private CommandMessengerTransceiver commandMessenger;
-	private ConsoleCommandReceiver consoleCommandReceiver;
 
 	public MainWindow () : base (Gtk.WindowType.Toplevel)
 	{
@@ -105,7 +104,6 @@ public partial class MainWindow: Gtk.Window
 		logger.LogInfo ("PhotoboothGUI.Start()");
 		//Start
 		commandMessenger.Initialize ();
-		consoleCommandReceiver.Initialize ();
 		photoBooth.Start ();
 	}
 
