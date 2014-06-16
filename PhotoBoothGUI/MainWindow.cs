@@ -168,7 +168,7 @@ public partial class MainWindow: Gtk.Window
 				else
 				{
 					labelInstruction.Text = String.Format(CultureInfo.InvariantCulture, 
-						"Foto {0} van {1}", a.Index, a.SessionSize);
+						"Foto {0} van {1}", a.Index+1, a.SessionSize);
 				}
 				//Create and scale the pixbuf
 			var result = CreateAndScalePicture(a.Picture, imagePhoto.Allocation.Width);

@@ -112,7 +112,7 @@ namespace com.prodg.photobooth.domain
 					session.ResultImage = imageProcessor.Process (session);
 					//Signal that a new picture was added
 					if (PictureAdded != null) {
-						PictureAdded.Invoke (this, new PictureAddedEventArgs (session.ResultImage, session.ImageCount - 1, 
+						PictureAdded.Invoke (this, new PictureAddedEventArgs (session.ResultImage, session.ImageCount, 
 							imageProcessor.RequiredImages));
 					}
 					//Return the session
