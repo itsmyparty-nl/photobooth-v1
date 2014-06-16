@@ -55,7 +55,7 @@ public partial class MainWindow: Gtk.Window
 		ISettings settings = new com.prodg.photobooth.config.Settings (logger);
 
 		var camera = new Camera (logger);
-		var commandMessenger = new CommandMessengerTransceiver (logger, settings);
+		commandMessenger = new CommandMessengerTransceiver (logger, settings);
 
 		camera.StateChanged += OnCameraStateChanged;
 		camera.BatteryWarning += OnCameraBatteryWarning;
@@ -63,13 +63,13 @@ public partial class MainWindow: Gtk.Window
 		var triggerControl = new RemoteTrigger (Command.Trigger, commandMessenger, commandMessenger, logger);
 		var printControl = new RemoteTrigger (Command.Print, commandMessenger, commandMessenger, logger);
 		var printTwiceControl = new RemoteTrigger (Command.PrintTwice, commandMessenger, commandMessenger, logger);
-		var powerControl = new RemoteTrigger (Command.Power, consoleCommandReceiver, commandMessenger, logger);
+		var powerControl = new RemoteTrigger (Command.Power, commandMessenger, commandMessenger, logger);
 		hardware = new Hardware (camera, printer, triggerControl, printControl, printTwiceControl,
 			                      powerControl, logger);
 
 		IImageProcessor imageProcessor = new CollageImageProcessor (logger, settings);
 		IPhotoBoothService photoBoothService = new PhotoBoothService (hardware, imageProcessor, logger, settings);
-		IPhotoBoothModel photoBooth = new PhotoBoothModel (photoBoothService, hardware, logger);
+		photoBooth = new PhotoBoothModel (photoBoothService, hardware, logger);
 
 		SetInstructionStyle ();
 
@@ -112,7 +112,6 @@ public partial class MainWindow: Gtk.Window
 		logger.LogInfo ("PhotoboothGUI.Stop()");
 		//Stop
 		photoBooth.Stop();
-		consoleCommandReceiver.DeInitialize();
 		commandMessenger.DeInitialize();
 	}
 
@@ -230,7 +229,7 @@ public partial class MainWindow: Gtk.Window
 		
 	protected void OnDeleteEvent (object sender, DeleteEventArgs a)
 	{
-		Stop ();
+		Shutdown ();
 		a.RetVal = true;
 	}
 
