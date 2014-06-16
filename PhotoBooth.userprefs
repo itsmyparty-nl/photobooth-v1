@@ -1,8 +1,11 @@
 ﻿<Properties GitUserInfo="UsingGIT">
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|Mixed Platforms" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="PhotoBoothGUI/MainWindow.cs">
+  <MonoDevelop.Ide.Workbench>
     <Files>
-      <File FileName="PhotoBoothGUI/MainWindow.cs" Line="80" Column="59" />
+      <File FileName="PhotoBoothGUI/MainWindow.cs" Line="126" Column="3" />
+      <File FileName="PhotoBoothGUI/gtk-gui/gui.stetic" Line="1" Column="1" />
+      <File FileName="PhotoBoothGUI/NLog.config" Line="19" Column="1" />
+      <File FileName="PhotoBoothGUI/presentation/widget/OverlayedImageWidget.cs" Line="22" Column="53" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
