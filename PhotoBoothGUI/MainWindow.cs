@@ -45,6 +45,8 @@ public partial class MainWindow: Gtk.Window
 
 		//Instantiate all classes
 		logger = new NLogger ();
+
+		logger.LogInfo ("Creating photobooth GUI application");
 		//Register all unhandled exception handlers
 		AppDomain.CurrentDomain.UnhandledException += HandleUnhandledAppdomainException;
 		GLib.ExceptionManager.UnhandledException += HandleUnhandledGlibException;
@@ -55,7 +57,6 @@ public partial class MainWindow: Gtk.Window
 
 		var camera = new Camera (logger);
 		var commandMessenger = new CommandMessengerTransceiver (logger, settings);
-		var consoleCommandReceiver = new ConsoleCommandReceiver (logger);
 
 		camera.StateChanged += OnCameraStateChanged;
 		camera.BatteryWarning += OnCameraBatteryWarning;
@@ -71,21 +72,37 @@ public partial class MainWindow: Gtk.Window
 		IPhotoBoothService photoBoothService = new PhotoBoothService (hardware, imageProcessor, logger, settings);
 		IPhotoBoothModel photoBooth = new PhotoBoothModel (photoBoothService, hardware, logger);
 
+		SetInstructionStyle ();
+
 		//Subscribe to the shutdown requested event 
 		photoBooth.ShutdownRequested += OnPhotoBoothShutdownRequested; 
 		photoBoothService.PictureAdded += PhotoBoothServiceOnPictureAdded;
 
 		statusbar1.Push (1, "Waiting for camera");
-
 		labelInstruction.Text = "Druk op de rode knop om te starten!";
+
+		Start ();
 
 		//textview1.Visible = false;
 		//GtkScrolledWindow.Visible = false;
 		this.Fullscreen ();
 	}
 
+	private void SetInstructionStyle()
+	{
+		Pango.FontDescription fontdesc = new Pango.FontDescription();
+		fontdesc.Family = "Sans";
+		fontdesc.Size = (int)(32*Pango.Scale.PangoScale);
+		fontdesc.Weight = Pango.Weight.Semibold;
+		labelInstruction.ModifyFont(fontdesc);
+
+		Gdk.Color fontcolor = new Gdk.Color(255,255,255);
+		labelInstruction.ModifyFg (StateType.Normal, fontcolor);
+	}
+
 	private void Start()
 	{
+		logger.LogInfo ("PhotoboothGUI.Start()");
 		//Start
 		commandMessenger.Initialize ();
 		consoleCommandReceiver.Initialize ();
@@ -94,6 +111,7 @@ public partial class MainWindow: Gtk.Window
 
 	private void Stop ()
 	{
+		logger.LogInfo ("PhotoboothGUI.Stop()");
 		//Stop
 		photoBooth.Stop();
 		consoleCommandReceiver.DeInitialize();
@@ -102,6 +120,7 @@ public partial class MainWindow: Gtk.Window
 
 	private void Shutdown()
 	{	
+		logger.LogInfo ("PhotoboothGUI.Shutdown()");
 		Stop ();
 		Application.Quit ();
 	}
