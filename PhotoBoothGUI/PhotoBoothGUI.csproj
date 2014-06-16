@@ -73,6 +73,8 @@
     <Compile Include="common\TextBoxLogger.cs" />
     <Compile Include="domain\ButtonRemoteControl.cs" />
     <Compile Include="infrastructure\hardware\GdkPrinter.cs" />
+    <Compile Include="presentation\widget\OverlayedImageWidget.cs" />
+    <Compile Include="gtk-gui\com.prodg.photobooth.OverlayedImageWidget.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -92,5 +94,9 @@
     <Content Include="NLog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="presentation\" />
+    <Folder Include="presentation\widget\" />
   </ItemGroup>
 </Project>

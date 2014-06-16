@@ -7,9 +7,9 @@ public partial class MainWindow
 	
 	private global::Gtk.Image imagePhoto;
 	
-	private global::Gtk.Statusbar statusbar1;
-	
 	private global::Gtk.Label labelInstruction;
+	
+	private global::Gtk.Statusbar statusbar1;
 
 	protected virtual void Build ()
 	{
@@ -24,24 +24,14 @@ public partial class MainWindow
 		this.vbox1.Spacing = 6;
 		// Container child vbox1.Gtk.Box+BoxChild
 		this.imagePhoto = new global::Gtk.Image ();
-		this.imagePhoto.WidthRequest = 1200;
 		this.imagePhoto.HeightRequest = 800;
 		this.imagePhoto.Name = "imagePhoto";
 		this.vbox1.Add (this.imagePhoto);
 		global::Gtk.Box.BoxChild w1 = ((global::Gtk.Box.BoxChild)(this.vbox1 [this.imagePhoto]));
+		w1.PackType = ((global::Gtk.PackType)(1));
 		w1.Position = 0;
 		w1.Expand = false;
-		// Container child vbox1.Gtk.Box+BoxChild
-		this.statusbar1 = new global::Gtk.Statusbar ();
-		this.statusbar1.HeightRequest = 25;
-		this.statusbar1.Name = "statusbar1";
-		this.statusbar1.Spacing = 6;
-		this.vbox1.Add (this.statusbar1);
-		global::Gtk.Box.BoxChild w2 = ((global::Gtk.Box.BoxChild)(this.vbox1 [this.statusbar1]));
-		w2.PackType = ((global::Gtk.PackType)(1));
-		w2.Position = 1;
-		w2.Expand = false;
-		w2.Fill = false;
+		w1.Fill = false;
 		// Container child vbox1.Gtk.Box+BoxChild
 		this.labelInstruction = new global::Gtk.Label ();
 		this.labelInstruction.HeightRequest = 190;
@@ -50,7 +40,17 @@ public partial class MainWindow
 		this.labelInstruction.UseMarkup = true;
 		this.labelInstruction.Wrap = true;
 		this.vbox1.Add (this.labelInstruction);
-		global::Gtk.Box.BoxChild w3 = ((global::Gtk.Box.BoxChild)(this.vbox1 [this.labelInstruction]));
+		global::Gtk.Box.BoxChild w2 = ((global::Gtk.Box.BoxChild)(this.vbox1 [this.labelInstruction]));
+		w2.PackType = ((global::Gtk.PackType)(1));
+		w2.Position = 1;
+		w2.Expand = false;
+		w2.Fill = false;
+		// Container child vbox1.Gtk.Box+BoxChild
+		this.statusbar1 = new global::Gtk.Statusbar ();
+		this.statusbar1.Name = "statusbar1";
+		this.statusbar1.Spacing = 6;
+		this.vbox1.Add (this.statusbar1);
+		global::Gtk.Box.BoxChild w3 = ((global::Gtk.Box.BoxChild)(this.vbox1 [this.statusbar1]));
 		w3.PackType = ((global::Gtk.PackType)(1));
 		w3.Position = 2;
 		w3.Expand = false;
@@ -59,8 +59,8 @@ public partial class MainWindow
 		if ((this.Child != null)) {
 			this.Child.ShowAll ();
 		}
-		this.DefaultWidth = 1282;
-		this.DefaultHeight = 1069;
+		this.DefaultWidth = 1303;
+		this.DefaultHeight = 1053;
 		this.Show ();
 		this.DeleteEvent += new global::Gtk.DeleteEventHandler (this.OnDeleteEvent);
 	}

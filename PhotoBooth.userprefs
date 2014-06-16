@@ -1,17 +1,8 @@
 ﻿<Properties GitUserInfo="UsingGIT">
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|Mixed Platforms" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="PhotoBooth/infrastructure/command/CommandMessengerTransceiver.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="PhotoBoothGUI/MainWindow.cs">
     <Files>
-      <File FileName="PhotoBoothGUI/MainWindow.cs" Line="198" Column="1" />
-      <File FileName="PhotoBoothGUI/Program.cs" Line="1" Column="1" />
-      <File FileName="PhotoBoothConsole/application/PhotoBoothConsole.cs" Line="1" Column="1" />
-      <File FileName="PhotoBooth/domain/PhotoBoothModel.cs" Line="1" Column="1" />
-      <File FileName="PhotoBoothConsole/application/App.config" Line="1" Column="1" />
-      <File FileName="PhotoBoothGUI/App.config" Line="4" Column="47" />
-      <File FileName="PhotoBooth/infrastructure/hardware/NetPrinter.cs" Line="1" Column="1" />
-      <File FileName="PhotoBoothGUI/NLog.config" Line="1" Column="1" />
-      <File FileName="CommandMessenger/TransportLayer/SerialTransport.cs" Line="317" Column="37" />
-      <File FileName="PhotoBooth/infrastructure/command/CommandMessengerTransceiver.cs" Line="66" Column="40" />
+      <File FileName="PhotoBoothGUI/MainWindow.cs" Line="80" Column="59" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

@@ -76,7 +76,6 @@ public partial class MainWindow: Gtk.Window
 		photoBoothService.PictureAdded += PhotoBoothServiceOnPictureAdded;
 
 		statusbar1.Push (1, "Waiting for camera");
-		SetInstructionStyle ();
 
 		labelInstruction.Text = "Druk op de rode knop om te starten!";
 
@@ -140,17 +139,6 @@ public partial class MainWindow: Gtk.Window
 			}
 		}
 		return false;
-	}
-
-	private void SetInstructionStyle()
-	{
-		Pango.FontDescription fontdesc = new Pango.FontDescription();
-		fontdesc.Family = "Sans";
-		fontdesc.Size = (int)(32*Pango.Scale.PangoScale);
-		fontdesc.Weight = Pango.Weight.Semibold;
-		labelInstruction.ModifyFont(fontdesc);
-		Gdk.Color fontcolor = new Gdk.Color(255,255,255);
-		labelInstruction.ModifyFg(StateType.Normal, fontcolor);
 	}
 
 	private void PhotoBoothServiceOnPictureAdded (object sender, PictureAddedEventArgs a)
