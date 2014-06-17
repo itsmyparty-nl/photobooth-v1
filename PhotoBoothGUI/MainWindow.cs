@@ -80,6 +80,7 @@ public partial class MainWindow: Gtk.Window
         printControl.Fired += OnPrintControlFired;
         printTwiceControl.Fired += OnPrintTwiceControlFired;
         triggerControl.Fired += OnTriggerControlFired;
+		photoBooth.ErrorOccurred += OnPhotoBoothErrorOccurred;
 
 		statusbar1.Push (1, "Waiting for camera");
 
@@ -91,6 +92,14 @@ public partial class MainWindow: Gtk.Window
 		//textview1.Visible = false;
 		//GtkScrolledWindow.Visible = false;
 		this.Fullscreen ();
+	}
+
+	void OnPhotoBoothErrorOccurred (object sender, com.prodg.photobooth.domain.ErrorEventArgs e)
+	{
+		Gtk.Application.Invoke ((b, c) => {
+			imagePhoto.Pixbuf = instructionImages ["error"];
+			imageInstruction.Pixbuf = instructionImages ["title"];
+		});
 	}
 
 	private Dictionary<string, Gdk.Pixbuf> instructionImages;
@@ -108,6 +117,7 @@ public partial class MainWindow: Gtk.Window
 		instructionImages.Add("finished",new Gdk.Pixbuf (System.IO.Path.Combine(resources,"legend.png")));
 		instructionImages.Add ("ready", new Gdk.Pixbuf (System.IO.Path.Combine (resources, "ready.png")));
 		instructionImages.Add ("empty", new Gdk.Pixbuf (System.IO.Path.Combine (resources, "empty.png")));
+		instructionImages.Add ("error", new Gdk.Pixbuf (System.IO.Path.Combine (resources, "error.png")));
 	}
 
     private void OnPrintControlFired(object sender, TriggerControlEventArgs e)
@@ -182,6 +192,7 @@ public partial class MainWindow: Gtk.Window
 		logger.LogException ("Caught unhandled exception", exception);
 		if (tryToRecover) {
 			try {
+				imagePhoto.Pixbuf = instructionImages["error"];
 				Stop ();
 				Start ();
 				return true;

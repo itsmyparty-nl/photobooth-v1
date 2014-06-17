@@ -21,7 +21,20 @@ using System;
 
 namespace com.prodg.photobooth.domain
 {
-    /// <summary>
+	/// <summary>
+	/// Event args to use for signalling that an error occurred
+	/// </summary>
+	public class ErrorEventArgs : EventArgs
+	{
+		public ErrorEventArgs(string errorMessage)
+		{
+			Message = errorMessage;
+		}
+
+		public string Message { get; private set; }
+	}
+
+	/// <summary>
     /// Interface for the Photobooth application model.
     /// <para>
     /// The model maintains and controls the state of the photobooth by
@@ -35,7 +48,12 @@ namespace com.prodg.photobooth.domain
     /// </summary>
     public interface IPhotoBoothModel: IDisposable
     {
-        /// <summary>
+		/// <summary>
+		/// Occurs when error occurred.
+		/// </summary>
+		event EventHandler<ErrorEventArgs> ErrorOccurred;
+
+		/// <summary>
         /// Event to signal that shutdown is requested
         /// </summary>
         /// <remarks>This event is added to provide a single location for handling all hardware controls, while keeping

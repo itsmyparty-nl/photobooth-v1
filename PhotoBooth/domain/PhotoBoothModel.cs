@@ -25,7 +25,7 @@ using com.prodg.photobooth.infrastructure.hardware;
 
 namespace com.prodg.photobooth.domain
 {
-    /// <summary>
+	/// <summary>
     /// The Photobooth application model.
     /// <see cref="IPhotoBoothModel"/>
     /// </summary>
@@ -43,6 +43,11 @@ namespace com.prodg.photobooth.domain
         /// <remarks>This event is added to provide a single location for handling all hardware controls, while keeping
         /// the responsibility of stopping the model at the application class</remarks>
         public event EventHandler ShutdownRequested;
+
+		/// <summary>
+		/// Occurs when error occurred.
+		/// </summary>
+		public event EventHandler<ErrorEventArgs> ErrorOccurred;
 
         /// <summary>
         /// C'tor
@@ -130,7 +135,7 @@ namespace com.prodg.photobooth.domain
             catch (Exception ex)
             {
                 //Log the exception
-                logger.LogException("Error while capturing images", ex);
+                logger.LogException("Error while handling shutdown", ex);
                 //Rethrow since no mitigation is possible
                 throw;
             }
@@ -160,8 +165,10 @@ namespace com.prodg.photobooth.domain
 				//Wait until releasing the control to show that printing is busy
 				await Task.Delay (TimeSpan.FromSeconds (45));
 			} catch (Exception ex) {
-				logger.LogException ("Error while capturing images", ex);
-				//In case anything went wrong, there's most probably no use in trying again.
+				logger.LogException ("Error while printing", ex);
+				if (ErrorOccurred != null) {
+					ErrorOccurred.Invoke (this, new ErrorEventArgs("Error while printing"));
+				}
 			}
 
 			//always reset the control to its initial state
@@ -197,7 +204,10 @@ namespace com.prodg.photobooth.domain
 				//Wait until releasing the control to show that printing is busy
 				await Task.Delay (TimeSpan.FromSeconds (90));
 			} catch (Exception ex) {
-				logger.LogException ("Error while printing", ex);
+				logger.LogException ("Error while printing twice", ex);
+				if (ErrorOccurred != null) {
+					ErrorOccurred.Invoke (this, new ErrorEventArgs("Error while printing twice"));
+				}
 			}
 			//always reset the control to its initial state
 			hardware.PrintTwiceControl.Unlock ();
@@ -231,11 +241,22 @@ namespace com.prodg.photobooth.domain
 						hardware.PrintControl.Arm ();
 						hardware.PrintTwiceControl.Arm ();
 					}
+					else
+					{
+						if (ErrorOccurred != null) {
+							logger.LogError ("Capturing did not lead to a successful session");
+							ErrorOccurred.Invoke (this, new ErrorEventArgs("Capturing did not lead to a successful session"));
+						}
+					}
+
 				} finally {
 					sessionLock.Release ();
 				}
 			} catch (Exception ex) {
 				logger.LogException ("Error while capturing images", ex);
+				if (ErrorOccurred != null) {
+					ErrorOccurred.Invoke (this, new ErrorEventArgs("Error while capturing images"));
+				}
 			}
 
 			//Always re-arm the trigger after shooting

@@ -116,6 +116,7 @@ namespace com.prodg.photobooth.domain
 						PictureAdded(this, new PictureAddedEventArgs (session.ResultImage, session.ImageCount, 
 							imageProcessor.RequiredImages));
 					}
+
 					//Return the session
 					return session;
 				} catch (Exception ex) {
