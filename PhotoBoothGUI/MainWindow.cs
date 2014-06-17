@@ -75,7 +75,10 @@ public partial class MainWindow: Gtk.Window
 
 		//Subscribe to the shutdown requested event 
 		photoBooth.ShutdownRequested += OnPhotoBoothShutdownRequested; 
-		photoBoothService.PictureAdded += PhotoBoothServiceOnPictureAdded;
+		photoBoothService.PictureAdded += OnPhotoBoothServicePictureAdded;
+        printControl.Fired += OnPrintControlFired;
+        printTwiceControl.Fired += OnPrintTwiceControlFired;
+        triggerControl.Fired += OnTriggerControlFired;
 
 		statusbar1.Push (1, "Waiting for camera");
 		labelInstruction.Text = "Druk op de rode knop om te starten!";
@@ -86,6 +89,30 @@ public partial class MainWindow: Gtk.Window
 		//GtkScrolledWindow.Visible = false;
 		this.Fullscreen ();
 	}
+
+    private void OnPrintControlFired(object sender, TriggerControlEventArgs e)
+    {
+        Gtk.Application.Invoke((b, c) =>
+        {
+            labelInstruction.Text = "Wacht op de foto (+-45s). Plak deze na het printen in het gastenboek";
+        });
+    }
+
+    private void OnPrintTwiceControlFired(object sender, TriggerControlEventArgs e)
+    {
+        Gtk.Application.Invoke((b, c) =>
+        {
+            labelInstruction.Text = "Wacht op de foto's (+-90s). Plak de 1e na het printen in het gastenboek, de 2e is voor jezelf";
+        });
+    }
+
+    private void OnTriggerControlFired(object sender, TriggerControlEventArgs e)
+    {
+        Gtk.Application.Invoke((b, c) =>
+        {
+            labelInstruction.Text = "Smile !!!";
+        });
+    }
 
 	private void SetInstructionStyle()
 	{
@@ -157,7 +184,7 @@ public partial class MainWindow: Gtk.Window
 		return false;
 	}
 
-	private void PhotoBoothServiceOnPictureAdded (object sender, PictureAddedEventArgs a)
+	private void OnPhotoBoothServicePictureAdded (object sender, PictureAddedEventArgs a)
 	{
 		Gtk.Application.Invoke((b,c) =>
 	    {

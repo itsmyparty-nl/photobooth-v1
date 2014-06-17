@@ -65,21 +65,23 @@ namespace com.prodg.photobooth.infrastructure.hardware
 	        int pollingIndex = 0;
 	        while (!deinitRequested)
 	        {
-	            if (!initialized)
+	            lock (cameraLock)
 	            {
-	                TryInitialize();
-	            }
-	            else
-	            {
-	                pollingIndex++;
-	                //Check with a reduced frequency
-	                if (pollingIndex%5 != 0) continue;
+	                if (!initialized)
+	                {
+	                    TryInitialize();
+	                }
+	                else
+	                {
+	                    pollingIndex++;
+	                    //Check with a reduced frequency
+	                    if (pollingIndex%5 != 0) continue;
 
-                    MonitorCameraPresence();
-                    pollingIndex = 0;
+	                    MonitorCameraPresence();
+	                    pollingIndex = 0;
+	                }
 	            }
-                
-                //Sleep until the next poll
+	            //Sleep until the next poll
                 if (!deinitRequested)
                 {
                     Thread.Sleep(1000);
@@ -269,7 +271,13 @@ namespace com.prodg.photobooth.infrastructure.hardware
 	        {
                 if (!CheckInitialized()) return;
 
-	            camera.DeleteAll(CameraBaseFolder, context);
+	            //Try to delete all images on the camera
+                camera.DeleteAll(CameraBaseFolder, context);
+
+                //Deinitialize to fix slow reponse issues after multiple sessions
+                DisposeCameraObjects();
+	            initialized = false;
+                //note: the monitor thread will re-initialize the camera
 	        }
 		}
 

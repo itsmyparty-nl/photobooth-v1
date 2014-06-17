@@ -94,7 +94,8 @@ namespace com.prodg.photobooth.domain
 			return await Task.Run (() => {
 				try {
 					int failureCount = 0;
-					var session = new PhotoSession (settings);
+
+                    var session = new PhotoSession (settings);
 
 					while (session.ImageCount < imageProcessor.RequiredImages && failureCount < 10) {
 						string imagePath = session.GetNextImagePath ();
