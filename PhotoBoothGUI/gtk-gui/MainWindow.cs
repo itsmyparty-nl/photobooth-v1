@@ -21,7 +21,6 @@ public partial class MainWindow
 		// Container child MainWindow.Gtk.Container+ContainerChild
 		this.vbox1 = new global::Gtk.VBox ();
 		this.vbox1.Name = "vbox1";
-		this.vbox1.Spacing = 6;
 		// Container child vbox1.Gtk.Box+BoxChild
 		this.imagePhoto = new global::Gtk.Image ();
 		this.imagePhoto.HeightRequest = 800;
@@ -58,7 +57,7 @@ public partial class MainWindow
 			this.Child.ShowAll ();
 		}
 		this.DefaultWidth = 1303;
-		this.DefaultHeight = 1063;
+		this.DefaultHeight = 1051;
 		this.Show ();
 		this.DeleteEvent += new global::Gtk.DeleteEventHandler (this.OnDeleteEvent);
 	}
