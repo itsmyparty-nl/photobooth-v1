@@ -201,7 +201,7 @@ public partial class MainWindow: Gtk.Window
 				imageInstruction.Pixbuf = instructionImages ["indicator_" + (a.Index + 1)];
 			}
 			//Create and scale the pixbuf
-			var result = CreateAndScalePicture (a.Picture, imagePhoto.Allocation.Width);
+			var result = CreateAndScalePicture (a.Picture, imagePhoto.Allocation.Height);
 
 			//Set the pixbuf on the UI
 			imagePhoto.Pixbuf = result.Result;
@@ -209,17 +209,17 @@ public partial class MainWindow: Gtk.Window
 		});
 	}
 
-	private async Task<Gdk.Pixbuf> CreateAndScalePicture(System.Drawing.Image picture, int width)
+	private async Task<Gdk.Pixbuf> CreateAndScalePicture(System.Drawing.Image picture, int height)
     {
 		return await Task.Run(() =>
 	    {
 	        using (var stream = new MemoryStream())
 	        {
-	            picture.Save(stream, ImageFormat.Bmp);
+	            picture.Save(stream, ImageFormat.Png);
 	            stream.Position = 0;
                 var pixBuf = new Gdk.Pixbuf(stream);
 
-	            double scale = width/(double) pixBuf.Width;
+	            double scale = height/(double) pixBuf.Height;
                 return pixBuf.ScaleSimple((int)(scale * pixBuf.Width), (int)(scale * pixBuf.Height), Gdk.InterpType.Bilinear);
 	        }
 	    });
