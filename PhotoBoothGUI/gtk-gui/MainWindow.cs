@@ -7,7 +7,7 @@ public partial class MainWindow
 	
 	private global::Gtk.Image imagePhoto;
 	
-	private global::Gtk.Label labelInstruction;
+	private global::Gtk.Image imageInstruction;
 	
 	private global::Gtk.Statusbar statusbar1;
 
@@ -33,14 +33,12 @@ public partial class MainWindow
 		w1.Expand = false;
 		w1.Fill = false;
 		// Container child vbox1.Gtk.Box+BoxChild
-		this.labelInstruction = new global::Gtk.Label ();
-		this.labelInstruction.HeightRequest = 190;
-		this.labelInstruction.Name = "labelInstruction";
-		this.labelInstruction.LabelProp = global::Mono.Unix.Catalog.GetString ("Instructions");
-		this.labelInstruction.UseMarkup = true;
-		this.labelInstruction.Wrap = true;
-		this.vbox1.Add (this.labelInstruction);
-		global::Gtk.Box.BoxChild w2 = ((global::Gtk.Box.BoxChild)(this.vbox1 [this.labelInstruction]));
+		this.imageInstruction = new global::Gtk.Image ();
+		this.imageInstruction.WidthRequest = 1280;
+		this.imageInstruction.HeightRequest = 200;
+		this.imageInstruction.Name = "imageInstruction";
+		this.vbox1.Add (this.imageInstruction);
+		global::Gtk.Box.BoxChild w2 = ((global::Gtk.Box.BoxChild)(this.vbox1 [this.imageInstruction]));
 		w2.PackType = ((global::Gtk.PackType)(1));
 		w2.Position = 1;
 		w2.Expand = false;
@@ -60,7 +58,7 @@ public partial class MainWindow
 			this.Child.ShowAll ();
 		}
 		this.DefaultWidth = 1303;
-		this.DefaultHeight = 1053;
+		this.DefaultHeight = 1063;
 		this.Show ();
 		this.DeleteEvent += new global::Gtk.DeleteEventHandler (this.OnDeleteEvent);
 	}

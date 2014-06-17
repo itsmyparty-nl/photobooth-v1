@@ -24,6 +24,7 @@ using System.Threading.Tasks;
 using System.Globalization;
 using Gtk;
 using Pango;
+using System.Collections.Generic;
 using com.prodg.photobooth.config;
 using com.prodg.photobooth.infrastructure.command;
 using com.prodg.photobooth.common;
@@ -54,6 +55,8 @@ public partial class MainWindow: Gtk.Window
 		//Initialize
 		ISettings settings = new com.prodg.photobooth.config.Settings (logger);
 
+		PreloadImages ();
+
 		var camera = new Camera (logger);
 		commandMessenger = new CommandMessengerTransceiver (logger, settings);
 
@@ -71,8 +74,6 @@ public partial class MainWindow: Gtk.Window
 		IPhotoBoothService photoBoothService = new PhotoBoothService (hardware, imageProcessor, logger, settings);
 		photoBooth = new PhotoBoothModel (photoBoothService, hardware, logger);
 
-		SetInstructionStyle ();
-
 		//Subscribe to the shutdown requested event 
 		photoBooth.ShutdownRequested += OnPhotoBoothShutdownRequested; 
 		photoBoothService.PictureAdded += OnPhotoBoothServicePictureAdded;
@@ -81,7 +82,9 @@ public partial class MainWindow: Gtk.Window
         triggerControl.Fired += OnTriggerControlFired;
 
 		statusbar1.Push (1, "Waiting for camera");
-		labelInstruction.Text = "Druk op de rode knop om te starten!";
+
+		imagePhoto.Pixbuf = instructionImages ["instruction"];
+		imageInstruction.Pixbuf = instructionImages ["title"];
 
 		Start ();
 
@@ -90,41 +93,44 @@ public partial class MainWindow: Gtk.Window
 		this.Fullscreen ();
 	}
 
+	private Dictionary<string, Gdk.Pixbuf> instructionImages;
+
+	private void PreloadImages()
+	{
+		instructionImages = new Dictionary<string, Gdk.Pixbuf> ();
+		var resources = System.IO.Path.Combine(Directory.GetCurrentDirectory(), "Resources" );
+		instructionImages.Add("title",new Gdk.Pixbuf (System.IO.Path.Combine(resources,"tilte.png")));
+		instructionImages.Add("indicator_1",new Gdk.Pixbuf (System.IO.Path.Combine(resources,"indicator1of4.png")));
+		instructionImages.Add("indicator_2",new Gdk.Pixbuf (System.IO.Path.Combine(resources,"indicator2of4.png")));
+		instructionImages.Add("indicator_3",new Gdk.Pixbuf (System.IO.Path.Combine(resources,"indicator3of4.png")));
+		instructionImages.Add("indicator_4",new Gdk.Pixbuf (System.IO.Path.Combine(resources,"indicator4of4.png")));
+		instructionImages.Add("instruction",new Gdk.Pixbuf (System.IO.Path.Combine(resources,"largeinstruction.png")));
+		instructionImages.Add("finished",new Gdk.Pixbuf (System.IO.Path.Combine(resources,"legend.png")));
+		instructionImages.Add ("ready", new Gdk.Pixbuf (System.IO.Path.Combine (resources, "ready.png")));
+	}
+
     private void OnPrintControlFired(object sender, TriggerControlEventArgs e)
     {
-        Gtk.Application.Invoke((b, c) =>
-        {
-            labelInstruction.Text = "Wacht op de foto (+-45s)";
-        });
+		Gtk.Application.Invoke ((b, c) => {
+			imagePhoto.Pixbuf = instructionImages ["instruction"];
+			imageInstruction.Pixbuf = instructionImages ["title"];
+		});
     }
 
     private void OnPrintTwiceControlFired(object sender, TriggerControlEventArgs e)
     {
-        Gtk.Application.Invoke((b, c) =>
-        {
-            labelInstruction.Text = "Wacht op de foto's (+-90s)";
-        });
+		Gtk.Application.Invoke ((b, c) => {
+			imagePhoto.Pixbuf = instructionImages ["instruction"];
+			imageInstruction.Pixbuf = instructionImages ["title"];
+		});
     }
 
     private void OnTriggerControlFired(object sender, TriggerControlEventArgs e)
     {
-        Gtk.Application.Invoke((b, c) =>
-        {
-            labelInstruction.Text = "Smile !!!";
-        });
+		Gtk.Application.Invoke ((b, c) => {
+			imageInstruction.Pixbuf = instructionImages ["ready"];
+		});
     }
-
-	private void SetInstructionStyle()
-	{
-		Pango.FontDescription fontdesc = new Pango.FontDescription();
-		fontdesc.Family = "Sans";
-		fontdesc.Size = (int)(32*Pango.Scale.PangoScale);
-		fontdesc.Weight = Pango.Weight.Semibold;
-		labelInstruction.ModifyFont(fontdesc);
-
-		Gdk.Color fontcolor = new Gdk.Color(255,255,255);
-		labelInstruction.ModifyFg (StateType.Normal, fontcolor);
-	}
 
 	private void Start()
 	{
@@ -190,12 +196,11 @@ public partial class MainWindow: Gtk.Window
 	    {
 				if (a.IsFinal)
 				{
-					labelInstruction.Text = "Klaar! Print of start een nieuwe sessie";
+					imageInstruction.Pixbuf = instructionImages ["finished"];
 				}
 				else
 				{
-					labelInstruction.Text = String.Format(CultureInfo.InvariantCulture, 
-						"Foto {0} van {1}", a.Index+1, a.SessionSize);
+					imageInstruction.Pixbuf = instructionImages ["indicator_"+a.Index+1];
 				}
 				//Create and scale the pixbuf
 			var result = CreateAndScalePicture(a.Picture, imagePhoto.Allocation.Width);

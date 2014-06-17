@@ -115,7 +115,9 @@
     <Content Include="Resources\ready.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\tilte.png" />
+    <Content Include="Resources\tilte.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup />
 </Project>
