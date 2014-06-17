@@ -192,23 +192,19 @@ public partial class MainWindow: Gtk.Window
 
 	private void OnPhotoBoothServicePictureAdded (object sender, PictureAddedEventArgs a)
 	{
-		Gtk.Application.Invoke((b,c) =>
-	    {
-				if (a.IsFinal)
-				{
-					imageInstruction.Pixbuf = instructionImages ["finished"];
-				}
-				else
-				{
-					imageInstruction.Pixbuf = instructionImages ["indicator_"+a.Index+1];
-				}
-				//Create and scale the pixbuf
-			var result = CreateAndScalePicture(a.Picture, imagePhoto.Allocation.Width);
+		Gtk.Application.Invoke ((b, c) => {
+			if (a.IsFinal) {
+				imageInstruction.Pixbuf = instructionImages ["finished"];
+			} else {
+				imageInstruction.Pixbuf = instructionImages ["indicator_" + (a.Index + 1)];
+			}
+			//Create and scale the pixbuf
+			var result = CreateAndScalePicture (a.Picture, imagePhoto.Allocation.Width);
 
-	        //Set the pixbuf on the UI
+			//Set the pixbuf on the UI
 			imagePhoto.Pixbuf = result.Result;
-	        ShowAll();
-	    });
+			ShowAll ();
+		});
 	}
 
 	private async Task<Gdk.Pixbuf> CreateAndScalePicture(System.Drawing.Image picture, int width)
