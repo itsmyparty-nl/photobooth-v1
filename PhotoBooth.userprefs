@@ -1,9 +1,24 @@
 ﻿<Properties GitUserInfo="UsingGIT">
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|Mixed Platforms" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="PhotoBoothGUI/MainWindow.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Test-Photobooth/domain/TestPhotoBoothModel.cs">
     <Files>
-      <File FileName="PhotoBoothGUI/MainWindow.cs" Line="218" Column="53" />
+      <File FileName="PhotoBoothGUI/MainWindow.cs" Line="130" Column="25" />
+      <File FileName="PhotoBooth/domain/PhotoBoothService.cs" Line="123" Column="18" />
+      <File FileName="PhotoBooth/domain/PhotoSession.cs" Line="1" Column="1" />
+      <File FileName="PhotoBooth/infrastructure/hardware/NetPrinter.cs" Line="99" Column="6" />
+      <File FileName="PhotoBooth/infrastructure/hardware/Camera.cs" Line="1" Column="1" />
+      <File FileName="Test-Photobooth/domain/TestImageProcessor.cs" Line="1" Column="1" />
+      <File FileName="Test-Photobooth/domain/TestPhotoBoothModel.cs" Line="66" Column="1" />
+      <File FileName="Test-Photobooth/infrastructure/hardware/TestNetPrinter.cs" Line="43" Column="22" />
+      <File FileName="PhotoBooth/domain/CollageImageProcessor.cs" Line="1" Column="1" />
     </Files>
+    <Pads>
+      <Pad Id="MonoDevelop.NUnit.TestPad">
+        <State expanded="True">
+          <Node name="Test-Photobooth" selected="True" />
+        </State>
+      </Pad>
+    </Pads>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore />

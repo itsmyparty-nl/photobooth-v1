@@ -18,6 +18,7 @@
 #endregion
 
 using System.Drawing;
+using System.IO;
 using System.Drawing.Imaging;
 using com.prodg.photobooth.common;
 using com.prodg.photobooth.config;
@@ -34,6 +35,52 @@ namespace com.prodg.photobooth.infrastructure.hardware
         public TestNetPrinter(): 
             base(settings, logger)
         { }
+
+		[Test]
+		public void TestDisposeImages()
+		{
+			for (int i = 0; i < 100; i++) {
+				var image = new Bitmap (800, 600);
+				image.Dispose ();
+			}
+		}
+
+		[Test]
+		public void TestDisposeFromDiskImages()
+		{
+			var resources = System.IO.Path.Combine(Directory.GetCurrentDirectory(), "resources" );
+
+			for (int i = 0; i < 20; i++) {
+				var srcImage = Image.FromFile(System.IO.Path.Combine(resources,"img1.JPG"));
+				srcImage.Dispose ();
+			}
+		}
+
+		[Test]
+		public void TestDisposeClonedFromDiskImages()
+		{
+			var resources = System.IO.Path.Combine(Directory.GetCurrentDirectory(), "resources" );
+
+			var srcImage = Image.FromFile(System.IO.Path.Combine(resources,"img1.JPG"));
+			for (int i = 0; i < 100; i++) {
+				var copiedImage = (Image)srcImage.Clone ();
+				copiedImage.Dispose ();
+			}
+		}
+
+		[Test]
+		public void TestDisposeClonedRotatedFromDiskImages()
+		{
+			var resources = System.IO.Path.Combine(Directory.GetCurrentDirectory(), "resources" );
+
+			var srcImage = Image.FromFile(System.IO.Path.Combine(resources,"img1.JPG"));
+			for (int i = 0; i < 100; i++) {
+				var copiedImage = (Image)srcImage.Clone ();
+				copiedImage.RotateFlip (RotateFlipType.Rotate180FlipNone);
+				copiedImage.Dispose ();
+			}
+		}
+
 
         [Test]
         public void TestScaleToPageX()
