@@ -154,6 +154,7 @@ public partial class MainWindow: Gtk.Window
 	{	
 		logger.LogInfo ("PhotoboothGUI.Shutdown()");
 		Stop ();
+		logger.LogInfo ("Quitting application");
 		Application.Quit ();
 	}
 
