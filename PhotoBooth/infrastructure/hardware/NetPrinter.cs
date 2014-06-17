@@ -89,6 +89,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
             catch (Exception ex)
             {
                 logger.LogException("Error while printing", ex);
+				throw;
             }
         }
 
@@ -197,7 +198,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
 
             g.InterpolationMode = InterpolationMode.HighQualityBicubic;
             g.SmoothingMode = SmoothingMode.HighQuality;
-            g.DrawImage(rotatedImage, new Rectangle(0, 0, availableWidth, availableHeight));
+            //g.DrawImage(rotatedImage, new Rectangle(0, 0, availableWidth, availableHeight));
         }
     }
 }

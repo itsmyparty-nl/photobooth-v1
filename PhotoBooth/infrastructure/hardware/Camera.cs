@@ -84,7 +84,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
 	            //Sleep until the next poll
                 if (!deinitRequested)
                 {
-                    Thread.Sleep(1000);
+                    Thread.Sleep(3000);
                 }
 	        }
 	    }
@@ -215,15 +215,6 @@ namespace com.prodg.photobooth.infrastructure.hardware
 	            if (context == null) return;
 	            if (camera == null) return;
 
-	            try
-	            {
-	                camera.Exit(context);
-	            }
-	            catch (Exception)
-	            {
-	                logger.LogWarning("Could not Exit camera from context");
-	            }
-
 	            DisposeCameraObjects();
 	        }
 	    }
@@ -244,7 +235,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
 	                logger.LogDebug("Battery Level: " + GetBatteryLevel());
 
 	                //Capture and download
-	                LibGPhoto2.ICameraFilePath path = camera.Capture(LibGPhoto2.CameraCaptureType.Image, context);
+					LibGPhoto2.ICameraFilePath path = camera.Capture(LibGPhoto2.CameraCaptureType.Image, context);
 	                logger.LogDebug("Capture finished. File: " + Path.Combine(path.folder, path.name));
 	                LibGPhoto2.ICameraFile cameraFile = camera.GetFile(path.folder, path.name,
 	                    LibGPhoto2.CameraFileType.Normal,
@@ -321,7 +312,18 @@ namespace com.prodg.photobooth.infrastructure.hardware
 	            {
 	                if (camera != null)
 	                {
-	                    camera.Dispose();
+						if (context != null)
+						{
+							try
+							{
+								camera.Exit(context);
+							}
+							catch (Exception)
+							{
+								logger.LogWarning("Could not Exit camera from context");
+							}
+						}
+						camera.Dispose();
 	                }
 	                if (context != null)
 	                {

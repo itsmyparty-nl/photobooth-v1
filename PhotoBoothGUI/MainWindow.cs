@@ -107,6 +107,7 @@ public partial class MainWindow: Gtk.Window
 		instructionImages.Add("instruction",new Gdk.Pixbuf (System.IO.Path.Combine(resources,"largeinstruction.png")));
 		instructionImages.Add("finished",new Gdk.Pixbuf (System.IO.Path.Combine(resources,"legend.png")));
 		instructionImages.Add ("ready", new Gdk.Pixbuf (System.IO.Path.Combine (resources, "ready.png")));
+		instructionImages.Add ("empty", new Gdk.Pixbuf (System.IO.Path.Combine (resources, "empty.png")));
 	}
 
     private void OnPrintControlFired(object sender, TriggerControlEventArgs e)
@@ -129,6 +130,7 @@ public partial class MainWindow: Gtk.Window
     {
 		Gtk.Application.Invoke ((b, c) => {
 			imageInstruction.Pixbuf = instructionImages ["ready"];
+			imagePhoto.Pixbuf = instructionImages ["empty"];
 		});
     }
 

@@ -18,6 +18,7 @@
 #endregion
 
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using com.prodg.photobooth.common;
 using com.prodg.photobooth.infrastructure.hardware;
@@ -33,7 +34,8 @@ namespace com.prodg.photobooth.domain
         private readonly ILogger logger;
         private readonly IHardware hardware;
         private readonly IPhotoBoothService service;
-        private PhotoSession currentSession; 
+        private readonly SemaphoreSlim sessionLock;
+		private PhotoSession currentSession;
 
         /// <summary>
         /// Event to signal that shutdown is requested
@@ -53,6 +55,7 @@ namespace com.prodg.photobooth.domain
             this.hardware = hardware;
             this.logger = logger;
             this.service = service;
+			sessionLock = new SemaphoreSlim (1);
 
             currentSession = null;
         }
@@ -134,105 +137,109 @@ namespace com.prodg.photobooth.domain
         }
 
         private async void OnPrintControlTriggered(object sender, TriggerControlEventArgs e)
-        {
-            logger.LogInfo("Print control fired");
+		{
+			logger.LogInfo ("Print control fired");
            
-            try
-            {
-                //Release the print button to prevent printing twice
-                hardware.PrintControl.Lock();
-                hardware.PrintTwiceControl.Release();
-                //Print
-                if (currentSession != null)
-                {
-                    //Get the last sesion from the queue and print it
-                    await service.Print(currentSession);
-                }
-                else
-                {
-                    logger.LogWarning("Nothing to print");
-                }
+			try {
+				try {
+					sessionLock.Wait ();
+					//Release the print button to prevent printing twice
+					hardware.PrintControl.Lock ();
+					hardware.PrintTwiceControl.Release ();
+					//Print
+					if (currentSession != null) {
+						//Get the last sesion from the queue and print it
+						await service.Print (currentSession);
+					} else {
+						logger.LogWarning ("Nothing to print");
+					}
+				} finally {
+					sessionLock.Release ();
+				}
 
-                //Wait until releasing the control to show that printing is busy
-                await Task.Delay(TimeSpan.FromSeconds(45));
-            }
-            catch (Exception ex)
-            {
-                logger.LogException("Error while capturing images", ex);
-                //In case anything went wrong, there's most probably no use in trying again.
-            }
-            //always reset the control to its initial state
-            hardware.PrintControl.Unlock();
-            hardware.PrintControl.Release();
-        }
+				//Wait until releasing the control to show that printing is busy
+				await Task.Delay (TimeSpan.FromSeconds (45));
+			} catch (Exception ex) {
+				logger.LogException ("Error while capturing images", ex);
+				//In case anything went wrong, there's most probably no use in trying again.
+			}
+
+			//always reset the control to its initial state
+			hardware.PrintControl.Unlock ();
+			hardware.PrintControl.Release ();
+		}
 
         //TODO: printing twice results in object disposed exceptions --> garbagecollector when rotated image is set to null
         private async void OnPrintTwiceControlTriggered(object sender, TriggerControlEventArgs e)
-        {
-            logger.LogInfo("Print twice control fired");
+		{
+			logger.LogInfo ("Print twice control fired");
 
-            //Release the print button to prevent printing twice
-            hardware.PrintControl.Release();
-            hardware.PrintTwiceControl.Lock();
+			//Release the print button to prevent printing twice
+			hardware.PrintControl.Release ();
+			hardware.PrintTwiceControl.Lock ();
 
-            try
-            {
-                //Print
-                if (currentSession != null)
-                {
-                    //Get the last sesion from the queue and print it
-                    await service.Print(currentSession);
-                    await service.Print(currentSession);
-                }
-                else
-                {
-                    logger.LogInfo("Nothing to print");
-                    return;
-                }
-               
-                //Wait until releasing the control to show that printing is busy
-                await Task.Delay(TimeSpan.FromSeconds(90));
-            }
-            catch (Exception ex)
-            {
-                logger.LogException("Error while printing", ex);
-            }
-            //always reset the control to its initial state
-            hardware.PrintTwiceControl.Unlock();
-            hardware.PrintTwiceControl.Release();
-        }
+			try {
+				try {
+				
+					sessionLock.Wait ();
+					if (currentSession != null) {
+						//Get the last sesion from the queue and print it
+						await service.Print (currentSession);
+						await service.Print (currentSession);
+					} else {
+						logger.LogInfo ("Nothing to print");
+						return;
+					}
+
+				} finally {
+					sessionLock.Release ();
+				}
+				//Wait until releasing the control to show that printing is busy
+				await Task.Delay (TimeSpan.FromSeconds (90));
+			} catch (Exception ex) {
+				logger.LogException ("Error while printing", ex);
+			}
+			//always reset the control to its initial state
+			hardware.PrintTwiceControl.Unlock ();
+			hardware.PrintTwiceControl.Release ();
+		}
 
         private async void OnTriggerControlTriggered(object sender, TriggerControlEventArgs e)
-        {
-            logger.LogInfo("Trigger control fired");
+		{
+			logger.LogInfo ("Trigger control fired");
 
-            //Release the trigger to prevent double sessions
-            hardware.TriggerControl.Lock();
-            hardware.PrintControl.Release();
-            hardware.PrintTwiceControl.Release();
+			//Release the trigger to prevent double sessions
+			hardware.TriggerControl.Lock ();
+			hardware.PrintControl.Release ();
+			hardware.PrintTwiceControl.Release ();
 
-            try
-            {
-                await Task.Delay(TimeSpan.FromSeconds(5));
+			try {
+				try {
+					sessionLock.Wait ();
+					if (currentSession != null) {
+						currentSession.Dispose ();
+						currentSession = null;
+					}
+					await Task.Delay (TimeSpan.FromSeconds (5));
 
-                //Take pictures and add to the queue
-                currentSession = await service.Capture();
+					//Take pictures and add to the queue
+					currentSession = await service.Capture ();
 
-                if (currentSession != null && currentSession.ResultImage != null)
-                {
-                    //Afer capturing we're ready for printing or for another shoot
-                    hardware.PrintControl.Arm();
-                    hardware.PrintTwiceControl.Arm();
-                }
-            }
-            catch (Exception ex)
-            {
-                logger.LogException("Error while capturing images", ex);
-            }
+					if (currentSession != null && currentSession.ResultImage != null) {
+						//Afer capturing we're ready for printing or for another shoot
+						hardware.PrintControl.Arm ();
+						hardware.PrintTwiceControl.Arm ();
+					}
+				} finally {
+					sessionLock.Release ();
+				}
+			} catch (Exception ex) {
+				logger.LogException ("Error while capturing images", ex);
+			}
 
-            //Always re-arm the trigger after shooting
-            hardware.TriggerControl.Unlock();
-        }
+			//Always re-arm the trigger after shooting
+			hardware.TriggerControl.Unlock ();
+		}
 
         #region IDisposable Implementation
 

@@ -1,18 +1,32 @@
 ﻿<Properties GitUserInfo="UsingGIT">
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|Mixed Platforms" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Test-Photobooth/domain/TestPhotoBoothModel.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Test-Photobooth/infrastructure/hardware/TestNetPrinter.cs">
     <Files>
-      <File FileName="PhotoBoothGUI/MainWindow.cs" Line="130" Column="25" />
-      <File FileName="PhotoBooth/domain/PhotoBoothService.cs" Line="123" Column="18" />
+      <File FileName="PhotoBoothGUI/MainWindow.cs" Line="102" Column="97" />
+      <File FileName="PhotoBooth/domain/PhotoBoothService.cs" Line="1" Column="1" />
       <File FileName="PhotoBooth/domain/PhotoSession.cs" Line="1" Column="1" />
-      <File FileName="PhotoBooth/infrastructure/hardware/NetPrinter.cs" Line="99" Column="6" />
+      <File FileName="PhotoBooth/infrastructure/hardware/NetPrinter.cs" Line="1" Column="1" />
       <File FileName="PhotoBooth/infrastructure/hardware/Camera.cs" Line="1" Column="1" />
       <File FileName="Test-Photobooth/domain/TestImageProcessor.cs" Line="1" Column="1" />
-      <File FileName="Test-Photobooth/domain/TestPhotoBoothModel.cs" Line="66" Column="1" />
-      <File FileName="Test-Photobooth/infrastructure/hardware/TestNetPrinter.cs" Line="43" Column="22" />
+      <File FileName="Test-Photobooth/domain/TestPhotoBoothModel.cs" Line="23" Column="1" />
+      <File FileName="Test-Photobooth/infrastructure/hardware/TestNetPrinter.cs" Line="36" Column="26" />
       <File FileName="PhotoBooth/domain/CollageImageProcessor.cs" Line="1" Column="1" />
     </Files>
     <Pads>
+      <Pad Id="ProjectPad">
+        <State expanded="True">
+          <Node name="PhotoBoothConsole" selected="True" />
+          <Node name="PhotoBoothGUI" expanded="True" />
+          <Node name="Test-Photobooth" expanded="True">
+            <Node name="domain" expanded="True" />
+            <Node name="infrastructure" expanded="True">
+              <Node name="hardware" expanded="True" />
+            </Node>
+            <Node name="Properties" expanded="True" />
+            <Node name="resources" expanded="True" />
+          </Node>
+        </State>
+      </Pad>
       <Pad Id="MonoDevelop.NUnit.TestPad">
         <State expanded="True">
           <Node name="Test-Photobooth" selected="True" />
