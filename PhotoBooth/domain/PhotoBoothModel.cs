@@ -145,12 +145,12 @@ namespace com.prodg.photobooth.domain
 		{
 			logger.LogInfo ("Print control fired");
            
+			//Release the print button to prevent printing twice
+			hardware.PrintTwiceControl.Release ();
+			hardware.PrintControl.Lock ();
 			try {
 				try {
 					sessionLock.Wait ();
-					//Release the print button to prevent printing twice
-					hardware.PrintControl.Lock ();
-					hardware.PrintTwiceControl.Release ();
 					//Print
 					if (currentSession != null) {
 						//Get the last sesion from the queue and print it
