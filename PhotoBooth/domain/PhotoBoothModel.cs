@@ -217,6 +217,7 @@ namespace com.prodg.photobooth.domain
 				try {
 					sessionLock.Wait ();
 					if (currentSession != null) {
+						logger.LogDebug("Disposing previous session");
 						currentSession.Dispose ();
 						currentSession = null;
 					}
