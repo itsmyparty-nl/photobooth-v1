@@ -94,6 +94,9 @@
     <Content Include="NLog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Resources\empty.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Resources\indicator1of4.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
