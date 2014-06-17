@@ -23,23 +23,17 @@ using System.Drawing.Imaging;
 using com.prodg.photobooth.common;
 using com.prodg.photobooth.config;
 using NUnit.Framework;
+using Rhino.Mocks;
 
 namespace com.prodg.photobooth.infrastructure.hardware
 {
     [TestFixture]
-    public class TestNetPrinter: NetPrinter
+    public class TestNetPrinter
     {
-        private static readonly ILogger logger = new ConsoleLogger();
-        private static readonly ISettings settings = null;
-        
-        public TestNetPrinter(): 
-            base(settings, logger)
-        { }
-
 		[Test]
 		public void TestDisposeImages()
 		{
-			for (int i = 0; i < 100; i++) {
+			for (int i = 0; i < 10; i++) {
 				var image = new Bitmap (800, 600);
 				image.Dispose ();
 			}
@@ -50,7 +44,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
 		{
 			var resources = System.IO.Path.Combine(Directory.GetCurrentDirectory(), "resources" );
 
-			for (int i = 0; i < 20; i++) {
+			for (int i = 0; i < 10; i++) {
 				var srcImage = Image.FromFile(System.IO.Path.Combine(resources,"img1.JPG"));
 				srcImage.Dispose ();
 			}
@@ -62,7 +56,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
 			var resources = System.IO.Path.Combine(Directory.GetCurrentDirectory(), "resources" );
 
 			var srcImage = Image.FromFile(System.IO.Path.Combine(resources,"img1.JPG"));
-			for (int i = 0; i < 100; i++) {
+			for (int i = 0; i < 10; i++) {
 				var copiedImage = (Image)srcImage.Clone ();
 				copiedImage.Dispose ();
 			}
@@ -74,13 +68,31 @@ namespace com.prodg.photobooth.infrastructure.hardware
 			var resources = System.IO.Path.Combine(Directory.GetCurrentDirectory(), "resources" );
 
 			var srcImage = Image.FromFile(System.IO.Path.Combine(resources,"img1.JPG"));
-			for (int i = 0; i < 100; i++) {
+			for (int i = 0; i < 10; i++) {
 				var copiedImage = (Image)srcImage.Clone ();
 				copiedImage.RotateFlip (RotateFlipType.Rotate180FlipNone);
 				copiedImage.Dispose ();
 			}
 		}
 
+		[Test]
+		public void TestPrintAndDispose ()
+		{
+			var resources = System.IO.Path.Combine(Directory.GetCurrentDirectory(), "resources" );
+			var logger = MockRepository.GenerateStub<ILogger> ();
+			var settings = MockRepository.GenerateStub<ISettings>();
+			settings.Stub(x => x.PrinterName).Return("Canon-CP780");
+			settings.Stub (x => x.PrintMarginBottom).Return (0);
+			settings.Stub (x => x.PrintMarginLeft).Return (0);
+			settings.Stub (x => x.PrintMarginRight).Return (0);
+			settings.Stub (x => x.PrintMarginTop).Return (0);
+			var printer = new NetPrinter (settings, logger);
+			for (int i = 0; i < 5; i++) {
+				var srcImage = Image.FromFile(System.IO.Path.Combine(resources,"img1.JPG"));
+				printer.Print (srcImage);
+				srcImage.Dispose ();
+			}
+		}
 
         [Test]
         public void TestScaleToPageX()
