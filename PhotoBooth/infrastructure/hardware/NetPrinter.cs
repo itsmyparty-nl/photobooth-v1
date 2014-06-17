@@ -82,7 +82,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
                 pd.DefaultPageSettings.Margins = new Margins(settings.PrintMarginLeft, settings.PrintMarginRight,
                     settings.PrintMarginTop, settings.PrintMarginBottom);
 
-                pd.Print();
+				pd.Print();
 
 				printFinished.WaitOne();
             }
@@ -96,7 +96,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
         {
 			//Free all stored variables for this print
 			storedImage = null;
-			rotatedImage.Dispose ();
+			//rotatedImage.Dispose ();
 			rotatedImage = null;
 
 			//Trigger that the print is finished
