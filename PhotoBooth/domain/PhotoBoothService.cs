@@ -103,7 +103,7 @@ namespace com.prodg.photobooth.domain
 							Image image = session.AddPicture (imagePath);
 							//Signal that a new picture was added
 							if (PictureAdded != null) {
-								PictureAdded.Invoke (this, new PictureAddedEventArgs (image, session.ImageCount - 1, 
+								PictureAdded(this, new PictureAddedEventArgs (image, session.ImageCount - 1, 
 									imageProcessor.RequiredImages));
 							}
 						} else {
@@ -113,7 +113,7 @@ namespace com.prodg.photobooth.domain
 					session.ResultImage = imageProcessor.Process (session);
 					//Signal that a new picture was added
 					if (PictureAdded != null) {
-						PictureAdded.Invoke (this, new PictureAddedEventArgs (session.ResultImage, session.ImageCount, 
+						PictureAdded(this, new PictureAddedEventArgs (session.ResultImage, session.ImageCount, 
 							imageProcessor.RequiredImages));
 					}
 					//Return the session

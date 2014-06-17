@@ -23,6 +23,7 @@ using com.prodg.photobooth.config;
 using com.prodg.photobooth.common;
 using System.Drawing.Printing;
 using System.Drawing;
+using System.Threading;
 
 namespace com.prodg.photobooth.infrastructure.hardware
 {
@@ -37,11 +38,13 @@ namespace com.prodg.photobooth.infrastructure.hardware
         private Image storedImage;
         private Image rotatedImage;
         private PrintDocument pd;
+		private ManualResetEvent printFinished;
 
         public NetPrinter(ISettings settings, ILogger logger)
         {
             this.settings = settings;
             this.logger = logger;
+			printFinished = new ManualResetEvent (false);
         }
 
         /// <summary>
@@ -52,11 +55,18 @@ namespace com.prodg.photobooth.infrastructure.hardware
         {
             try
             {
-                storedImage = image;
-                pd = new PrintDocument();
+                //Store variables for printing
+				storedImage = image;
+				rotatedImage = (Image) storedImage.Clone();
+				rotatedImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
+				printFinished.Reset();
+
+				//Initialize the print document
+				pd = new PrintDocument();
 
                 pd.PrintPage += printDocument_PrintPage;
                 pd.BeginPrint += printDocument_BeginPrint;
+				pd.EndPrint += printDocument_EndPrint;
                 pd.PrinterSettings.PrinterName = settings.PrinterName;
                 //Set the paper settings before calling print in order to get the correct graphics object
 
@@ -74,11 +84,23 @@ namespace com.prodg.photobooth.infrastructure.hardware
 
                 pd.Print();
 
+				printFinished.WaitOne();
             }
             catch (Exception ex)
             {
                 logger.LogException("Error while printing", ex);
             }
+        }
+
+        void printDocument_EndPrint (object sender, PrintEventArgs e)
+        {
+			//Free all stored variables for this print
+			storedImage = null;
+			rotatedImage.Dispose ();
+			rotatedImage = null;
+
+			//Trigger that the print is finished
+			printFinished.Set ();
         }
 
         public void Initialize()
@@ -160,9 +182,6 @@ namespace com.prodg.photobooth.infrastructure.hardware
                     Math.Floor(pd.OriginAtMargins
                         ? marginBounds.Height
                         : (e.PageSettings.Landscape ? printableArea.Width : printableArea.Height));
-
-            rotatedImage = (Image) storedImage.Clone();
-            rotatedImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
 
             logger.LogInfo(
                 String.Format("Printing image ({2}x{3}) on {0}, printable area ({1}), bounds ({4}), dpi ({5},{6})",
