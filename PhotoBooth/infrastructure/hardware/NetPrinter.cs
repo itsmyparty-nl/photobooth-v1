@@ -22,6 +22,7 @@ using System.Drawing.Drawing2D;
 using com.prodg.photobooth.config;
 using com.prodg.photobooth.common;
 using System.Drawing.Printing;
+using System.Drawing.Imaging;
 using System.Drawing;
 using System.Threading;
 
@@ -39,12 +40,14 @@ namespace com.prodg.photobooth.infrastructure.hardware
         private Image rotatedImage;
         private PrintDocument pd;
 		private ManualResetEvent printFinished;
+		private ImageAttributes attributes;
 
         public NetPrinter(ISettings settings, ILogger logger)
         {
             this.settings = settings;
             this.logger = logger;
 			printFinished = new ManualResetEvent (false);
+			attributes = new ImageAttributes();
         }
 
         /// <summary>
@@ -199,6 +202,8 @@ namespace com.prodg.photobooth.infrastructure.hardware
             g.InterpolationMode = InterpolationMode.HighQualityBicubic;
             g.SmoothingMode = SmoothingMode.HighQuality;
             //g.DrawImage(rotatedImage, new Rectangle(0, 0, availableWidth, availableHeight));
+			g.DrawImage(rotatedImage, new Rectangle(0, 0, availableWidth, availableHeight),
+				0, 0, rotatedImage.Width, rotatedImage.Height, GraphicsUnit.Pixel, attributes);
         }
     }
 }
