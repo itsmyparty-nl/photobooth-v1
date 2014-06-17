@@ -97,6 +97,9 @@
     <Content Include="Resources\empty.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Resources\error.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Resources\indicator1of4.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
