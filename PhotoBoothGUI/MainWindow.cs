@@ -94,7 +94,7 @@ public partial class MainWindow: Gtk.Window
     {
         Gtk.Application.Invoke((b, c) =>
         {
-            labelInstruction.Text = "Wacht op de foto (+-45s). Plak deze na het printen in het gastenboek";
+            labelInstruction.Text = "Wacht op de foto (+-45s)";
         });
     }
 
@@ -102,7 +102,7 @@ public partial class MainWindow: Gtk.Window
     {
         Gtk.Application.Invoke((b, c) =>
         {
-            labelInstruction.Text = "Wacht op de foto's (+-90s). Plak de 1e na het printen in het gastenboek, de 2e is voor jezelf";
+            labelInstruction.Text = "Wacht op de foto's (+-90s)";
         });
     }
 
@@ -190,7 +190,7 @@ public partial class MainWindow: Gtk.Window
 	    {
 				if (a.IsFinal)
 				{
-					labelInstruction.Text = "Klaar! Druk op de knoppen aan de zijkant om te printen, of op de grote knop om een nieuwe sessie te starten.";
+					labelInstruction.Text = "Klaar! Print of start een nieuwe sessie";
 				}
 				else
 				{
