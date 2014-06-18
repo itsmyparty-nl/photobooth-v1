@@ -37,7 +37,7 @@ public partial class MainWindow: Gtk.Window
 	private ILogger logger;
 	private IHardware hardware;
 	private ICamera camera;
-	private readonly IPhotoBoothModel photoBooth;
+	private IPhotoBoothModel photoBooth;
 	private CommandMessengerTransceiver commandMessenger;
 	private Gdk.Cursor invisibleCursor;
 
@@ -114,6 +114,7 @@ public partial class MainWindow: Gtk.Window
 			invisibleCursor = new Gdk.Cursor (inv, inv, Gdk.Color.Zero,
 				Gdk.Color.Zero, 0, 0);
 		}
+		GdkWindow.Cursor = invisibleCursor;
 	}
 
 	private void ShowCursor()
@@ -189,9 +190,18 @@ public partial class MainWindow: Gtk.Window
 		ShowCursor ();
 
 		logger.LogInfo ("Disposing hardware");
-		photoBooth.Dispose ();
-		commandMessenger.Dispose ();
-		camera.Dispose ();
+		if (photoBooth != null) {
+			photoBooth.Dispose ();
+			photoBooth = null;
+		}
+		if (commandMessenger != null) {
+			commandMessenger.Dispose ();
+			commandMessenger = null;
+		}
+		if (camera != null) {
+			camera.Dispose ();
+			camera = null;
+		}
 
 		logger.LogInfo ("Quitting application");
 		Application.Quit ();
