@@ -107,7 +107,8 @@ public partial class MainWindow: Gtk.Window
 	private void PreloadImages()
 	{
 		instructionImages = new Dictionary<string, Gdk.Pixbuf> ();
-		var resources = System.IO.Path.Combine(Directory.GetCurrentDirectory(), "Resources" );
+		var path = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly ().GetName ().CodeBase).Replace("file:","");
+		var resources = System.IO.Path.Combine(path, "Resources" );
 		instructionImages.Add("title",new Gdk.Pixbuf (System.IO.Path.Combine(resources,"tilte.png")));
 		instructionImages.Add("indicator_1",new Gdk.Pixbuf (System.IO.Path.Combine(resources,"indicator1of4.png")));
 		instructionImages.Add("indicator_2",new Gdk.Pixbuf (System.IO.Path.Combine(resources,"indicator2of4.png")));
