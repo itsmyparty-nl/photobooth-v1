@@ -203,7 +203,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
             g.SmoothingMode = SmoothingMode.HighQuality;
             //g.DrawImage(rotatedImage, new Rectangle(0, 0, availableWidth, availableHeight));
 			g.DrawImage(rotatedImage, new Rectangle(0, 0, availableWidth, availableHeight),
-				0, 0, rotatedImage.Width, rotatedImage.Height, GraphicsUnit.Pixel, attributes);
+				0, 0, (int)(rotatedImage.Width*0.72), (int)(rotatedImage.Height*0.72), GraphicsUnit.Pixel, attributes);
         }
     }
 }
