@@ -55,12 +55,12 @@ namespace com.prodg.photobooth.domain
             button.Visible = false;
         }
 
-        public void Lock()
+        public int Lock(bool showLocked)
         {
-            //Nothing
+            return 0;
         }
 
-        public void Unlock()
+        public void Unlock(int LockId)
         {
             //Nothing
         }
