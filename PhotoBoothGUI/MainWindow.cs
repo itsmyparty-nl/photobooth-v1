@@ -36,8 +36,10 @@ public partial class MainWindow: Gtk.Window
 {
 	private ILogger logger;
 	private IHardware hardware;
+	private ICamera camera;
 	private readonly IPhotoBoothModel photoBooth;
 	private CommandMessengerTransceiver commandMessenger;
+	private Gdk.Cursor invisibleCursor;
 
 	public MainWindow () : base (Gtk.WindowType.Toplevel)
 	{
@@ -56,8 +58,9 @@ public partial class MainWindow: Gtk.Window
 		ISettings settings = new com.prodg.photobooth.config.Settings (logger);
 
 		PreloadImages ();
+		HideCursor ();
 
-		var camera = new Camera (logger);
+		camera = new Camera (logger);
 		commandMessenger = new CommandMessengerTransceiver (logger, settings);
 
 		camera.StateChanged += OnCameraStateChanged;
@@ -73,6 +76,7 @@ public partial class MainWindow: Gtk.Window
 		IImageProcessor imageProcessor = new CollageImageProcessor (logger, settings);
 		IPhotoBoothService photoBoothService = new PhotoBoothService (hardware, imageProcessor, logger, settings);
 		photoBooth = new PhotoBoothModel (photoBoothService, hardware, logger);
+
 
 		//Subscribe to the shutdown requested event 
 		photoBooth.ShutdownRequested += OnPhotoBoothShutdownRequested; 
@@ -103,6 +107,23 @@ public partial class MainWindow: Gtk.Window
 	}
 
 	private Dictionary<string, Gdk.Pixbuf> instructionImages;
+
+	private void HideCursor()
+	{
+		using (Gdk.Pixmap inv = new Gdk.Pixmap (null, 1, 1, 1)) {
+			invisibleCursor = new Gdk.Cursor (inv, inv, Gdk.Color.Zero,
+				Gdk.Color.Zero, 0, 0);
+		}
+	}
+
+	private void ShowCursor()
+	{
+		if (invisibleCursor != null)
+		{
+			invisibleCursor.Dispose ();
+			invisibleCursor = null;
+		}
+	}
 
 	private void PreloadImages()
 	{
@@ -165,6 +186,13 @@ public partial class MainWindow: Gtk.Window
 	{	
 		logger.LogInfo ("PhotoboothGUI.Shutdown()");
 		Stop ();
+		ShowCursor ();
+
+		logger.LogInfo ("Disposing hardware");
+		photoBooth.Dispose ();
+		commandMessenger.Dispose ();
+		camera.Dispose ();
+
 		logger.LogInfo ("Quitting application");
 		Application.Quit ();
 	}
