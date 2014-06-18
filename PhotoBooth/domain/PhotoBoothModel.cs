@@ -145,73 +145,98 @@ namespace com.prodg.photobooth.domain
 		{
 			logger.LogInfo ("Print control fired");
            
-			//Release the print button to prevent printing twice
-			hardware.PrintTwiceControl.Release ();
-			hardware.PrintControl.Lock ();
-			try {
-				try {
-					sessionLock.Wait ();
-					//Print
-					if (currentSession != null) {
-						//Get the last sesion from the queue and print it
-						await service.Print (currentSession);
-					} else {
-						logger.LogWarning ("Nothing to print");
-					}
-				} finally {
-					sessionLock.Release ();
-				}
+			//lock both buttons but only indicate that the first is printing
+			var lockId = hardware.PrintControl.Lock (true);
+            var twiceLockId = hardware.PrintTwiceControl.Lock(false);
+            try
+            {
+                try
+                {
+                    sessionLock.Wait();
+                    //Print
+                    if (currentSession != null)
+                    {
+                        //Get the last sesion from the queue and print it
+                        await service.Print(currentSession);
+                    }
+                    else
+                    {
+                        logger.LogWarning("Nothing to print");
+                    }
+                }
+                finally
+                {
+                    sessionLock.Release();
+                }
 
-				//Wait until releasing the control to show that printing is busy
-				await Task.Delay (TimeSpan.FromSeconds (45));
-			} catch (Exception ex) {
-				logger.LogException ("Error while printing", ex);
-				if (ErrorOccurred != null) {
-					ErrorOccurred.Invoke (this, new ErrorEventArgs("Error while printing"));
-				}
-			}
-
-			//always reset the control to its initial state
-			hardware.PrintControl.Unlock ();
-			hardware.PrintControl.Release ();
+                //Wait until releasing the control to show that printing is busy
+                await Task.Delay(TimeSpan.FromSeconds(45));
+            }
+            catch (Exception ex)
+            {
+                logger.LogException("Error while printing", ex);
+                if (ErrorOccurred != null)
+                {
+                    ErrorOccurred.Invoke(this, new ErrorEventArgs("Error while printing"));
+                }
+            }
+            finally
+            {
+                //always reset the control to its initial state
+                hardware.PrintControl.Unlock(lockId);
+                hardware.PrintTwiceControl.Unlock(twiceLockId);
+            }
 		}
 
-        //TODO: printing twice results in object disposed exceptions --> garbagecollector when rotated image is set to null
         private async void OnPrintTwiceControlTriggered(object sender, TriggerControlEventArgs e)
 		{
 			logger.LogInfo ("Print twice control fired");
 
 			//Release the print button to prevent printing twice
 			hardware.PrintControl.Release ();
-			hardware.PrintTwiceControl.Lock ();
+			var lockId = hardware.PrintTwiceControl.Lock (true);
+            var singleLockId = hardware.PrintControl.Lock(false);
 
-			try {
-				try {
-				
-					sessionLock.Wait ();
-					if (currentSession != null) {
-						//Get the last sesion from the queue and print it
-						await service.Print (currentSession);
-						await service.Print (currentSession);
-					} else {
-						logger.LogInfo ("Nothing to print");
-						return;
-					}
+            try
+            {
+                try
+                {
 
-				} finally {
-					sessionLock.Release ();
-				}
-				//Wait until releasing the control to show that printing is busy
-				await Task.Delay (TimeSpan.FromSeconds (90));
-			} catch (Exception ex) {
-				logger.LogException ("Error while printing twice", ex);
-				if (ErrorOccurred != null) {
-					ErrorOccurred.Invoke (this, new ErrorEventArgs("Error while printing twice"));
-				}
-			}
-			//always reset the control to its initial state
-			hardware.PrintTwiceControl.Unlock ();
-			hardware.PrintTwiceControl.Release ();
+                    sessionLock.Wait();
+                    if (currentSession != null)
+                    {
+                        //Get the last sesion from the queue and print it
+                        await service.Print(currentSession);
+                        await service.Print(currentSession);
+                    }
+                    else
+                    {
+                        logger.LogInfo("Nothing to print");
+                        return;
+                    }
+
+                }
+                finally
+                {
+                    sessionLock.Release();
+                }
+                //Wait until releasing the control to show that printing is busy
+                await Task.Delay(TimeSpan.FromSeconds(90));
+            }
+            catch (Exception ex)
+            {
+                logger.LogException("Error while printing twice", ex);
+                if (ErrorOccurred != null)
+                {
+                    ErrorOccurred.Invoke(this, new ErrorEventArgs("Error while printing twice"));
+                }
+            }
+            finally
+            {
+                //always reset the control to its initial state
+                hardware.PrintTwiceControl.Unlock(lockId);
+                hardware.PrintControl.Unlock(singleLockId);
+            }
 		}
 
         private async void OnTriggerControlTriggered(object sender, TriggerControlEventArgs e)
@@ -219,48 +244,61 @@ namespace com.prodg.photobooth.domain
 			logger.LogInfo ("Trigger control fired");
 
 			//Release the trigger to prevent double sessions
-			hardware.TriggerControl.Lock ();
+			var lockId = hardware.TriggerControl.Lock (true);
 			hardware.PrintControl.Release ();
 			hardware.PrintTwiceControl.Release ();
 
-			try {
-				try {
-					sessionLock.Wait ();
-					if (currentSession != null) {
-						logger.LogDebug("Disposing previous session");
-						currentSession.Dispose ();
-						currentSession = null;
-					}
-					await Task.Delay (TimeSpan.FromSeconds (5));
+            try
+            {
+                try
+                {
+                    sessionLock.Wait();
+                    if (currentSession != null)
+                    {
+                        logger.LogDebug("Disposing previous session");
+                        currentSession.Dispose();
+                        currentSession = null;
+                    }
+                    await Task.Delay(TimeSpan.FromSeconds(5));
 
-					//Take pictures and add to the queue
-					currentSession = await service.Capture ();
+                    //Take pictures and add to the queue
+                    currentSession = await service.Capture();
 
-					if (currentSession != null && currentSession.ResultImage != null) {
-						//Afer capturing we're ready for printing or for another shoot
-						hardware.PrintControl.Arm ();
-						hardware.PrintTwiceControl.Arm ();
-					}
-					else
-					{
-						if (ErrorOccurred != null) {
-							logger.LogError ("Capturing did not lead to a successful session");
-							ErrorOccurred.Invoke (this, new ErrorEventArgs("Capturing did not lead to a successful session"));
-						}
-					}
+                    if (currentSession != null && currentSession.ResultImage != null)
+                    {
+                        //Afer capturing we're ready for printing or for another shoot
+                        hardware.PrintControl.Arm();
+                        hardware.PrintTwiceControl.Arm();
+                    }
+                    else
+                    {
+                        if (ErrorOccurred != null)
+                        {
+                            logger.LogError("Capturing did not lead to a successful session");
+                            ErrorOccurred.Invoke(this,
+                                new ErrorEventArgs("Capturing did not lead to a successful session"));
+                        }
+                    }
 
-				} finally {
-					sessionLock.Release ();
-				}
-			} catch (Exception ex) {
-				logger.LogException ("Error while capturing images", ex);
-				if (ErrorOccurred != null) {
-					ErrorOccurred.Invoke (this, new ErrorEventArgs("Error while capturing images"));
-				}
-			}
-
-			//Always re-arm the trigger after shooting
-			hardware.TriggerControl.Unlock ();
+                }
+                finally
+                {
+                    sessionLock.Release();
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogException("Error while capturing images", ex);
+                if (ErrorOccurred != null)
+                {
+                    ErrorOccurred.Invoke(this, new ErrorEventArgs("Error while capturing images"));
+                }
+            }
+            finally
+            {
+                //Always re-arm the trigger after shooting
+                hardware.TriggerControl.Unlock(lockId);
+            }
 		}
 
         #region IDisposable Implementation

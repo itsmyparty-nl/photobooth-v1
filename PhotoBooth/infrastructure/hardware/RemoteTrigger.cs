@@ -18,6 +18,7 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using com.prodg.photobooth.common;
 using com.prodg.photobooth.infrastructure.command;
@@ -32,7 +33,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
         Released,
         Armed,
     }
-    
+
     /// <summary>
     /// The remote trigger
     /// <para>
@@ -48,9 +49,16 @@ namespace com.prodg.photobooth.infrastructure.hardware
         private readonly Command command;
         private readonly string triggerContext;
         private TriggerState currentState;
-        private bool locked;
+        private readonly Random lockIdGenerator;
 
-        /// <summary>
+        private readonly List<int> lockQueue;
+
+        private bool Locked
+        {
+            get { return lockQueue.Count > 0; }
+        }
+
+    /// <summary>
         /// C'tor
         /// </summary>
         public RemoteTrigger(Command command,
@@ -58,10 +66,13 @@ namespace com.prodg.photobooth.infrastructure.hardware
         {
             Id = command.ToString();
             triggerContext = ((int) command).ToString(CultureInfo.InvariantCulture);
+            lockQueue = new List<int>();
+            lockIdGenerator = new Random();
             this.command = command;
             this.commandReceiver = commandReceiver;
             this.commandTransmitter = commandTransmitter;
             this.logger = logger;
+
         }
 
         #region IRemoteControl Members
@@ -73,7 +84,10 @@ namespace com.prodg.photobooth.infrastructure.hardware
             if (!ChangeState(TriggerState.Armed)) return;
             
             commandReceiver.CommandReceived += OnCommandReceived;
-            commandTransmitter.SendCommand(Command.PrepareControl, triggerContext);
+            if (!Locked)
+            {
+                commandTransmitter.SendCommand(Command.PrepareControl, triggerContext);
+            }
         }
 
         public void Release()
@@ -81,32 +95,37 @@ namespace com.prodg.photobooth.infrastructure.hardware
             if (!ChangeState(TriggerState.Released)) return;
             
             commandReceiver.CommandReceived -= OnCommandReceived;
-            commandTransmitter.SendCommand(Command.ReleaseControl, triggerContext);
+            if (!Locked)
+            {
+                commandTransmitter.SendCommand(Command.ReleaseControl, triggerContext);
+            }
         }
 
-        public void Lock()
+        public int Lock(bool indicateLock)
         {
-            if (locked)
+            //first send a release to the control to make sure any active component on the remote side is
+            //gracefully stopped. Note that this does not actually release the control!
+            commandTransmitter.SendCommand(Command.ReleaseControl, triggerContext);
+
+            if (indicateLock)
+            {
+                commandTransmitter.SendCommand(Command.LockControl, triggerContext);
+            }
+
+            var lockId = lockIdGenerator.Next();
+            lockQueue.Add(lockId);
+            return lockId;
+        }
+
+        public void Unlock(int lockId)
+        {
+            if (!lockQueue.Contains(lockId))
             {
                 logger.LogDebug(String.Format(CultureInfo.InvariantCulture,
-                                                "RemoteControl.{0}: trying to lock twice, ignored.", Id));
+                    "RemoteControl.{0}: trying to unlock with non-locked id ({1})", Id, lockId));
                 return;
             }
             
-            commandTransmitter.SendCommand(Command.ReleaseControl, triggerContext);
-            commandTransmitter.SendCommand(Command.LockControl, triggerContext);
-            locked = true;
-        }
-
-        public void Unlock()
-        {
-            if (!locked)
-            {
-                logger.LogDebug(String.Format(CultureInfo.InvariantCulture,
-                                                "RemoteControl.{0}: trying to unlock twice, ignored.", Id));
-                return;
-            }
-
             commandTransmitter.SendCommand(Command.UnlockControl, triggerContext);
             switch (currentState)
             {
@@ -119,7 +138,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
                 default:
                     throw new NotSupportedException("TriggerState not supported: " + currentState);
             }
-            locked = false;
+            lockQueue.Remove(lockId);
         }
 
         public event EventHandler<TriggerControlEventArgs> Fired;
@@ -129,7 +148,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
         private void OnCommandReceived(object sender, CommandReceivedEventArgs e)
         {
             //Only handle a single button type: the one that's configured
-            if (locked)
+            if (Locked)
             {
                 logger.LogDebug(String.Format(CultureInfo.InvariantCulture,
                                             "RemoteControl.{0}: Ignoring received command due to lock", Id));
@@ -186,7 +205,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
         public void Initialize()
         {
             currentState = TriggerState.Released;
-            locked = false;
+            lockQueue.Clear();
 
             //Subscribe to the specific command handled by this control
             commandReceiver.Subscribe(command);
@@ -197,7 +216,6 @@ namespace com.prodg.photobooth.infrastructure.hardware
             //First release
             Release();
 
-            //Do nothing yet
             commandReceiver.UnSubscribe(command);
         }
 

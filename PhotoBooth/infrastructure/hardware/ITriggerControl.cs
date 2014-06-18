@@ -39,9 +39,9 @@ namespace com.prodg.photobooth.infrastructure.hardware
 		
 		void Release();
 
-	    void Lock();
+	    int Lock(bool indicateLock);
 
-	    void Unlock();
+	    void Unlock(int lockId);
 		
 		event EventHandler<TriggerControlEventArgs> Fired;
 	}
