@@ -67,9 +67,12 @@ public partial class MainWindow: Gtk.Window
 		camera.BatteryWarning += OnCameraBatteryWarning;
 		var printer = new NetPrinter (settings, logger);
 		var triggerControl = new RemoteTrigger (Command.Trigger, commandMessenger, commandMessenger, logger);
-		var printControl = new RemoteTrigger (Command.Print, commandMessenger, commandMessenger, logger);
-		var printTwiceControl = new RemoteTrigger (Command.PrintTwice, commandMessenger, commandMessenger, logger);
-		var powerControl = new RemoteTrigger (Command.Power, commandMessenger, commandMessenger, logger);
+		//var printControl = new RemoteTrigger (Command.Print, commandMessenger, commandMessenger, logger);
+		//var printTwiceControl = new RemoteTrigger (Command.PrintTwice, commandMessenger, commandMessenger, logger);
+        var printControl = new TriggerControlStub(Command.Print.ToString(), 300, logger);
+        var printTwiceControl = new TriggerControlStub(Command.PrintTwice.ToString(), null, logger);
+		
+        var powerControl = new RemoteTrigger (Command.Power, commandMessenger, commandMessenger, logger);
 		hardware = new Hardware (camera, printer, triggerControl, printControl, printTwiceControl,
 			                      powerControl, logger);
 

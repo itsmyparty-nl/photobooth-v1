@@ -109,6 +109,7 @@
     <Compile Include="infrastructure\hardware\IPrinter.cs" />
     <Compile Include="infrastructure\hardware\PrinterStub.cs" />
     <Compile Include="infrastructure\hardware\NetPrinter.cs" />
+    <Compile Include="infrastructure\hardware\TriggerControlStub.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
