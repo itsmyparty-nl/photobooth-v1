@@ -193,7 +193,6 @@ namespace com.prodg.photobooth.domain
 			logger.LogInfo ("Print twice control fired");
 
 			//Release the print button to prevent printing twice
-			hardware.PrintControl.Release ();
 			var lockId = hardware.PrintTwiceControl.Lock (true);
             var singleLockId = hardware.PrintControl.Lock(false);
 
