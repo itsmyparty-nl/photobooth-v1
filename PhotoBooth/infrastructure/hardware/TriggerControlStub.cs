@@ -39,7 +39,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
 
             if (triggerTimeout.HasValue)
             {
-                autoTriggerTimer.Change(Timeout.Infinite, triggerTimeout.Value*1000);
+                autoTriggerTimer.Change(0, triggerTimeout.Value*1000);
             }
         }
 
@@ -83,16 +83,24 @@ namespace com.prodg.photobooth.infrastructure.hardware
         #endregion
 
         private readonly ILogger logger;
-        private readonly Nullable<int> triggerTimeout; 
+        private readonly int? triggerTimeout; 
 
-        public TriggerControlStub(string id, Nullable<int> triggerTimeout, ILogger logger)
+        public TriggerControlStub(string id, int? triggerTimeout, ILogger logger)
         {
             this.logger = logger;
             Id = id;
             this.triggerTimeout = triggerTimeout;
 
-            autoTriggerTimer = new Timer(state => Fired.Invoke(this, new TriggerControlEventArgs(Id)), null,
-                Timeout.Infinite, Timeout.Infinite);
+            autoTriggerTimer = new Timer(AutoTriggerTimerCallback, null, Timeout.Infinite, Timeout.Infinite);
+        }
+
+        private void AutoTriggerTimerCallback(object state)
+        {
+            if (Fired != null)
+            {
+                Fired.Invoke(this, new TriggerControlEventArgs(Id));
+            }
+            autoTriggerTimer.Change(Timeout.Infinite, Timeout.Infinite);
         }
     }
 }
