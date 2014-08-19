@@ -39,7 +39,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
 
             if (triggerTimeout.HasValue)
             {
-                autoTriggerTimer.Change(0, triggerTimeout.Value*1000);
+                autoTriggerTimer.Change(triggerTimeout.Value * 1000, Timeout.Infinite);
             }
         }
 
