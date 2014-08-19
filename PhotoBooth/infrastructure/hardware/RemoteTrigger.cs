@@ -209,7 +209,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
 
             //Subscribe to the specific command handled by this control
             commandReceiver.Subscribe(command);
-            commandTransmitter.SendCommand(Command.ReleaseControl, triggerControl);
+            commandTransmitter.SendCommand(Command.ReleaseControl, triggerContext);
         }
 
         public void DeInitialize()
