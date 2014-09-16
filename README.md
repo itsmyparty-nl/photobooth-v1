@@ -68,11 +68,12 @@ The arduino code has been tested on the UDOO board / Arduino DUE and on an Ardui
 Note: A serial connection is the typical way to connect the Arduino to the photobooth application, however 'keypress' emulation supported by the arduino Leonardo is also rudimentarily supported!
 
 ### How do I get set up? ###
+WORK IN PROGRESS
 
-T.B.D.
+* Building the project: `xbuild photobooth.sln`
+* Configuration: Edit app.config before building or edit PhotoBoothGui.exe.config or PhotoBoothConsole.exe.config after building
+* Important note on the Dyesub backend: use gutenprint52+usb in the cups URL and Backend=dyesub as configuration parameter. Otherwise the printer won't work!
 
-* Configuration
-* Dependencies
 * Deployment instructions
 
 ### Contribution guidelines ###
