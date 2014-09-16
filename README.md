@@ -17,7 +17,7 @@ the question on WHY .NET :)
 Note: When using this project for your personal photobooth. Be prepared to put in some quality time since setting it up is still quite an effort.
 I will spend some effort in making everything more user-friendly, but since I have a busy day time job and a family it might take a while until it is foolproof. 
 
-Note: A few libraries (CmdMessenger & Libgphoto2) are currently integrated in the project as source code. This needs to be cleaned up and changes and additions still need to be submitted to their respectful owners. Just so you know that I'm not trying to take credit for your code.
+Note: A few libraries (CmdMessenger & Libgphoto2) are currently integrated in the project as source code. This needs to be cleaned up and changes and additions still need to be submitted to their respectful owners. Just so you know that I'm not trying to take credit for your code. Other dead code is still also in the repository. This needs to be cleaned up as well!
 
 ### Big thank you ###
 * To the Arduino people: Without Arduino I never would have used micro controllers! Thanks for starting the open-source hardware madness!
