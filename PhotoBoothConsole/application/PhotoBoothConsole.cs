@@ -20,10 +20,7 @@
 using System;
 using System.Globalization;
 using System.Threading;
-using com.prodg.photobooth.common;
-using com.prodg.photobooth.config;
 using com.prodg.photobooth.domain;
-using com.prodg.photobooth.infrastructure.command;
 using com.prodg.photobooth.infrastructure.hardware;
 
 namespace com.prodg.photobooth.application
@@ -36,45 +33,15 @@ namespace com.prodg.photobooth.application
         private static readonly ManualResetEvent ShutdownRequested = new ManualResetEvent(false);
         
         public static void Main (string[] args)
-		{
-		    //Instantiate all classes
-			ILogger logger = new NLogger();
-			ISettings settings = new Settings(logger);
-
-            using (var camera = new Camera(logger))
-            using (var commandMessenger = new CommandMessengerTransceiver(logger, settings))
-            using (var consoleCommandReceiver = new ConsoleCommandReceiver(logger))
+        {
+            using (var photoBooth = new PhotoBooth())
             {
-                camera.BatteryWarning += OnCameraBatteryWarning;
-                var printer = new NetPrinter(settings, logger);
-                var triggerControl = new RemoteTrigger(Command.Trigger, commandMessenger, commandMessenger, logger);
-                var printControl = new RemoteTrigger(Command.Print, commandMessenger, commandMessenger, logger);
-                var printTwiceControl = new RemoteTrigger(Command.PrintTwice, commandMessenger, commandMessenger, logger);
-                var powerControl = new RemoteTrigger(Command.Power, consoleCommandReceiver, commandMessenger, logger);
-                IHardware hardware = new Hardware(camera, printer, triggerControl, printControl, printTwiceControl,
-                    powerControl, logger);
-
-                IImageProcessor imageProcessor = new CollageImageProcessor(logger, settings);
-                IPhotoBoothService photoBoothService = new PhotoBoothService(hardware, imageProcessor, logger, settings);
-                IPhotoBoothModel photoBooth = new PhotoBoothModel(photoBoothService, hardware, logger);
-
-                //Subscribe to the shutdown requested event 
-                photoBooth.ShutdownRequested += (sender, eventArgs) => ShutdownRequested.Set();
-
-                //Start
-                commandMessenger.Initialize();
-                consoleCommandReceiver.Initialize();
-                photoBooth.Start();
-                
-                //Wait until the photobooth is finished
-                ShutdownRequested.WaitOne();
-                
-                //Stop
-                photoBooth.Stop();
-                consoleCommandReceiver.DeInitialize();
-                commandMessenger.DeInitialize();
+                photoBooth.Hardware.Camera.BatteryWarning += OnCameraBatteryWarning;
+                //Wait for a shutdow trigger
+                photoBooth.ShutdownRequested.WaitOne();
+                photoBooth.Hardware.Camera.BatteryWarning -= OnCameraBatteryWarning;
             }
-		}
+        }
 
         static void OnCameraBatteryWarning(object sender, CameraBatteryWarningEventArgs e)
         {

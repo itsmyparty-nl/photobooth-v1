@@ -18,9 +18,11 @@
 #endregion
 
 using System;
+using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
 using com.prodg.photobooth.common;
+using com.prodg.photobooth.config;
 using com.prodg.photobooth.infrastructure.hardware;
 
 namespace com.prodg.photobooth.domain
@@ -35,6 +37,7 @@ namespace com.prodg.photobooth.domain
         private readonly IHardware hardware;
         private readonly IPhotoBoothService service;
         private readonly SemaphoreSlim sessionLock;
+	    private readonly ISettings settings;
 		private PhotoSession currentSession;
 
         /// <summary>
@@ -55,12 +58,14 @@ namespace com.prodg.photobooth.domain
         /// <param name="service"></param>
         /// <param name="hardware"></param>
         /// <param name="logger"></param>
-        public PhotoBoothModel(IPhotoBoothService service, IHardware hardware, ILogger logger)
+        /// <param name="settings"></param>
+        public PhotoBoothModel(IPhotoBoothService service, IHardware hardware, ILogger logger, ISettings settings)
         {
             this.hardware = hardware;
             this.logger = logger;
             this.service = service;
-			sessionLock = new SemaphoreSlim (1);
+            this.settings = settings;
+            sessionLock = new SemaphoreSlim (1);
 
             currentSession = null;
         }
@@ -70,7 +75,8 @@ namespace com.prodg.photobooth.domain
         /// </summary>
         public void Start()
         {
-            logger.LogInfo("Starting Photobooth application model");
+            logger.LogInfo(string.Format(CultureInfo.InvariantCulture,
+                "Starting Photobooth application model for event {0}", settings.EventId));
 
             //Acquire the hardware
             hardware.Acquire();
@@ -170,7 +176,7 @@ namespace com.prodg.photobooth.domain
                 }
 
                 //Wait until releasing the control to show that printing is busy
-                await Task.Delay(TimeSpan.FromSeconds(45));
+                await Task.Delay(TimeSpan.FromSeconds(settings.PrintDurationMs));
             }
             catch (Exception ex)
             {
@@ -221,7 +227,7 @@ namespace com.prodg.photobooth.domain
                     sessionLock.Release();
                 }
                 //Wait until releasing the control to show that printing is busy
-                await Task.Delay(TimeSpan.FromSeconds(90));
+                await Task.Delay(TimeSpan.FromMilliseconds(settings.PrintDurationMs*2));
             }
             catch (Exception ex)
             {
@@ -259,13 +265,21 @@ namespace com.prodg.photobooth.domain
                         currentSession.Dispose();
                         currentSession = null;
                     }
-                    await Task.Delay(TimeSpan.FromSeconds(5));
-
+                    //Wait before taking the first picture if configured
+                    if (settings.TriggerDelayMs > 0)
+                    {
+                        await Task.Delay(TimeSpan.FromMilliseconds(settings.TriggerDelayMs));
+                    }
                     //Take pictures and add to the queue
                     currentSession = await service.Capture();
 
                     if (currentSession != null && currentSession.ResultImage != null)
                     {
+                        //Save the session for later use (e.g. offloading) if configured
+                        if (settings.SaveSessions)
+                        {
+                            await service.Save(currentSession);
+                        }
                         //Afer capturing we're ready for printing or for another shoot
                         hardware.PrintControl.Arm();
                         hardware.PrintTwiceControl.Arm();

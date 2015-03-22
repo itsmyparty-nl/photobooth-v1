@@ -90,6 +90,17 @@ namespace com.prodg.photobooth.config
         int PrintMarginLeft { get; }
         int PrintMarginBottom { get; }
         int PrintMarginRight { get; }
+
+        int PrintDurationMs { get; }
 		#endregion
+
+        #region Save & Offload
+        string EventId { get; }
+        bool SaveSessions { get; }
+        bool OffloadSessions { get; }
+        string OffloadAddress { get; }
+        #endregion
+
+        int TriggerDelayMs { get; }
     }
 }

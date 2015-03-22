@@ -20,10 +20,12 @@
 using System;
 using System.Drawing;
 using System.Globalization;
+using System.IO;
 using System.Threading.Tasks;
 using com.prodg.photobooth.common;
 using com.prodg.photobooth.config;
 using com.prodg.photobooth.infrastructure.hardware;
+using com.prodg.photobooth.infrastructure.serialization;
 
 namespace com.prodg.photobooth.domain
 {
@@ -64,7 +66,8 @@ namespace com.prodg.photobooth.domain
         private readonly ILogger logger;
         private readonly IHardware hardware;
         private readonly IImageProcessor imageProcessor;
-        private readonly ISettings settings;
+        private readonly IStreamSerializer serializer;
+        private readonly PhotoSessionFactory sessionFactory;
 
         public event EventHandler<PictureAddedEventArgs> PictureAdded;
 
@@ -73,14 +76,16 @@ namespace com.prodg.photobooth.domain
         /// </summary>
         /// <param name="hardware"></param>
         /// <param name="imageProcessor"></param>
+        /// <param name="serializer"></param>
         /// <param name="logger"></param>
         /// <param name="settings"></param>
-        public PhotoBoothService(IHardware hardware, IImageProcessor imageProcessor, ILogger logger, ISettings settings)
+        public PhotoBoothService(IHardware hardware, IImageProcessor imageProcessor, IStreamSerializer serializer, ILogger logger, ISettings settings)
         {
             this.hardware = hardware;
             this.logger = logger;
-            this.settings = settings;
+            this.serializer = serializer;
             this.imageProcessor = imageProcessor;
+            sessionFactory = new PhotoSessionFactory(settings);
         }
 
         /// <summary>
@@ -89,13 +94,13 @@ namespace com.prodg.photobooth.domain
         /// <returns>The session containing the captured and processed images</returns>
         public async Task<PhotoSession> Capture()
 		{
-			logger.LogInfo ("Start Capturing images");
+            var session = sessionFactory.CreateSession();
+            logger.LogInfo(string.Format(CultureInfo.InvariantCulture, "Start Capturing images for event {0}, session {1}",
+                session.EventId, session.Id));
                 
 			return await Task.Run (() => {
 				try {
 					int failureCount = 0;
-
-                    var session = new PhotoSession (settings);
 
 					while (session.ImageCount < imageProcessor.RequiredImages && failureCount < 10) {
 						string imagePath = session.GetNextImagePath ();
@@ -149,5 +154,29 @@ namespace com.prodg.photobooth.domain
                 }
             });
 		}
+
+        /// <summary>
+        /// Save a photo session
+        /// </summary>
+        /// <param name="session"></param>
+        public async Task Save(PhotoSession session)
+        {
+            logger.LogInfo(string.Format(CultureInfo.InvariantCulture, "Start saving session {0}", session.StoragePath));
+
+            await Task.Run(() =>
+            {
+                try
+                {
+                    using (var fileStream = File.Create(Path.Combine(session.StoragePath, "session." + serializer.Type)))
+                    {
+                        serializer.Serialize(fileStream, session);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    logger.LogException("Error while saving session", ex);
+                }
+            });
+        }
     }
 }

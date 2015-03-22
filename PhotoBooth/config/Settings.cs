@@ -33,7 +33,7 @@ namespace com.prodg.photobooth.config
     /// the settings from the application.
     /// </para> 
     /// </summary>
-    public class Settings: ISettings
+    public class Settings : ISettings
     {
         #region Setting key definitions
 
@@ -46,12 +46,17 @@ namespace com.prodg.photobooth.config
         private const string CollageScalePercentageKey = "CollageScalePercentage";
         private const string CollagePaddingPixelsKey = "CollagePaddingPixels";
         private const string CollageAspectRatioKey = "CollageAspectRatio";
-		private const string PrinterNameKey = "PrinterName";
+        private const string PrinterNameKey = "PrinterName";
         private const string PrintMarginTopKey = "PrintMarginTop";
         private const string PrintMarginLeftKey = "PrintMarginLeft";
         private const string PrintMarginBottomKey = "PrintMarginBottom";
         private const string PrintMarginRightKey = "PrintMarginRight";
-
+        private const string SaveSessionsKey = "SaveSessions";
+        private const string OffloadSessionsKey = "OffloadSessions";
+        private const string OffloadAddressKey = "OffloadAddress";
+        private const string TriggerDelayMsKey = "TriggerDelayMs";
+        private const string PrintDurationMsKey = "PrintDurationMs";
+        private const string EventIdKey = "EventId";
         #endregion
 
         #region ISettings Members
@@ -65,12 +70,18 @@ namespace com.prodg.photobooth.config
         public float CollageScalePercentage { get; private set; }
         public int CollagePaddingPixels { get; private set; }
         public double CollageAspectRatio { get; private set; }
-		public string PrinterName { get; private set; }
+        public string PrinterName { get; private set; }
         public int PrintMarginTop { get; private set; }
         public int PrintMarginLeft { get; private set; }
         public int PrintMarginBottom { get; private set; }
         public int PrintMarginRight { get; private set; }
-
+        public int PrintDurationMs { get; private set; }
+        public bool SaveSessions { get; private set; }
+        public bool OffloadSessions { get; private set; }
+        public string OffloadAddress { get; private set; }
+        public int TriggerDelayMs { get; private set; }
+        public string EventId { get; private set; }
+       
         #endregion
 
         /// <summary>
@@ -79,13 +90,13 @@ namespace com.prodg.photobooth.config
         /// Reads in all settings from the app config file of the current application
         /// </para>
         /// </summary>
-		public Settings(ILogger logger)
+        public Settings(ILogger logger)
         {
             try
             {
                 // Get the AppSettings section.
                 NameValueCollection appSettings =
-                   ConfigurationManager.AppSettings;
+                    ConfigurationManager.AppSettings;
 
                 if (appSettings.Count == 0)
                 {
@@ -102,23 +113,34 @@ namespace com.prodg.photobooth.config
                 CollageScalePercentage = Convert.ToSingle(appSettings.Get(CollageScalePercentageKey));
                 CollagePaddingPixels = Convert.ToInt32(appSettings.Get(CollagePaddingPixelsKey));
                 CollageAspectRatio = Convert.ToDouble(appSettings.Get(CollageAspectRatioKey));
-				PrinterName = appSettings.Get(PrinterNameKey);
+                PrinterName = appSettings.Get(PrinterNameKey);
                 PrintMarginTop = Convert.ToInt32(appSettings.Get(PrintMarginTopKey));
                 PrintMarginLeft = Convert.ToInt32(appSettings.Get(PrintMarginLeftKey));
                 PrintMarginBottom = Convert.ToInt32(appSettings.Get(PrintMarginBottomKey));
                 PrintMarginRight = Convert.ToInt32(appSettings.Get(PrintMarginRightKey));
+                SaveSessions = Convert.ToBoolean(appSettings.Get(SaveSessionsKey));
+                OffloadSessions = Convert.ToBoolean(appSettings.Get(OffloadSessionsKey));
+                OffloadAddress = appSettings.Get(OffloadAddressKey);
+                TriggerDelayMs = Convert.ToInt32(appSettings.Get(TriggerDelayMsKey));
+                PrintDurationMs = Convert.ToInt32(appSettings.Get(PrintDurationMsKey));
+                EventId = appSettings.Get(EventIdKey);
 
-				try
-				{
-				if (!Directory.Exists(StoragePath))
-				{
-						Directory.CreateDirectory(StoragePath);
-				}
-				}
-				catch (Exception ex)
-				{
-					logger.LogException(string.Format(@"Error while creating directory {0}",StoragePath),ex);
-				}
+                // Check consistency
+                if (!SaveSessions && OffloadSessions)
+                {
+                    throw new ConfigurationErrorsException("Save sessions must be enabled when offloading is enabled");
+                }
+                try
+                {
+                    if (!Directory.Exists(StoragePath))
+                    {
+                        Directory.CreateDirectory(StoragePath);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    logger.LogException(string.Format(@"Error while creating directory {0}", StoragePath), ex);
+                }
 
             }
             catch (ConfigurationErrorsException e)

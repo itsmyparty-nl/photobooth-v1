@@ -22,80 +22,50 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Threading.Tasks;
 using System.Globalization;
+using com.prodg.photobooth.config;
 using Gtk;
 using Pango;
 using System.Collections.Generic;
-using com.prodg.photobooth.config;
-using com.prodg.photobooth.infrastructure.command;
-using com.prodg.photobooth.common;
 using com.prodg.photobooth.domain;
 using com.prodg.photobooth.infrastructure.hardware;
 
 
 public partial class MainWindow: Gtk.Window
 {
-	private ILogger logger;
-	private IHardware hardware;
-	private ICamera camera;
-	private IPhotoBoothModel photoBooth;
-	private CommandMessengerTransceiver commandMessenger;
+	private PhotoBooth photoBooth;
 	private Gdk.Cursor invisibleCursor;
 
 	public MainWindow () : base (Gtk.WindowType.Toplevel)
 	{
 		Build ();
 
-		//Instantiate all classes
-		logger = new NLogger ();
-
-		logger.LogInfo ("Creating photobooth GUI application");
 		//Register all unhandled exception handlers
 		AppDomain.CurrentDomain.UnhandledException += HandleUnhandledAppdomainException;
 		GLib.ExceptionManager.UnhandledException += HandleUnhandledGlibException;
 		TaskScheduler.UnobservedTaskException += HandleUnobservedTaskException;
 
-		//Initialize
-		ISettings settings = new com.prodg.photobooth.config.Settings (logger);
+        var photoBooth = new PhotoBooth();
 
 		PreloadImages ();
 		HideCursor ();
 
-		camera = new Camera (logger);
-		commandMessenger = new CommandMessengerTransceiver (logger, settings);
-
-		camera.StateChanged += OnCameraStateChanged;
-		camera.BatteryWarning += OnCameraBatteryWarning;
-		//var printer = new NetPrinter (settings, logger);
-		var printer = new PrinterStub(logger);
-                var triggerControl = new RemoteTrigger (Command.Trigger, commandMessenger, commandMessenger, logger);
-		var printControl = new RemoteTrigger (Command.Print, commandMessenger, commandMessenger, logger);
-		var printTwiceControl = new RemoteTrigger (Command.PrintTwice, commandMessenger, commandMessenger, logger);
-        //var printControl = new TriggerControlStub(Command.Print.ToString(), 300, logger);
-        //var printTwiceControl = new TriggerControlStub(Command.PrintTwice.ToString(), null, logger);
+		photoBooth.Hardware.Camera.StateChanged += OnCameraStateChanged;
+        photoBooth.Hardware.Camera.BatteryWarning += OnCameraBatteryWarning;
 		
-        var powerControl = new RemoteTrigger (Command.Power, commandMessenger, commandMessenger, logger);
-		hardware = new Hardware (camera, printer, triggerControl, printControl, printTwiceControl,
-			                      powerControl, logger);
-
-		IImageProcessor imageProcessor = new CollageImageProcessor (logger, settings);
-		IPhotoBoothService photoBoothService = new PhotoBoothService (hardware, imageProcessor, logger, settings);
-		photoBooth = new PhotoBoothModel (photoBoothService, hardware, logger);
-
-
 		//Subscribe to the shutdown requested event 
-		photoBooth.ShutdownRequested += OnPhotoBoothShutdownRequested; 
-		photoBoothService.PictureAdded += OnPhotoBoothServicePictureAdded;
-        printControl.Fired += OnPrintControlFired;
-        printTwiceControl.Fired += OnPrintTwiceControlFired;
-        triggerControl.Fired += OnTriggerControlFired;
-		photoBooth.ErrorOccurred += OnPhotoBoothErrorOccurred;
+		photoBooth.Model.ShutdownRequested += OnPhotoBoothShutdownRequested; 
+		photoBooth.Service.PictureAdded += OnPhotoBoothServicePictureAdded;
+        photoBooth.Hardware.PrintControl.Fired += OnPrintControlFired;
+        photoBooth.Hardware.PrintTwiceControl.Fired += OnPrintTwiceControlFired;
+        photoBooth.Hardware.TriggerControl.Fired += OnTriggerControlFired;
+        photoBooth.Model.ErrorOccurred += OnPhotoBoothErrorOccurred;
 
 		statusbar1.Push (1, "Waiting for camera");
 
 		imagePhoto.Pixbuf = instructionImages ["instruction"];
 		imageInstruction.Pixbuf = instructionImages ["title"];
 
-		Start ();
+		photoBooth.Start ();
 
 		//textview1.Visible = false;
 		//GtkScrolledWindow.Visible = false;
@@ -130,22 +100,40 @@ public partial class MainWindow: Gtk.Window
 		}
 	}
 
-	private void PreloadImages()
+	private void PreloadImages(ISettings settings)
 	{
 		instructionImages = new Dictionary<string, Gdk.Pixbuf> ();
 		var path = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly ().GetName ().CodeBase).Replace("file:","");
-		var resources = System.IO.Path.Combine(path, "Resources" );
-		instructionImages.Add("title",new Gdk.Pixbuf (System.IO.Path.Combine(resources,"tilte.png")));
-		instructionImages.Add("indicator_1",new Gdk.Pixbuf (System.IO.Path.Combine(resources,"indicator1of4.png")));
-		instructionImages.Add("indicator_2",new Gdk.Pixbuf (System.IO.Path.Combine(resources,"indicator2of4.png")));
-		instructionImages.Add("indicator_3",new Gdk.Pixbuf (System.IO.Path.Combine(resources,"indicator3of4.png")));
-		instructionImages.Add("indicator_4",new Gdk.Pixbuf (System.IO.Path.Combine(resources,"indicator4of4.png")));
-		instructionImages.Add("instruction",new Gdk.Pixbuf (System.IO.Path.Combine(resources,"largeinstruction.png")));
-		instructionImages.Add("finished",new Gdk.Pixbuf (System.IO.Path.Combine(resources,"legend.png")));
-		instructionImages.Add ("ready", new Gdk.Pixbuf (System.IO.Path.Combine (resources, "ready.png")));
-		instructionImages.Add ("empty", new Gdk.Pixbuf (System.IO.Path.Combine (resources, "empty.png")));
-		instructionImages.Add ("error", new Gdk.Pixbuf (System.IO.Path.Combine (resources, "error.png")));
+
+        string eventResources = Path.Combine(path, "Resources", settings.EventId);
+        string defaultResources = Path.Combine(path, "Resources");
+
+        instructionImages.Add("title", new Gdk.Pixbuf(GetResourcePath("tilte.png", eventResources, defaultResources)));
+        instructionImages.Add("indicator_1", new Gdk.Pixbuf(GetResourcePath("indicator1of4.png", eventResources, defaultResources)));
+        instructionImages.Add("indicator_2", new Gdk.Pixbuf(GetResourcePath("indicator2of4.png", eventResources, defaultResources)));
+        instructionImages.Add("indicator_3", new Gdk.Pixbuf(GetResourcePath("indicator3of4.png", eventResources, defaultResources)));
+        instructionImages.Add("indicator_4", new Gdk.Pixbuf(GetResourcePath("indicator4of4.png", eventResources, defaultResources)));
+        instructionImages.Add("instruction", new Gdk.Pixbuf(GetResourcePath("largeinstruction.png", eventResources, defaultResources)));
+        instructionImages.Add("finished", new Gdk.Pixbuf(GetResourcePath("legend.png", eventResources, defaultResources)));
+        instructionImages.Add("ready", new Gdk.Pixbuf(GetResourcePath("ready.png", eventResources, defaultResources)));
+        instructionImages.Add("empty", new Gdk.Pixbuf(GetResourcePath("empty.png", eventResources, defaultResources)));
+        instructionImages.Add("error", new Gdk.Pixbuf(GetResourcePath("error.png", eventResources, defaultResources)));
 	}
+
+    private string GetResourcePath(string fileName, string eventResources, string defaultResources)
+    {
+        string resourcePath = System.IO.Path.Combine(eventResources, fileName);
+        if (!File.Exists(resourcePath))
+        {
+            System.IO.Path.Combine(defaultResources, fileName);
+            if (!File.Exists(resourcePath))
+            {
+                throw new Exception(String.Format(CultureInfo.InvariantCulture, "Default resource for {0} not found",
+                    fileName));
+            }
+        }
+        return resourcePath;
+    }
 
     private void OnPrintControlFired(object sender, TriggerControlEventArgs e)
     {
@@ -171,44 +159,14 @@ public partial class MainWindow: Gtk.Window
 		});
     }
 
-	private void Start()
-	{
-		logger.LogInfo ("PhotoboothGUI.Start()");
-		//Start
-		commandMessenger.Initialize ();
-		photoBooth.Start ();
-	}
-
-	private void Stop ()
-	{
-		logger.LogInfo ("PhotoboothGUI.Stop()");
-		//Stop
-		photoBooth.Stop();
-		commandMessenger.DeInitialize();
-	}
-
 	private void Shutdown()
 	{	
-		logger.LogInfo ("PhotoboothGUI.Shutdown()");
-		Stop ();
+		photoBooth.Stop ();
 		ShowCursor ();
+        
+        photoBooth.Dispose();
 
-		logger.LogInfo ("Disposing hardware");
-		if (photoBooth != null) {
-			photoBooth.Dispose ();
-			photoBooth = null;
-		}
-		if (commandMessenger != null) {
-			commandMessenger.Dispose ();
-			commandMessenger = null;
-		}
-		if (camera != null) {
-			camera.Dispose ();
-			camera = null;
-		}
-
-		logger.LogInfo ("Quitting application");
-		Application.Quit ();
+        Application.Quit ();
 	}
 
 	void HandleUnobservedTaskException (object sender, UnobservedTaskExceptionEventArgs e)
@@ -232,19 +190,26 @@ public partial class MainWindow: Gtk.Window
 
 	private bool HandleUnhandledException(Exception exception, bool tryToRecover)
 	{
-		logger.LogException ("Caught unhandled exception", exception);
-		if (tryToRecover) {
-			try {
-				imagePhoto.Pixbuf = instructionImages["error"];
-				Stop ();
-				Start ();
-				return true;
-			} catch (Exception) {
-				logger.LogException ("Unable to restore application, quitting", exception);
-				return false;
-			}
-		}
-		return false;
+	    if (photoBooth != null)
+	    {
+	        photoBooth.Logger.LogException("Caught unhandled exception", exception);
+	        if (tryToRecover)
+	        {
+	            try
+	            {
+	                imagePhoto.Pixbuf = instructionImages["error"];
+                    photoBooth.Stop();
+                    photoBooth.Start();
+	                return true;
+	            }
+	            catch (Exception)
+	            {
+                    photoBooth.Logger.LogException("Unable to restore application, quitting", exception);
+	                return false;
+	            }
+	        }
+	    }
+	    return false;
 	}
 
 	private void OnPhotoBoothServicePictureAdded (object sender, PictureAddedEventArgs a)
@@ -291,7 +256,7 @@ public partial class MainWindow: Gtk.Window
 	{
 		Gtk.Application.Invoke ((b, c) => {
 			string logString = string.Format (CultureInfo.InvariantCulture, "WARNING BATTERY LOW: {0}%", e.Level);
-			logger.LogWarning (logString);
+            photoBooth.Logger.LogWarning(logString);
 			statusbar1.Push (1, logString);
 		});
 	}

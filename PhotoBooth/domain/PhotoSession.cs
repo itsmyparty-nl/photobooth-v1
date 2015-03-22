@@ -20,42 +20,55 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Globalization;
 using System.IO;
-using com.prodg.photobooth.config;
+using Newtonsoft.Json;
 
 namespace com.prodg.photobooth.domain
 {
     /// <summary>
     /// A single session in which pictures are taken which are processed into a single result image
     /// </summary>
+    [JsonObject(MemberSerialization.OptIn)]
     public class PhotoSession: IDisposable
     {
-        /// <summary>
-        /// Cache the last index for performance, consider an alternate implementation
-        /// </summary>
-        private static int _lastSessionIndex;  
-        
-        private readonly ISettings settings;
-        
+        [JsonProperty]
+        public string EventId { get; private set; }
+
+        [JsonProperty]
+        public string Id { get; private set; }
+
+        [JsonProperty]
         public string StoragePath { get; private set; }
         
+        [JsonProperty]
         public List<Image> Images { get; private set; }
 
+        [JsonProperty]
         public Image ResultImage { get; set; }
 
         public int ImageCount { get { return Images.Count; } }
 
         /// <summary>
-        /// Constructor
+        /// Serialization constructor
         /// </summary>
-        /// <param name="settings"></param>
-        public PhotoSession(ISettings settings)
+        [JsonConstructor]
+        internal PhotoSession()
         {
             Images = new List<Image>();
-            this.settings = settings;
+        }
 
-			StoragePath = PrepareSession();
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="eventId"></param>
+        /// <param name="id"></param>
+        /// <param name="storagePath"></param>
+        public PhotoSession(string eventId, string id, string storagePath)
+            : this()
+        {
+            EventId = eventId;
+            Id = id;
+            StoragePath = storagePath;
         }
 
         public string GetNextImagePath()
@@ -74,37 +87,6 @@ namespace com.prodg.photobooth.domain
 
             return image;
         }
-
-        #region Helper methods
-        
-        private string PrepareSession()
-        {
-            int sessionIndex = GetNextSessionIndex();
-            string storagePath = GetSessionPath(sessionIndex);
-            
-            //Note: do not catch the exceptions since this is inrecoverable
-            Directory.CreateDirectory(storagePath);
-
-            return storagePath;
-        }
-
-        private int GetNextSessionIndex()
-        {
-            _lastSessionIndex++;
-            //Get the next session storage path which is unused
-            while (Directory.Exists(GetSessionPath(_lastSessionIndex)))
-            {
-                _lastSessionIndex++;
-            }
-            return _lastSessionIndex;
-        }
-
-        private string GetSessionPath(int index)
-        {
-            return Path.Combine(settings.StoragePath, index.ToString(CultureInfo.InvariantCulture));
-        }
-
-        #endregion
 
         #region IDisposable Implementation
 

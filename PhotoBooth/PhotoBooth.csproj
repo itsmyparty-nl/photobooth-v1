@@ -70,6 +70,10 @@
     <Optimize>false</Optimize>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Newtonsoft.Json.6.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="NLog">
       <HintPath>..\packages\NLog.2.1.0\lib\net45\NLog.dll</HintPath>
     </Reference>
@@ -88,6 +92,8 @@
     <Compile Include="domain\PhotoBoothService.cs" />
     <Compile Include="domain\PhotoBoothModel.cs" />
     <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="domain\PhotoBooth.cs" />
+    <Compile Include="domain\PhotoSessionFactory.cs" />
     <Compile Include="infrastructure\command\ConsoleCommandReceiver.cs" />
     <Compile Include="infrastructure\command\CommandMessengerTransceiver.cs" />
     <Compile Include="infrastructure\hardware\CameraStub.cs" />
@@ -110,6 +116,8 @@
     <Compile Include="infrastructure\hardware\PrinterStub.cs" />
     <Compile Include="infrastructure\hardware\NetPrinter.cs" />
     <Compile Include="infrastructure\hardware\TriggerControlStub.cs" />
+    <Compile Include="infrastructure\serialization\IStreamSerializer.cs" />
+    <Compile Include="infrastructure\serialization\JsonStreamSerializer.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
