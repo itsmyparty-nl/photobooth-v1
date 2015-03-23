@@ -46,6 +46,8 @@ namespace com.prodg.photobooth.domain
 
         public ILogger Logger { get; private set; }
 
+		public ISettings Settings { get; private set; }
+
         public PhotoBooth()
         {
             //Instantiate all classes
@@ -53,10 +55,10 @@ namespace com.prodg.photobooth.domain
 
             logger.LogInfo("Creating photobooth application");
             
-            ISettings settings = new Settings(logger);
+            Settings = new Settings(logger);
 
             camera = new Camera(logger);
-            commandMessenger = new CommandMessengerTransceiver(logger, settings);
+			commandMessenger = new CommandMessengerTransceiver(logger, Settings);
             consoleReceiver = new ConsoleCommandReceiver(logger);
             ShutdownRequested = new AutoResetEvent(false);
 
@@ -68,9 +70,9 @@ namespace com.prodg.photobooth.domain
             ITriggerControl powerControl = new RemoteTrigger(Command.Power, consoleReceiver, commandMessenger, logger);
 
             //Create a real printer or a stub depending on the settings
-            if (!string.IsNullOrWhiteSpace(settings.PrinterName))
+			if (!string.IsNullOrWhiteSpace(Settings.PrinterName))
             {
-                printer = new NetPrinter(settings, logger);
+				printer = new NetPrinter(Settings, logger);
                 printControl = new RemoteTrigger(Command.Print, commandMessenger, commandMessenger, logger);
                 printTwiceControl = new RemoteTrigger(Command.PrintTwice, commandMessenger, commandMessenger, logger);
             }
@@ -85,11 +87,11 @@ namespace com.prodg.photobooth.domain
                 powerControl, logger);
   
             var serializer = new JsonStreamSerializer();
-            var imageProcessor = new CollageImageProcessor(logger, settings);
+			var imageProcessor = new CollageImageProcessor(logger, Settings);
             
-            Service = new PhotoBoothService(Hardware, imageProcessor, serializer, logger, settings);
+			Service = new PhotoBoothService(Hardware, imageProcessor, serializer, logger, Settings);
 
-            Model = new PhotoBoothModel(Service, Hardware, logger, settings);
+			Model = new PhotoBoothModel(Service, Hardware, logger, Settings);
             //Subscribe to the shutdown requested event 
             Model.ShutdownRequested += (sender, eventArgs) => ShutdownRequested.Set();
         }

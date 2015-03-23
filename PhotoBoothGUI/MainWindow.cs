@@ -46,7 +46,7 @@ public partial class MainWindow: Gtk.Window
 
         var photoBooth = new PhotoBooth();
 
-		PreloadImages ();
+		PreloadImages(photoBooth.Settings);
 		HideCursor ();
 
 		photoBooth.Hardware.Camera.StateChanged += OnCameraStateChanged;
@@ -105,8 +105,8 @@ public partial class MainWindow: Gtk.Window
 		instructionImages = new Dictionary<string, Gdk.Pixbuf> ();
 		var path = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly ().GetName ().CodeBase).Replace("file:","");
 
-        string eventResources = Path.Combine(path, "Resources", settings.EventId);
-        string defaultResources = Path.Combine(path, "Resources");
+		string eventResources = System.IO.Path.Combine(path, "Resources", settings.EventId);
+		string defaultResources = System.IO.Path.Combine(path, "Resources");
 
         instructionImages.Add("title", new Gdk.Pixbuf(GetResourcePath("tilte.png", eventResources, defaultResources)));
         instructionImages.Add("indicator_1", new Gdk.Pixbuf(GetResourcePath("indicator1of4.png", eventResources, defaultResources)));
@@ -266,7 +266,7 @@ public partial class MainWindow: Gtk.Window
 		if (e.NewState)
 		{
 			Gtk.Application.Invoke ((b, c) => {
-				statusbar1.Push (1, hardware.Camera.Id);
+				statusbar1.Push (1, photoBooth.Hardware.Camera.Id);
 			});
 		}
 		else

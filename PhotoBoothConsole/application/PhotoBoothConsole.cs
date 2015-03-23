@@ -30,14 +30,12 @@ namespace com.prodg.photobooth.application
 	/// </summary>
     public static class PhotoBoothConsole
 	{
-        private static readonly ManualResetEvent ShutdownRequested = new ManualResetEvent(false);
-        
         public static void Main (string[] args)
         {
             using (var photoBooth = new PhotoBooth())
             {
                 photoBooth.Hardware.Camera.BatteryWarning += OnCameraBatteryWarning;
-                //Wait for a shutdow trigger
+                //Wait for a shutdown trigger
                 photoBooth.ShutdownRequested.WaitOne();
                 photoBooth.Hardware.Camera.BatteryWarning -= OnCameraBatteryWarning;
             }

@@ -7,7 +7,7 @@
     <widget-library name="glade-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f" />
     <widget-library name="../../bin/debug/PhotoBoothGUI.exe" internal="true" />
   </import>
-  <widget class="Gtk.Window" id="MainWindow" design-size="1303 1051">
+  <widget class="Gtk.Window" id="MainWindow" design-size="1303 1057">
     <property name="MemberName" />
     <property name="Title" translatable="yes">MainWindow</property>
     <property name="WindowPosition">CenterOnParent</property>
@@ -15,6 +15,7 @@
     <child>
       <widget class="Gtk.VBox" id="vbox1">
         <property name="MemberName" />
+        <property name="Spacing">3</property>
         <child>
           <widget class="Gtk.Image" id="imagePhoto">
             <property name="MemberName" />

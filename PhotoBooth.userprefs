@@ -1,10 +1,12 @@
 ﻿<Properties GitUserInfo="UsingGIT">
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|Mixed Platforms" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="PhotoBoothGUI/MainWindow.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="PhotoBoothConsole/application/PhotoBoothConsole.cs">
     <Files>
-      <File FileName="PhotoBooth/domain/CollageImageProcessor.cs" Line="130" Column="1" />
-      <File FileName="PhotoBooth/infrastructure/hardware/NetPrinter.cs" Line="204" Column="15" />
-      <File FileName="PhotoBoothGUI/MainWindow.cs" Line="110" Column="137" />
+      <File FileName="PhotoBooth/domain/CollageImageProcessor.cs" Line="1" Column="1" />
+      <File FileName="PhotoBooth/infrastructure/hardware/NetPrinter.cs" Line="1" Column="1" />
+      <File FileName="PhotoBoothGUI/MainWindow.cs" Line="1" Column="1" />
+      <File FileName="PhotoBooth/domain/PhotoBooth.cs" Line="94" Column="67" />
+      <File FileName="PhotoBoothConsole/application/PhotoBoothConsole.cs" Line="38" Column="38" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
