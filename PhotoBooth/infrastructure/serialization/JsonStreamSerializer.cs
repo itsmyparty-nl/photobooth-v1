@@ -18,6 +18,7 @@
 #endregion
 
 using System.IO;
+using com.prodg.photobooth.common;
 using Newtonsoft.Json;
 
 namespace com.prodg.photobooth.infrastructure.serialization
@@ -25,14 +26,18 @@ namespace com.prodg.photobooth.infrastructure.serialization
     public class JsonStreamSerializer : IStreamSerializer
     {
         private readonly JsonSerializer serializer;
+        private ILogger logger;
 
         public string Type
         {
             get { return "json"; }
         }
 
-        public JsonStreamSerializer()
+        public JsonStreamSerializer(ILogger logger)
         {
+            this.logger = logger;
+            logger.LogDebug("Creating JSon serializer");
+
             serializer = new JsonSerializer
             {
                 DateFormatHandling = DateFormatHandling.IsoDateFormat,
@@ -47,6 +52,8 @@ namespace com.prodg.photobooth.infrastructure.serialization
         
         public void Serialize(Stream stream, object obj)
         {
+            logger.LogDebug("Serializing stream to JSON");
+
             try
             {
                 using (var streamWriter = new StreamWriter(stream))
@@ -63,6 +70,8 @@ namespace com.prodg.photobooth.infrastructure.serialization
 
         public T Deserialize<T>(Stream stream) where T : class
         {
+            logger.LogDebug("Deserializing stream to JSON");
+
             try
             {
                 using (var streamReader = new StreamReader(stream))

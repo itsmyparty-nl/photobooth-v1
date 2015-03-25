@@ -18,23 +18,26 @@
 #endregion
 
 using System;
+using System.Globalization;
 using System.Threading;
 using com.prodg.photobooth.common;
 using com.prodg.photobooth.config;
 using com.prodg.photobooth.infrastructure.command;
 using com.prodg.photobooth.infrastructure.hardware;
 using com.prodg.photobooth.infrastructure.serialization;
+using CommandMessenger.TransportLayer;
 
 namespace com.prodg.photobooth.domain
 {
     /// <summary>
     /// A single session in which pictures are taken which are processed into a single result image
     /// </summary>
-    public class PhotoBooth: IDisposable
+    public class PhotoBooth : IDisposable
     {
         private ICamera camera;
         private CommandMessengerTransceiver commandMessenger;
         private ConsoleCommandReceiver consoleReceiver;
+        private ITransport transport;
 
         public IHardware Hardware { get; private set; }
 
@@ -46,7 +49,7 @@ namespace com.prodg.photobooth.domain
 
         public ILogger Logger { get; private set; }
 
-		public ISettings Settings { get; private set; }
+        public ISettings Settings { get; private set; }
 
         public PhotoBooth()
         {
@@ -54,27 +57,64 @@ namespace com.prodg.photobooth.domain
             ILogger logger = new NLogger();
 
             logger.LogInfo("Creating photobooth application");
-            
+
             Settings = new Settings(logger);
 
             camera = new Camera(logger);
-			commandMessenger = new CommandMessengerTransceiver(logger, Settings);
+
+            CreateTransport(logger);
+
+            //transport = new StubbedTransport ();
+            commandMessenger = new CommandMessengerTransceiver(logger, transport);
             consoleReceiver = new ConsoleCommandReceiver(logger);
             ShutdownRequested = new AutoResetEvent(false);
 
-            IPrinter printer;
             ITriggerControl printControl;
+            ITriggerControl triggerControl = CreateTriggerControl(logger);
             ITriggerControl printTwiceControl;
-
-            ITriggerControl triggerControl = new RemoteTrigger(Command.Trigger, commandMessenger, commandMessenger, logger);
+            IPrinter printer = CreatePrinterControls(logger, out printControl, out printTwiceControl);
             ITriggerControl powerControl = new RemoteTrigger(Command.Power, consoleReceiver, commandMessenger, logger);
 
-            //Create a real printer or a stub depending on the settings
-			if (!string.IsNullOrWhiteSpace(Settings.PrinterName))
+            Hardware = new Hardware(camera, printer, triggerControl, printControl, printTwiceControl,
+                powerControl, logger);
+
+            var serializer = new JsonStreamSerializer(logger);
+            var imageProcessor = new CollageImageProcessor(logger, Settings);
+
+            Service = new PhotoBoothService(Hardware, imageProcessor, serializer, logger, Settings);
+
+            Model = new PhotoBoothModel(Service, Hardware, logger, Settings);
+            //Subscribe to the shutdown requested event 
+            Model.ShutdownRequested += (sender, eventArgs) => ShutdownRequested.Set();
+        }
+
+        private ITriggerControl CreateTriggerControl(ILogger logger)
+        {
+            if (!String.IsNullOrWhiteSpace(Settings.SerialPortName))
             {
-				printer = new NetPrinter(Settings, logger);
-                printControl = new RemoteTrigger(Command.Print, commandMessenger, commandMessenger, logger);
-                printTwiceControl = new RemoteTrigger(Command.PrintTwice, commandMessenger, commandMessenger, logger);
+                return new RemoteTrigger(Command.Trigger, commandMessenger, commandMessenger, logger);
+            }
+            return new RemoteTrigger(Command.Trigger, consoleReceiver, commandMessenger, logger);
+        }
+
+        private IPrinter CreatePrinterControls(ILogger logger, out ITriggerControl printControl,
+            out ITriggerControl printTwiceControl)
+        {
+            IPrinter printer;
+            if (!string.IsNullOrWhiteSpace(Settings.PrinterName))
+            {
+                logger.LogDebug(String.Format(CultureInfo.InvariantCulture, "Creating Printer {0}", Settings.PrinterName));
+                printer = new NetPrinter(Settings, logger);
+                if (!String.IsNullOrWhiteSpace(Settings.SerialPortName))
+                {
+                    printControl = new RemoteTrigger(Command.Print, commandMessenger, commandMessenger, logger);
+                    printTwiceControl = new RemoteTrigger(Command.PrintTwice, commandMessenger, commandMessenger, logger);
+                }
+                else
+                {
+                    printControl = new RemoteTrigger(Command.Print, consoleReceiver, commandMessenger, logger);
+                    printTwiceControl = new RemoteTrigger(Command.PrintTwice, consoleReceiver, commandMessenger, logger);
+                }
             }
             else
             {
@@ -82,18 +122,33 @@ namespace com.prodg.photobooth.domain
                 printControl = new TriggerControlStub(Command.Print.ToString(), 300, logger);
                 printTwiceControl = new TriggerControlStub(Command.PrintTwice.ToString(), null, logger);
             }
+            return printer;
+        }
 
-            Hardware = new Hardware(camera, printer, triggerControl, printControl, printTwiceControl,
-                powerControl, logger);
-  
-            var serializer = new JsonStreamSerializer();
-			var imageProcessor = new CollageImageProcessor(logger, Settings);
-            
-			Service = new PhotoBoothService(Hardware, imageProcessor, serializer, logger, Settings);
+        private void CreateTransport(ILogger logger)
+        {
 
-			Model = new PhotoBoothModel(Service, Hardware, logger, Settings);
-            //Subscribe to the shutdown requested event 
-            Model.ShutdownRequested += (sender, eventArgs) => ShutdownRequested.Set();
+            // Create Serial Port object
+            // Note that for some boards (e.g. Sparkfun Pro Micro) DtrEnable may need to be true.
+            if (string.IsNullOrWhiteSpace(Settings.SerialPortName))
+            {
+                logger.LogDebug(String.Format(CultureInfo.InvariantCulture, "Creating serial transport {0}:{1}:{2}",
+                    Settings.SerialPortName, Settings.SerialPortBaudRate, Settings.SerialPortDtrEnable));
+                transport = new SerialTransport
+                {
+                    CurrentSerialSettings =
+                    {
+                        PortName = Settings.SerialPortName,
+                        BaudRate = Settings.SerialPortBaudRate,
+                        DtrEnable = Settings.SerialPortDtrEnable
+                    }
+                };
+            }
+            else
+            {
+                logger.LogDebug("Creating stubbed transport");
+                transport = new StubbedTransport();
+            }
         }
 
         /// <summary>
@@ -122,65 +177,63 @@ namespace com.prodg.photobooth.domain
 
         #region IDisposable Implementation
 
-		bool disposed;
+        private bool disposed;
 
-		public void Dispose ()
-		{
-			Dispose (true);
-			GC.SuppressFinalize (this);
-		}
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
 
-		private void Dispose (bool disposing)
-		{
-		    if (!disposed)
-		    {
+        private void Dispose(bool disposing)
+        {
+            if (!disposed)
+            {
                 Logger.LogInfo("Disposing Photobooth application");
-		        if (disposing)
-		        {
-		            // Clean up managed objects
-		            if (camera != null)
-		            {
-		                camera.Dispose();
-		            }
-		            if (commandMessenger != null)
-		            {
-		                commandMessenger.Dispose();
-		            }
-		            if (consoleReceiver != null)
-		            {
-		                consoleReceiver.Dispose();
-		            }
-		            if (Model != null)
-		            {
-		                Model.Dispose();
-		            }
-		            if (ShutdownRequested != null)
-		            {
-		                ShutdownRequested.Dispose();
-		            }
-		        }
-		        camera = null;
+                if (disposing)
+                {
+                    // Clean up managed objects
+                    if (camera != null)
+                    {
+                        camera.Dispose();
+                    }
+                    if (commandMessenger != null)
+                    {
+                        commandMessenger.Dispose();
+                    }
+                    if (consoleReceiver != null)
+                    {
+                        consoleReceiver.Dispose();
+                    }
+                    if (Model != null)
+                    {
+                        Model.Dispose();
+                    }
+                    if (ShutdownRequested != null)
+                    {
+                        ShutdownRequested.Dispose();
+                    }
+                }
+                camera = null;
                 commandMessenger = null;
                 consoleReceiver = null;
-		        Hardware = null;
-		        Model = null;
-		        Logger = null;
-		        Service = null;
-		        ShutdownRequested = null;
+                Hardware = null;
+                Model = null;
+                Logger = null;
+                Service = null;
+                ShutdownRequested = null;
 
-		        // clean up any unmanaged objects
-		        disposed = true;
-		    }
-		}
+                // clean up any unmanaged objects
+                disposed = true;
+            }
+        }
 
-		~PhotoBooth()
-		{
-			Dispose (false);
-		}
-		
-		#endregion
+        ~PhotoBooth()
+        {
+            Dispose(false);
+        }
 
-
+        #endregion
     }
 }
 

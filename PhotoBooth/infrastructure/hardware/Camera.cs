@@ -45,7 +45,8 @@ namespace com.prodg.photobooth.infrastructure.hardware
 
 		public Camera (ILogger logger)
 		{
-			this.logger = logger;
+            logger.LogDebug("Creating camera interface");
+            this.logger = logger;
 			initialized = false;
             deinitRequested = false;
 		}

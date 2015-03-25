@@ -92,6 +92,7 @@ namespace com.prodg.photobooth.config
         /// </summary>
         public Settings(ILogger logger)
         {
+            logger.LogDebug("Initializing application settings");
             try
             {
                 // Get the AppSettings section.
