@@ -35,8 +35,14 @@ namespace com.prodg.photobooth.application
             using (var photoBooth = new PhotoBooth())
             {
                 photoBooth.Hardware.Camera.BatteryWarning += OnCameraBatteryWarning;
+                
+                photoBooth.Start();
+                
                 //Wait for a shutdown trigger
                 photoBooth.ShutdownRequested.WaitOne();
+
+                photoBooth.Stop();
+
                 photoBooth.Hardware.Camera.BatteryWarning -= OnCameraBatteryWarning;
             }
         }

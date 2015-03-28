@@ -66,6 +66,8 @@ namespace com.prodg.photobooth.domain
             this.service = service;
             this.settings = settings;
             sessionLock = new SemaphoreSlim (1);
+            
+            logger.LogDebug("Creating PhotoBooth Model");
 
             currentSession = null;
         }

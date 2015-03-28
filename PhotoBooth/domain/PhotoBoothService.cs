@@ -81,10 +81,14 @@ namespace com.prodg.photobooth.domain
         /// <param name="settings"></param>
         public PhotoBoothService(IHardware hardware, IImageProcessor imageProcessor, IStreamSerializer serializer, ILogger logger, ISettings settings)
         {
+            
             this.hardware = hardware;
             this.logger = logger;
             this.serializer = serializer;
             this.imageProcessor = imageProcessor;
+
+            logger.LogDebug("Creating PhotoBooth Service");
+
             sessionFactory = new PhotoSessionFactory(settings);
         }
 

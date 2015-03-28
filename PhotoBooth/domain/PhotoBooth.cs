@@ -130,7 +130,7 @@ namespace com.prodg.photobooth.domain
 
             // Create Serial Port object
             // Note that for some boards (e.g. Sparkfun Pro Micro) DtrEnable may need to be true.
-            if (string.IsNullOrWhiteSpace(Settings.SerialPortName))
+            if (!string.IsNullOrWhiteSpace(Settings.SerialPortName))
             {
                 logger.LogDebug(String.Format(CultureInfo.InvariantCulture, "Creating serial transport {0}:{1}:{2}",
                     Settings.SerialPortName, Settings.SerialPortBaudRate, Settings.SerialPortDtrEnable));

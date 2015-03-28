@@ -124,6 +124,7 @@
     <Content Include="PhotoBooth.dll.config">
       <DeployService-Deploy>True</DeployService-Deploy>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
     </Content>
   </ItemGroup>
   <ItemGroup>

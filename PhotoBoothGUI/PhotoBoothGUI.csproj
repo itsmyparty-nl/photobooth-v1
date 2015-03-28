@@ -84,7 +84,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <None Include="..\PhotoBoothConsole\application\App.config">
+      <Link>App.config</Link>
+    </None>
     <None Include="NLog.xsd">
       <SubType>Designer</SubType>
     </None>

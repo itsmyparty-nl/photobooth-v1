@@ -54,6 +54,9 @@ namespace com.prodg.photobooth.domain
         {
             this.logger = logger;
             this.settings = settings;
+
+            logger.LogDebug("Creating CollageImageProcessor");
+            
             //create some image attributes
             attributes = new ImageAttributes();
 
