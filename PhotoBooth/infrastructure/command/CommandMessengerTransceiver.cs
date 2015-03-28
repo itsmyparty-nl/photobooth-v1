@@ -54,8 +54,8 @@ namespace com.prodg.photobooth.infrastructure.command
             this.logger = logger;
             
             // Initialize the command messenger with the Serial Port transport layer
-            messenger = new CmdMessenger(transport);
-           
+            messenger = new CmdMessenger(transport) {PrintLfCr = true};
+
             // Attach to NewLinesReceived for logging purposes
             messenger.NewLineReceived += NewLineReceived;
             // Attach to NewLineSent for logging purposes
