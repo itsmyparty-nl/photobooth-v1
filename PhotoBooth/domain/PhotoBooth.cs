@@ -54,36 +54,36 @@ namespace com.prodg.photobooth.domain
         public PhotoBooth()
         {
             //Instantiate all classes
-            ILogger logger = new NLogger();
+            Logger = new NLogger();
 
-            logger.LogInfo("Creating photobooth application");
+            Logger.LogInfo("Creating photobooth application");
 
-            Settings = new Settings(logger);
+            Settings = new Settings(Logger);
 
-            camera = new Camera(logger);
+            camera = new Camera(Logger);
 
-            CreateTransport(logger);
+            CreateTransport(Logger);
 
             //transport = new StubbedTransport ();
-            commandMessenger = new CommandMessengerTransceiver(logger, transport);
-            consoleReceiver = new ConsoleCommandReceiver(logger);
+            commandMessenger = new CommandMessengerTransceiver(Logger, transport);
+            consoleReceiver = new ConsoleCommandReceiver(Logger);
             ShutdownRequested = new AutoResetEvent(false);
 
             ITriggerControl printControl;
-            ITriggerControl triggerControl = CreateTriggerControl(logger);
+            ITriggerControl triggerControl = CreateTriggerControl(Logger);
             ITriggerControl printTwiceControl;
-            IPrinter printer = CreatePrinterControls(logger, out printControl, out printTwiceControl);
-            ITriggerControl powerControl = new RemoteTrigger(Command.Power, consoleReceiver, commandMessenger, logger);
+            IPrinter printer = CreatePrinterControls(Logger, out printControl, out printTwiceControl);
+            ITriggerControl powerControl = new RemoteTrigger(Command.Power, consoleReceiver, commandMessenger, Logger);
 
             Hardware = new Hardware(camera, printer, triggerControl, printControl, printTwiceControl,
-                powerControl, logger);
+                powerControl, Logger);
 
-            var serializer = new JsonStreamSerializer(logger);
-            var imageProcessor = new CollageImageProcessor(logger, Settings);
+            var serializer = new JsonStreamSerializer(Logger);
+            var imageProcessor = new CollageImageProcessor(Logger, Settings);
 
-            Service = new PhotoBoothService(Hardware, imageProcessor, serializer, logger, Settings);
+            Service = new PhotoBoothService(Hardware, imageProcessor, serializer, Logger, Settings);
 
-            Model = new PhotoBoothModel(Service, Hardware, logger, Settings);
+            Model = new PhotoBoothModel(Service, Hardware, Logger, Settings);
             //Subscribe to the shutdown requested event 
             Model.ShutdownRequested += (sender, eventArgs) => ShutdownRequested.Set();
         }
