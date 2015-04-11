@@ -87,6 +87,7 @@
     <Compile Include="config\Settings.cs" />
     <Compile Include="domain\CollageImageProcessor.cs" />
     <Compile Include="config\ISettings.cs" />
+    <Compile Include="domain\converters\ImageConverter.cs" />
     <Compile Include="domain\IPhotoBoothModel.cs" />
     <Compile Include="domain\IPhotoBoothService.cs" />
     <Compile Include="domain\PhotoBoothService.cs" />

@@ -40,10 +40,10 @@ namespace com.prodg.photobooth.domain
         [JsonProperty]
         public string StoragePath { get; private set; }
         
-        [JsonProperty]
+        [JsonProperty(ItemConverterType = typeof(ImageConverter))]
         public List<Image> Images { get; private set; }
 
-        [JsonProperty]
+        [JsonProperty(ItemConverterType = typeof(ImageConverter))]
         public Image ResultImage { get; set; }
 
         public int ImageCount { get { return Images.Count; } }
@@ -52,7 +52,7 @@ namespace com.prodg.photobooth.domain
         /// Serialization constructor
         /// </summary>
         [JsonConstructor]
-        internal PhotoSession()
+        private PhotoSession()
         {
             Images = new List<Image>();
         }
