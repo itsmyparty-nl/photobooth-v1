@@ -44,7 +44,7 @@ public partial class MainWindow: Gtk.Window
 		GLib.ExceptionManager.UnhandledException += HandleUnhandledGlibException;
 		TaskScheduler.UnobservedTaskException += HandleUnobservedTaskException;
 
-        var photoBooth = new PhotoBooth();
+        photoBooth = new PhotoBooth();
 
 		PreloadImages(photoBooth.Settings);
 		HideCursor ();
