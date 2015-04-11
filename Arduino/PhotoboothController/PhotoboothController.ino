@@ -20,16 +20,16 @@ bool printBtnPushed = false;
 bool printTwiceBtnPushed = false;
 bool powerBtnPushed = false;
 
-#define INPUT_PIN_1 8
-#define INPUT_PIN_2 9
-#define INPUT_PIN_3 10
-#define INPUT_PIN_4 11
+#define INPUT_PIN_1 2
+#define INPUT_PIN_2 4
+#define INPUT_PIN_3 7
+#define INPUT_PIN_4 8
 
 /* In this demonstration a pulsating is implemented. */
-#define OUT_PIN_1  4
+#define OUT_PIN_1  3
 #define OUT_PIN_2  5
 #define OUT_PIN_3  6
-#define OUT_PIN_4  7
+#define OUT_PIN_4  9
 
 #define triggerBtnLed  OUT_PIN_1
 #define powerBtnLed  OUT_PIN_4
