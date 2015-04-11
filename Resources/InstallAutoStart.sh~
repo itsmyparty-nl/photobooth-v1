@@ -1,4 +1,0 @@
-#/bin/sh
-echo installing photobooth autostart script
-mkdir ~/.config/autostart
-cp photobooth.desktop ~/.config/autostart
