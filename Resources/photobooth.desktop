@@ -1,0 +1,4 @@
+[Desktop Entry]
+Name=Photobooth-GUI
+Exec=/home/pi/StartPhotoBooth.sh
+Type=application
