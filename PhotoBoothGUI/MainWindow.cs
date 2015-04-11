@@ -32,7 +32,7 @@ using com.prodg.photobooth.infrastructure.hardware;
 
 public partial class MainWindow: Gtk.Window
 {
-	private PhotoBooth photoBooth;
+	private readonly PhotoBooth photoBooth;
 	private Gdk.Cursor invisibleCursor;
 
 	public MainWindow () : base (Gtk.WindowType.Toplevel)

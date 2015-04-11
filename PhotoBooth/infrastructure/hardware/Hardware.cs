@@ -28,7 +28,6 @@ namespace com.prodg.photobooth.infrastructure.hardware
 		public Hardware(ICamera camera, IPrinter printer, ITriggerControl triggerControl, ITriggerControl printControl,
              ITriggerControl printTwiceControl, ITriggerControl powerControl, ILogger logger)
         {
-            
             Camera = camera;
 			Printer = printer;
             TriggerControl = triggerControl;
