@@ -22,6 +22,7 @@ using System.IO;
 using System.Collections.Specialized;
 using System.Configuration;
 using com.prodg.photobooth.common;
+using com.prodg.photobooth.domain.image;
 
 namespace com.prodg.photobooth.config
 {
@@ -57,6 +58,7 @@ namespace com.prodg.photobooth.config
         private const string TriggerDelayMsKey = "TriggerDelayMs";
         private const string PrintDurationMsKey = "PrintDurationMs";
         private const string EventIdKey = "EventId";
+        private const string FilterKey = "Filter";
         #endregion
 
         #region ISettings Members
@@ -70,6 +72,7 @@ namespace com.prodg.photobooth.config
         public float CollageScalePercentage { get; private set; }
         public int CollagePaddingPixels { get; private set; }
         public double CollageAspectRatio { get; private set; }
+        public FilterType Filter { get; private set; }
         public string PrinterName { get; private set; }
         public int PrintMarginTop { get; private set; }
         public int PrintMarginLeft { get; private set; }
@@ -114,6 +117,7 @@ namespace com.prodg.photobooth.config
                 CollageScalePercentage = Convert.ToSingle(appSettings.Get(CollageScalePercentageKey));
                 CollagePaddingPixels = Convert.ToInt32(appSettings.Get(CollagePaddingPixelsKey));
                 CollageAspectRatio = Convert.ToDouble(appSettings.Get(CollageAspectRatioKey));
+                Filter = (FilterType)Enum.Parse(typeof (FilterType), appSettings.Get(FilterKey));
                 PrinterName = appSettings.Get(PrinterNameKey);
                 PrintMarginTop = Convert.ToInt32(appSettings.Get(PrintMarginTopKey));
                 PrintMarginLeft = Convert.ToInt32(appSettings.Get(PrintMarginLeftKey));

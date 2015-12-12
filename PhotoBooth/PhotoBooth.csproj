@@ -85,6 +85,8 @@
   <ItemGroup>
     <Compile Include="common\NLogger.cs" />
     <Compile Include="config\Settings.cs" />
+    <Compile Include="domain\image\FilterType.cs" />
+    <Compile Include="domain\image\FilterFactory.cs" />
     <Compile Include="domain\CollageImageProcessor.cs" />
     <Compile Include="config\ISettings.cs" />
     <Compile Include="domain\converters\ImageConverter.cs" />

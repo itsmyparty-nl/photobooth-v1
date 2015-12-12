@@ -25,6 +25,7 @@ using System.Drawing.Imaging;
 using System.Globalization;
 using System.IO;
 using com.prodg.photobooth.config;
+using com.prodg.photobooth.domain.image;
 
 namespace com.prodg.photobooth.domain
 {
@@ -35,9 +36,12 @@ namespace com.prodg.photobooth.domain
     {
         private readonly ILogger logger;
         private readonly ISettings settings;
+        private EncoderParameters imageEncoderParameters;
+        private ImageCodecInfo imageCodecInfo;
 
         private readonly Color backgroundColor = Color.White;
-        private const string CollageFilename = "Collage.jpg";
+        private const string CollageFileEndname = "Collage.jpg";
+        private readonly string collageFilename;
         private ImageAttributes attributes;
 
         /// <summary>
@@ -63,16 +67,14 @@ namespace com.prodg.photobooth.domain
             RequiredImages = settings.CollageGridHeight*settings.CollageGridWidth;
 
             //create the grayscale ColorMatrix
-            var colorMatrix = new ColorMatrix(
-                new[]
-                {
-                    new[] {.3f, .3f, .3f, 0, 0},
-                    new[] {.59f, .59f, .59f, 0, 0},
-                    new[] {.11f, .11f, .11f, 0, 0},
-                    new[] {0, 0, 0, 1f, 0},
-                    new[] {0, 0, 0, 0, 1f}
-                });
+            var colorMatrix = FilterFactory.Create(settings.Filter);
+            collageFilename = settings.Filter + CollageFileEndname;
 
+            // EncoderParameter object in the array.
+            imageEncoderParameters = new EncoderParameters(1);
+            imageEncoderParameters.Param[0] = new EncoderParameter(Encoder.Quality, 97L);
+            imageCodecInfo = GetEncoderInfo("image/jpeg");
+   
             //set the color matrix attribute
             attributes.SetColorMatrix(colorMatrix);
         }
@@ -111,7 +113,7 @@ namespace com.prodg.photobooth.domain
                 }
             }
 
-            finalImage.Save(Path.Combine(session.StoragePath, CollageFilename), ImageFormat.Jpeg);
+            finalImage.Save(Path.Combine(session.StoragePath, collageFilename), imageCodecInfo, imageEncoderParameters);
             return finalImage;
         }
 
@@ -166,6 +168,19 @@ namespace com.prodg.photobooth.domain
             return croppedImageHeight;
         }
 
+        private static ImageCodecInfo GetEncoderInfo(String mimeType)
+        {
+            int j;
+            ImageCodecInfo[] encoders;
+            encoders = ImageCodecInfo.GetImageEncoders();
+            for (j = 0; j < encoders.Length; ++j)
+            {
+                if (encoders[j].MimeType == mimeType)
+                    return encoders[j];
+            }
+            return null;
+        }
+
         #region IDisposable Implementation
 
 		bool disposed;
@@ -188,6 +203,12 @@ namespace com.prodg.photobooth.domain
 		               attributes.Dispose();
                        attributes = null;
 		            }
+
+                    if (imageEncoderParameters != null)
+                    {
+                        imageEncoderParameters.Dispose();
+                        imageEncoderParameters = null;
+                    }
 		        }
 		        // clean up any unmanaged objects
 		        disposed = true;

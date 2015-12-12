@@ -17,6 +17,8 @@
 */
 #endregion
 
+using com.prodg.photobooth.domain.image;
+
 namespace com.prodg.photobooth.config
 {
     /// <summary>
@@ -80,6 +82,11 @@ namespace com.prodg.photobooth.config
         /// The aspect ratio of the collage (width divided by height) (default: 3:2)
         /// </summary>
         double CollageAspectRatio { get; }
+
+        /// <summary>
+        /// The filter to apply to the image
+        /// </summary>
+        FilterType Filter { get; }
 
         #endregion
 

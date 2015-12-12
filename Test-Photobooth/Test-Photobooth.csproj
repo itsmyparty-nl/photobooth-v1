@@ -67,16 +67,16 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="resources\img1.JPG">
+    <Content Include="resources\testimages\1.JPG">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="resources\img2.JPG">
+    <Content Include="resources\testimages\2.JPG">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="resources\img3.JPG">
+    <Content Include="resources\testimages\3.JPG">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="resources\img4.JPG">
+    <Content Include="resources\testimages\4.JPG">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
