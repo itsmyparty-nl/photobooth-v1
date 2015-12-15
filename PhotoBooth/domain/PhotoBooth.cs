@@ -22,6 +22,7 @@ using System.Globalization;
 using System.Threading;
 using com.prodg.photobooth.common;
 using com.prodg.photobooth.config;
+using com.prodg.photobooth.domain.image;
 using com.prodg.photobooth.infrastructure.command;
 using com.prodg.photobooth.infrastructure.hardware;
 using com.prodg.photobooth.infrastructure.serialization;
@@ -79,7 +80,7 @@ namespace com.prodg.photobooth.domain
                 powerControl, Logger);
 
             var serializer = new JsonStreamSerializer(Logger);
-            var imageProcessor = new CollageImageProcessor(Logger, Settings);
+            var imageProcessor = new ImageProcessingChain(Logger, Settings);
 
             Service = new PhotoBoothService(Hardware, imageProcessor, serializer, Logger, Settings);
 

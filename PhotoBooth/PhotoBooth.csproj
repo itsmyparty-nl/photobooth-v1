@@ -85,11 +85,16 @@
   <ItemGroup>
     <Compile Include="common\NLogger.cs" />
     <Compile Include="config\Settings.cs" />
+    <Compile Include="domain\image\OverlayImageProcessor.cs" />
+    <Compile Include="domain\image\ImageFileSink.cs" />
+    <Compile Include="domain\image\FilterImageProcessor.cs" />
     <Compile Include="domain\image\FilterType.cs" />
     <Compile Include="domain\image\FilterFactory.cs" />
-    <Compile Include="domain\CollageImageProcessor.cs" />
+    <Compile Include="domain\image\CollageImageProcessor.cs" />
     <Compile Include="config\ISettings.cs" />
     <Compile Include="domain\converters\ImageConverter.cs" />
+    <Compile Include="domain\image\ImageProcessingChain.cs" />
+    <Compile Include="domain\image\ISingleImageProcessor.cs" />
     <Compile Include="domain\IPhotoBoothModel.cs" />
     <Compile Include="domain\IPhotoBoothService.cs" />
     <Compile Include="domain\PhotoBoothService.cs" />
@@ -105,7 +110,7 @@
     <Compile Include="infrastructure\hardware\Camera.cs" />
     <Compile Include="common\ILogger.cs" />
     <Compile Include="common\ConsoleLogger.cs" />
-    <Compile Include="domain\IImageProcessor.cs" />
+    <Compile Include="domain\image\IMultiImageProcessor.cs" />
     <Compile Include="infrastructure\command\ICommandReceiver.cs" />
     <Compile Include="infrastructure\hardware\ITriggerControl.cs" />
     <Compile Include="domain\PhotoSession.cs" />

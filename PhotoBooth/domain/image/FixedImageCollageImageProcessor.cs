@@ -17,35 +17,30 @@
 */
 #endregion
 
-using System.Drawing.Drawing2D;
-using com.prodg.photobooth.common;
-using System.Drawing;
 using System;
+using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Globalization;
-using System.IO;
+using com.prodg.photobooth.common;
 using com.prodg.photobooth.config;
-using com.prodg.photobooth.domain.image;
 
-namespace com.prodg.photobooth.domain
+namespace com.prodg.photobooth.domain.image
 {
     /// <summary>
     /// An image processor processes a collection of images into a single image
     /// </summary>
-    public class CollageImageProcessor : IImageProcessor, IDisposable
+    public class FixedImageCollageImageProcessor : IMultiImageProcessor, IDisposable
     {
         private readonly ILogger logger;
         private readonly ISettings settings;
-        private EncoderParameters imageEncoderParameters;
-        private ImageCodecInfo imageCodecInfo;
+        private Image fixedImage;
 
         private readonly Color backgroundColor = Color.White;
-        private const string CollageFileEndname = "Collage.jpg";
-        private readonly string collageFilename;
         private ImageAttributes attributes;
 
         /// <summary>
-        /// <see cref="IImageProcessor.RequiredImages"/>
+        /// <see cref="IMultiImageProcessor.RequiredImages"/>
         /// </summary>
         public int RequiredImages { get; private set; }
 
@@ -54,29 +49,18 @@ namespace com.prodg.photobooth.domain
         /// </summary>
         /// <param name="logger"></param>
         /// <param name="settings"></param>
-        public CollageImageProcessor(ILogger logger, ISettings settings)
+        public FixedImageCollageImageProcessor(ILogger logger, ISettings settings, Image fixedImage)
         {
             this.logger = logger;
             this.settings = settings;
+            this.fixedImage = fixedImage;
 
-            logger.LogDebug("Creating CollageImageProcessor");
+            logger.LogDebug("Creating FixedImageCollageImageProcessor");
             
             //create some image attributes
             attributes = new ImageAttributes();
 
-            RequiredImages = settings.CollageGridHeight*settings.CollageGridWidth;
-
-            //create the grayscale ColorMatrix
-            var colorMatrix = FilterFactory.Create(settings.Filter);
-            collageFilename = settings.Filter + CollageFileEndname;
-
-            // EncoderParameter object in the array.
-            imageEncoderParameters = new EncoderParameters(1);
-            imageEncoderParameters.Param[0] = new EncoderParameter(Encoder.Quality, 97L);
-            imageCodecInfo = GetEncoderInfo("image/jpeg");
-   
-            //set the color matrix attribute
-            attributes.SetColorMatrix(colorMatrix);
+            RequiredImages = settings.CollageGridHeight*settings.CollageGridWidth-1;
         }
 
         /// <summary>
@@ -84,7 +68,7 @@ namespace com.prodg.photobooth.domain
         /// </summary>
         public Image Process(PhotoSession session)
         {
-            logger.LogInfo(string.Format("Processing {0}: {1} images", session.StoragePath, session.ImageCount));
+            logger.LogInfo(string.Format("Creating a collage of {0}: {1} images", session.StoragePath, session.ImageCount));
             if (session.ImageCount != RequiredImages)
             {
                 throw new InvalidOperationException(String.Format(CultureInfo.InvariantCulture,
@@ -111,9 +95,10 @@ namespace com.prodg.photobooth.domain
                     DrawCroppedImageOnCollage(currentImage, croppedImageHeight, imageIndex, graphics);
                     imageIndex++;
                 }
+                DrawCroppedImageOnCollage(fixedImage, croppedImageHeight, imageIndex, graphics);
             }
 
-            finalImage.Save(Path.Combine(session.StoragePath, collageFilename), imageCodecInfo, imageEncoderParameters);
+
             return finalImage;
         }
 
@@ -168,19 +153,6 @@ namespace com.prodg.photobooth.domain
             return croppedImageHeight;
         }
 
-        private static ImageCodecInfo GetEncoderInfo(String mimeType)
-        {
-            int j;
-            ImageCodecInfo[] encoders;
-            encoders = ImageCodecInfo.GetImageEncoders();
-            for (j = 0; j < encoders.Length; ++j)
-            {
-                if (encoders[j].MimeType == mimeType)
-                    return encoders[j];
-            }
-            return null;
-        }
-
         #region IDisposable Implementation
 
 		bool disposed;
@@ -204,18 +176,18 @@ namespace com.prodg.photobooth.domain
                        attributes = null;
 		            }
 
-                    if (imageEncoderParameters != null)
-                    {
-                        imageEncoderParameters.Dispose();
-                        imageEncoderParameters = null;
-                    }
+		            if (fixedImage != null)
+		            {
+		                fixedImage.Dispose();
+		                fixedImage = null;
+		            }
 		        }
 		        // clean up any unmanaged objects
 		        disposed = true;
 		    }
 		}
 
-        ~CollageImageProcessor()
+        ~FixedImageCollageImageProcessor()
 		{
 			Dispose (false);
 		}

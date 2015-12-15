@@ -1,4 +1,4 @@
-#region PhotoBooth - MIT - (c) 2014 Patrick Bronneberg
+﻿#region PhotoBooth - MIT - (c) 2015 Patrick Bronneberg
 /*
   PhotoBooth - an application to control a DIY photobooth
 
@@ -17,26 +17,19 @@
 */
 #endregion
 
-using System.Drawing;
-
-namespace com.prodg.photobooth.domain
+namespace com.prodg.photobooth.domain.image
 {
-	/// <summary>
-	/// An image processor processes a collection of images into a single image
-	/// </summary>
-	public interface IImageProcessor
-	{
-	    /// <summary>
-	    /// The required number of images to process
-	    /// </summary>
-        int RequiredImages { get; }
-        
-        /// <summary>
-		/// Processes the images into a single image
-		/// </summary>
-		/// <returns>
-		/// The resulting image
-		/// </returns>
-		Image Process(PhotoSession session);
-	}
+    public enum FilterType
+    {
+        Original,
+        DarkGrayscale,
+        Polaroid,
+        DesaturateLuminance,
+        Brownie,
+        VintagePinhole,
+        Kodachrome,
+        Technicolor,
+        Sepia,
+        AlternativePolaroid,
+    }
 }

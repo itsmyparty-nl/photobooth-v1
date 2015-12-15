@@ -24,6 +24,7 @@ using System.IO;
 using System.Threading.Tasks;
 using com.prodg.photobooth.common;
 using com.prodg.photobooth.config;
+using com.prodg.photobooth.domain.image;
 using com.prodg.photobooth.infrastructure.hardware;
 using com.prodg.photobooth.infrastructure.serialization;
 
@@ -65,7 +66,7 @@ namespace com.prodg.photobooth.domain
     {
         private readonly ILogger logger;
         private readonly IHardware hardware;
-        private readonly IImageProcessor imageProcessor;
+        private readonly IMultiImageProcessor imageProcessor;
         private readonly IStreamSerializer serializer;
         private readonly PhotoSessionFactory sessionFactory;
 
@@ -79,7 +80,7 @@ namespace com.prodg.photobooth.domain
         /// <param name="serializer"></param>
         /// <param name="logger"></param>
         /// <param name="settings"></param>
-        public PhotoBoothService(IHardware hardware, IImageProcessor imageProcessor, IStreamSerializer serializer, ILogger logger, ISettings settings)
+        public PhotoBoothService(IHardware hardware, IMultiImageProcessor imageProcessor, IStreamSerializer serializer, ILogger logger, ISettings settings)
         {
             
             this.hardware = hardware;

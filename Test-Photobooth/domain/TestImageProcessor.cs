@@ -48,15 +48,16 @@ namespace Test_Photobooth.domain
 
             settings.Stub(s => s.CollageGridWidth).Return(2);
             settings.Stub(s => s.CollageGridHeight).Return(2);
-            settings.Stub(s => s.CollageScalePercentage).Return(0.5f);
+            settings.Stub(s => s.CollageScalePercentage).Return(1);
             settings.Stub(s => s.CollagePaddingPixels).Return(20);
             settings.Stub(s => s.CollageAspectRatio).Return(1.5);
             settings.Stub(s => s.Filter).Return(filterType);
 
-            var imageProcessor = new CollageImageProcessor(logger, settings);
+            var imageProcessingChain = new ImageProcessingChain(logger, settings);
 
-            string baseFolder = Path.Combine(Directory.GetCurrentDirectory(), "resources");
-            ProcessImages(imageProcessor, baseFolder);
+            string baseFolder = @"C:\Users\nly96192\Downloads\KlimboomKerst2015";
+            //string baseFolder = @"C:\Users\nly96192\Desktop\Test";
+            ProcessImages(imageProcessingChain, baseFolder);
         }
 
         [Test]
@@ -95,7 +96,7 @@ namespace Test_Photobooth.domain
             ProcessImages(imageProcessor, baseFolder);
         }
 
-        private static void ProcessImages(IImageProcessor imageProcessor, string baseFolder)
+        private static void ProcessImages(IMultiImageProcessor imageProcessor, string baseFolder)
         {
             foreach (String imageFolder in Directory.GetDirectories(baseFolder))
             {
