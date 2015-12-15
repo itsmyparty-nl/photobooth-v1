@@ -85,6 +85,7 @@
   <ItemGroup>
     <Compile Include="common\NLogger.cs" />
     <Compile Include="config\Settings.cs" />
+    <Compile Include="domain\image\FixedImageCollageImageProcessor.cs" />
     <Compile Include="domain\image\OverlayImageProcessor.cs" />
     <Compile Include="domain\image\ImageFileSink.cs" />
     <Compile Include="domain\image\FilterImageProcessor.cs" />
