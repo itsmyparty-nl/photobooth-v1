@@ -42,6 +42,7 @@ namespace Test_Photobooth.domain
         [TestCase(FilterType.AlternativePolaroid)]
         [TestCase(FilterType.DarkGrayscale)]
         [TestCase(FilterType.FrozenBlue)]
+        [TestCase(FilterType.FrozenIce)]
         public void TestProcessImages2x2(FilterType filterType)
         {
             ConsoleLogger logger = new ConsoleLogger();

@@ -32,5 +32,6 @@ namespace com.prodg.photobooth.domain.image
         Sepia,
         AlternativePolaroid,
         FrozenBlue,
+        FrozenIce
     }
 }
