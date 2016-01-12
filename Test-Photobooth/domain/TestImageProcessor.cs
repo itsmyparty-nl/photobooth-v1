@@ -41,6 +41,7 @@ namespace Test_Photobooth.domain
         [TestCase(FilterType.DesaturateLuminance)]
         [TestCase(FilterType.AlternativePolaroid)]
         [TestCase(FilterType.DarkGrayscale)]
+        [TestCase(FilterType.FrozenBlue)]
         public void TestProcessImages2x2(FilterType filterType)
         {
             ConsoleLogger logger = new ConsoleLogger();
@@ -55,7 +56,7 @@ namespace Test_Photobooth.domain
 
             var imageProcessingChain = new ImageProcessingChain(logger, settings);
 
-            string baseFolder = @"C:\Users\nly96192\Downloads\KlimboomKerst2015";
+            string baseFolder = @"C:\Users\nly96192\Downloads\HHDxSoftwareInloopdag\";
             //string baseFolder = @"C:\Users\nly96192\Desktop\Test";
             ProcessImages(imageProcessingChain, baseFolder);
         }
