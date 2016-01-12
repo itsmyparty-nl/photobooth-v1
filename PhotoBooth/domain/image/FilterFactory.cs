@@ -158,9 +158,9 @@ namespace com.prodg.photobooth.domain.image
                     return new ColorMatrix(
                         new[]
                         {
-                            new[] {0.8f, 0.2f,     -0.2f, 0, 0},
-                            new[] {0,    1f, 1.25f, 0, 0},
-                            new[] {0,    0.2f , 0.8f, 0, 0},
+                            new[] {0.8f, 0.0f,     -0.1f, 0, 0},
+                            new[] {0,    1f, 1.12f, 0, 0},
+                            new[] {0,    0.1f , 0.9f, 0, 0},
                             new[] {0, 0, 0, 1f, 0},
                             new[] {0.05f, 0.05f, 0.05f, 0, 1f}
                         });
