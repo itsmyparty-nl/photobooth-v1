@@ -59,6 +59,8 @@ namespace com.prodg.photobooth.config
         private const string PrintDurationMsKey = "PrintDurationMs";
         private const string EventIdKey = "EventId";
         private const string FilterKey = "Filter";
+        private const string FixedImageFilenameKey = "FixedImageFilename";
+        private const string OverlayImageFilenameKey = "OverlayImageFilename";
         #endregion
 
         #region ISettings Members
@@ -84,7 +86,9 @@ namespace com.prodg.photobooth.config
         public string OffloadAddress { get; private set; }
         public int TriggerDelayMs { get; private set; }
         public string EventId { get; private set; }
-       
+        public string FixedImageFilename { get; private set; }
+        public string OverlayImageFilename { get; private set; }
+        
         #endregion
 
         /// <summary>
@@ -129,6 +133,8 @@ namespace com.prodg.photobooth.config
                 TriggerDelayMs = Convert.ToInt32(appSettings.Get(TriggerDelayMsKey));
                 PrintDurationMs = Convert.ToInt32(appSettings.Get(PrintDurationMsKey));
                 EventId = appSettings.Get(EventIdKey);
+                FixedImageFilename = appSettings.Get(FixedImageFilenameKey);
+                OverlayImageFilename = appSettings.Get(OverlayImageFilenameKey);
 
                 // Check consistency
                 if (!SaveSessions && OffloadSessions)

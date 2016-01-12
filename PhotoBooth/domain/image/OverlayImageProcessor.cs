@@ -40,7 +40,7 @@ namespace com.prodg.photobooth.domain.image
         /// C'tor
         /// </summary>
         /// <param name="logger"></param>
-        /// <param name="filterType"></param>
+        /// <param name="overlayImageFileName"></param>
         public OverlayImageProcessor(ILogger logger, string overlayImageFileName)
         {
             this.logger = logger;

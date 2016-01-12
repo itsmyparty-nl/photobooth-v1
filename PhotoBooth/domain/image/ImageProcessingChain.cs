@@ -43,14 +43,22 @@ namespace com.prodg.photobooth.domain.image
             {
                 new FilterImageProcessor(logger, settings.Filter)
             };
-            
-            imageCombiner = new CollageImageProcessor(logger, settings);
 
-            imagePostProcessors = new List<ISingleImageProcessor>
+            if (!string.IsNullOrWhiteSpace(settings.FixedImageFilename))
             {
-                new OverlayImageProcessor(logger, "redbutton-logo2.png"),
-                new ImageFileSink(logger, "collage.jpg", 90)
-            };
+                imageCombiner = new FixedImageCollageImageProcessor(logger, settings, settings.FixedImageFilename);
+            }
+            else
+            {
+                imageCombiner = new CollageImageProcessor(logger, settings);
+            }
+
+            imagePostProcessors = new List<ISingleImageProcessor>();
+            if (!string.IsNullOrWhiteSpace(settings.OverlayImageFilename))
+            {
+                imagePostProcessors.Add(new OverlayImageProcessor(logger, settings.OverlayImageFilename));
+            }
+            imagePostProcessors.Add(new ImageFileSink(logger, "collage.jpg", 90));
         }
 
         public Image Process(PhotoSession session)

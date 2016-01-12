@@ -35,6 +35,7 @@ namespace com.prodg.photobooth.domain.image
         private readonly ILogger logger;
         private readonly ISettings settings;
         private Image fixedImage;
+        private readonly string fixedImageFilename;
 
         private readonly Color backgroundColor = Color.White;
         private ImageAttributes attributes;
@@ -49,11 +50,13 @@ namespace com.prodg.photobooth.domain.image
         /// </summary>
         /// <param name="logger"></param>
         /// <param name="settings"></param>
-        public FixedImageCollageImageProcessor(ILogger logger, ISettings settings, Image fixedImage)
+        /// <param name="fixedImageFilename"></param>
+        public FixedImageCollageImageProcessor(ILogger logger, ISettings settings, string fixedImageFilename)
         {
             this.logger = logger;
             this.settings = settings;
-            this.fixedImage = fixedImage;
+            this.fixedImageFilename = fixedImageFilename;
+            fixedImage = Image.FromFile(fixedImageFilename);
 
             logger.LogDebug("Creating FixedImageCollageImageProcessor");
             
@@ -68,7 +71,7 @@ namespace com.prodg.photobooth.domain.image
         /// </summary>
         public Image Process(PhotoSession session)
         {
-            logger.LogInfo(string.Format("Creating a collage of {0}: {1} images", session.StoragePath, session.ImageCount));
+            logger.LogInfo(string.Format("Creating a fixed image collage of {0}: {1} images", session.StoragePath, session.ImageCount));
             if (session.ImageCount != RequiredImages)
             {
                 throw new InvalidOperationException(String.Format(CultureInfo.InvariantCulture,

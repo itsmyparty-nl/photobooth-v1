@@ -84,6 +84,16 @@ namespace com.prodg.photobooth.config
         double CollageAspectRatio { get; }
 
         /// <summary>
+        /// The fixed image to apply as last image in the collage
+        /// </summary>
+        string FixedImageFilename { get; }
+
+        /// <summary>
+        /// The overlay image to apply on top of the image
+        /// </summary>
+        string OverlayImageFilename { get; }
+        
+        /// <summary>
         /// The filter to apply to the image
         /// </summary>
         FilterType Filter { get; }
