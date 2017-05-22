@@ -46,7 +46,11 @@ namespace com.prodg.photobooth.infrastructure.hardware
         public void Release()
         {
             logger.LogDebug(String.Format(CultureInfo.InvariantCulture,
-                                            "TriggerControlStub.{0}: Release called", Id));                
+                                            "TriggerControlStub.{0}: Release called", Id));
+            if (triggerTimeout.HasValue)
+            {
+                autoTriggerTimer.Change(Timeout.Infinite, Timeout.Infinite);
+            }
         }
 
         public int Lock(bool indicateLock)
@@ -90,6 +94,8 @@ namespace com.prodg.photobooth.infrastructure.hardware
             this.logger = logger;
             Id = id;
             this.triggerTimeout = triggerTimeout;
+            logger.LogDebug(String.Format(CultureInfo.InvariantCulture,
+                "TriggerControlStub.{0}: Created with timeout {1}s", Id, triggerTimeout));    
 
             autoTriggerTimer = new Timer(AutoTriggerTimerCallback, null, Timeout.Infinite, Timeout.Infinite);
         }
@@ -98,6 +104,8 @@ namespace com.prodg.photobooth.infrastructure.hardware
         {
             if (Fired != null)
             {
+                logger.LogDebug(String.Format(CultureInfo.InvariantCulture,
+                    "TriggerControlStub.{0}: Triggered", Id));    
                 Fired.Invoke(this, new TriggerControlEventArgs(Id));
             }
             autoTriggerTimer.Change(Timeout.Infinite, Timeout.Infinite);
