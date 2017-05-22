@@ -120,7 +120,7 @@ namespace com.prodg.photobooth.domain
             else
             {
                 printer = new PrinterStub(logger);
-                printControl = new TriggerControlStub(Command.Print.ToString(), 300, logger);
+                printControl = new TriggerControlStub(Command.Print.ToString(), 60, logger);
                 printTwiceControl = new TriggerControlStub(Command.PrintTwice.ToString(), null, logger);
             }
             return printer;
