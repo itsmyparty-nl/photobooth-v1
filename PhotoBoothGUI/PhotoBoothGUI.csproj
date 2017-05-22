@@ -90,10 +90,47 @@
     <None Include="NLog.xsd">
       <SubType>Designer</SubType>
     </None>
+    <None Include="Resources\BruiloftIlse\Sources\error-en.pdn" />
+    <None Include="Resources\BruiloftIlse\Sources\indicator.pdn" />
+    <None Include="Resources\BruiloftIlse\Sources\largeinstruction-en.pdn" />
+    <None Include="Resources\BruiloftIlse\Sources\largeinstruction.pdn" />
+    <None Include="Resources\BruiloftIlse\Sources\legend.pdn" />
+    <None Include="Resources\BruiloftIlse\Sources\ready-en.pdn" />
+    <None Include="Resources\BruiloftIlse\Sources\tilte.pdn" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
     <Content Include="NLog.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\BruiloftIlse\empty.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\BruiloftIlse\error.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\BruiloftIlse\indicator1of4.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\BruiloftIlse\indicator2of4.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\BruiloftIlse\indicator3of4.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\BruiloftIlse\indicator4of4.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\BruiloftIlse\largeinstruction.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\BruiloftIlse\legend.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\BruiloftIlse\ready.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\BruiloftIlse\tilte.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\BruiloftJoliesEnErik\empty.png">
