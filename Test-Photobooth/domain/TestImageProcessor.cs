@@ -107,7 +107,7 @@ namespace Test_Photobooth.domain
                 {
                     using (
                         PhotoSession session = new PhotoSession("Test",
-                            id, imageFolder))
+                            0, imageFolder))
                     {
                         for (int i = 1; i <= imageProcessor.RequiredImages; i++)
                         {
