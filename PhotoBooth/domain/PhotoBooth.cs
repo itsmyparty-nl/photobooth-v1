@@ -20,13 +20,16 @@
 using System;
 using System.Globalization;
 using System.Threading;
+using System.Threading.Tasks;
 using com.prodg.photobooth.common;
 using com.prodg.photobooth.config;
 using com.prodg.photobooth.domain.image;
+using com.prodg.photobooth.domain.offload;
 using com.prodg.photobooth.infrastructure.command;
 using com.prodg.photobooth.infrastructure.hardware;
 using com.prodg.photobooth.infrastructure.serialization;
 using CommandMessenger.TransportLayer;
+using ItsMyParty.Photobooth.Api;
 
 namespace com.prodg.photobooth.domain
 {
@@ -48,6 +51,8 @@ namespace com.prodg.photobooth.domain
 
         public IPhotoBoothService Service { get; private set; }
 
+        public IPhotoboothOffloader Offloader { get; private set; }
+
         public ILogger Logger { get; private set; }
 
         public ISettings Settings { get; private set; }
@@ -56,8 +61,8 @@ namespace com.prodg.photobooth.domain
         {
             //Instantiate all classes
             Logger = new NLogger();
-
             Logger.LogInfo("Creating photobooth application");
+            var serializer = new JsonStreamSerializer(Logger);
 
             Settings = new Settings(Logger);
 
@@ -70,6 +75,19 @@ namespace com.prodg.photobooth.domain
             consoleReceiver = new ConsoleCommandReceiver(Logger);
             ShutdownRequested = new AutoResetEvent(false);
 
+            if (Settings.OffloadSessions)
+            {
+                var sessionApi = new SessionApiApi(Settings.OffloadAddress);
+                var shotApi = new ShotApiApi(Settings.OffloadAddress);
+                var offloadContextFileHandler = new OffloadContextFileHandler(serializer, Logger);
+                Offloader = new PhotoboothOffloader(sessionApi, shotApi, Settings, Logger,
+                    offloadContextFileHandler);
+            }
+            else
+            {
+                Offloader = new OffloadStub();
+            }
+
             ITriggerControl printControl;
             ITriggerControl triggerControl = CreateTriggerControl(Logger);
             ITriggerControl printTwiceControl;
@@ -79,12 +97,12 @@ namespace com.prodg.photobooth.domain
             Hardware = new Hardware(camera, printer, triggerControl, printControl, printTwiceControl,
                 powerControl, Logger);
 
-            var serializer = new JsonStreamSerializer(Logger);
             var imageProcessor = new ImageProcessingChain(Logger, Settings);
 
-            Service = new PhotoBoothService(Hardware, imageProcessor, serializer, Logger, Settings);
+            Service = new PhotoBoothService(Hardware, imageProcessor, serializer, Logger, Settings, Offloader);
 
             Model = new PhotoBoothModel(Service, Hardware, Logger, Settings);
+
             //Subscribe to the shutdown requested event 
             Model.ShutdownRequested += (sender, eventArgs) => ShutdownRequested.Set();
         }
@@ -161,6 +179,10 @@ namespace com.prodg.photobooth.domain
             //Start
             commandMessenger.Initialize();
             consoleReceiver.Initialize();
+            //Initial sweep for offloading data
+            Task.Run(() => Offloader.OffloadEvent())
+                .ContinueWith((t) => Logger.LogInfo($"Offloading sweep finished: {t}"));
+            //Start
             Model.Start();
         }
 

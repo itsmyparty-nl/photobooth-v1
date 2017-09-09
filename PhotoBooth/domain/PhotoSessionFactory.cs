@@ -56,7 +56,7 @@ namespace com.prodg.photobooth.domain
             //Note: do not catch the exceptions since this is irrecoverable
             Directory.CreateDirectory(storagePath);
 
-            return new PhotoSession(settings.EventId, sessionIndex.ToString(CultureInfo.InvariantCulture), storagePath);
+            return new PhotoSession(settings.EventId, sessionIndex, storagePath);
         }
 
         #region Helper methods

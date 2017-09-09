@@ -25,6 +25,7 @@ using System.Threading.Tasks;
 using com.prodg.photobooth.common;
 using com.prodg.photobooth.config;
 using com.prodg.photobooth.domain.image;
+using com.prodg.photobooth.domain.offload;
 using com.prodg.photobooth.infrastructure.hardware;
 using com.prodg.photobooth.infrastructure.serialization;
 
@@ -69,6 +70,7 @@ namespace com.prodg.photobooth.domain
         private readonly IMultiImageProcessor imageProcessor;
         private readonly IStreamSerializer serializer;
         private readonly PhotoSessionFactory sessionFactory;
+        private readonly IPhotoboothOffloader offloader;
 
         public event EventHandler<PictureAddedEventArgs> PictureAdded;
 
@@ -80,13 +82,15 @@ namespace com.prodg.photobooth.domain
         /// <param name="serializer"></param>
         /// <param name="logger"></param>
         /// <param name="settings"></param>
-        public PhotoBoothService(IHardware hardware, IMultiImageProcessor imageProcessor, IStreamSerializer serializer, ILogger logger, ISettings settings)
+        /// <param name="offloader"></param>
+        public PhotoBoothService(IHardware hardware, IMultiImageProcessor imageProcessor, IStreamSerializer serializer, ILogger logger, ISettings settings, IPhotoboothOffloader offloader)
         {
             
             this.hardware = hardware;
             this.logger = logger;
             this.serializer = serializer;
             this.imageProcessor = imageProcessor;
+            this.offloader = offloader;
 
             logger.LogDebug("Creating PhotoBooth Service");
 
@@ -176,6 +180,7 @@ namespace com.prodg.photobooth.domain
                     {
                         serializer.Serialize(fileStream, session);
                     }
+                    offloader.OffloadSession(session.Id);
                 }
                 catch (Exception ex)
                 {

@@ -78,6 +78,7 @@
       <HintPath>..\packages\NLog.2.1.0\lib\net45\NLog.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
@@ -97,7 +98,13 @@
     <Compile Include="domain\image\ImageProcessingChain.cs" />
     <Compile Include="domain\image\ISingleImageProcessor.cs" />
     <Compile Include="domain\IPhotoBoothModel.cs" />
+    <Compile Include="domain\offload\IPhotoboothOffloader.cs" />
     <Compile Include="domain\IPhotoBoothService.cs" />
+    <Compile Include="domain\offload\IOffloadContextFileHandler.cs" />
+    <Compile Include="domain\offload\OffloadContext.cs" />
+    <Compile Include="domain\offload\OffloadContextFileHandler.cs" />
+    <Compile Include="domain\offload\OffloadStub.cs" />
+    <Compile Include="domain\offload\PhotoboothOffloader.cs" />
     <Compile Include="domain\PhotoBoothService.cs" />
     <Compile Include="domain\PhotoBoothModel.cs" />
     <Compile Include="AssemblyInfo.cs" />
@@ -148,6 +155,10 @@
     <ProjectReference Include="..\GPhotoWrapper\GPhotoWrapper.csproj">
       <Project>{E4DCFEAB-A4B4-4EBC-A2AA-E33901C74235}</Project>
       <Name>GPhotoWrapper</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\PhotoboothApiClient\Photobooth-Api-Client.csproj">
+      <Project>{c9cc764c-de7a-4966-91b3-ed8305e61a69}</Project>
+      <Name>Photobooth-Api-Client</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

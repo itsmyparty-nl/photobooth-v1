@@ -61,6 +61,7 @@ namespace com.prodg.photobooth.config
         private const string FilterKey = "Filter";
         private const string FixedImageFilenameKey = "FixedImageFilename";
         private const string OverlayImageFilenameKey = "OverlayImageFilename";
+        private const string ApiEventIdKey = "ApiEventId";
         #endregion
 
         #region ISettings Members
@@ -88,6 +89,7 @@ namespace com.prodg.photobooth.config
         public string EventId { get; private set; }
         public string FixedImageFilename { get; private set; }
         public string OverlayImageFilename { get; private set; }
+        public long ApiEventId { get; private set; }
         
         #endregion
 
@@ -135,6 +137,7 @@ namespace com.prodg.photobooth.config
                 EventId = appSettings.Get(EventIdKey);
                 FixedImageFilename = appSettings.Get(FixedImageFilenameKey);
                 OverlayImageFilename = appSettings.Get(OverlayImageFilenameKey);
+                ApiEventId = Convert.ToInt64(appSettings.Get(ApiEventIdKey));
 
                 // Check consistency
                 if (!SaveSessions && OffloadSessions)

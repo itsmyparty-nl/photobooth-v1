@@ -35,7 +35,7 @@ namespace com.prodg.photobooth.domain
         public string EventId { get; private set; }
 
         [JsonProperty]
-        public string Id { get; private set; }
+        public int Id { get; private set; }
 
         [JsonProperty]
         public string StoragePath { get; private set; }
@@ -63,7 +63,7 @@ namespace com.prodg.photobooth.domain
         /// <param name="eventId"></param>
         /// <param name="id"></param>
         /// <param name="storagePath"></param>
-        public PhotoSession(string eventId, string id, string storagePath)
+        public PhotoSession(string eventId, int id, string storagePath)
             : this()
         {
             EventId = eventId;
