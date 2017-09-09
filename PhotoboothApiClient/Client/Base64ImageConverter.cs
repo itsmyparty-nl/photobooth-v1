@@ -47,7 +47,7 @@ namespace ItsMyParty.Photobooth.Client
         {
             using (var stream = new MemoryStream(buffer))
             {
-                return $"data:{imageFormat};base64,{Convert.ToBase64String(stream.ToArray())}";
+                return string.Format("data:{0};base64,{1}", imageFormat, Convert.ToBase64String(stream.ToArray()));
             }
         }
     }
