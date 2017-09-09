@@ -22,6 +22,7 @@ using System;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Net;
 using com.prodg.photobooth.common;
 using com.prodg.photobooth.config;
 using ItsMyParty.Photobooth.Api;
@@ -46,6 +47,10 @@ namespace com.prodg.photobooth.domain.offload
             this.eventFolder = Path.Combine(settings.StoragePath, settings.EventId);
             this.logger = logger;
             this.offloadContextFileHandler = offloadContextFileHandler;
+            
+            //Allow all SSL certificates
+            ServicePointManager.ServerCertificateValidationCallback +=
+                (sender, certificate, chain, sslPolicyErrors) => true;
         }
 
         public void OffloadEvent()

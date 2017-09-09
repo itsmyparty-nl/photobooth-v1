@@ -73,6 +73,11 @@ WORK IN PROGRESS
 * Building the project: `xbuild photobooth.sln`
 * Configuration: Edit app.config before building or edit PhotoBoothGui.exe.config or PhotoBoothConsole.exe.config after building
 * Important note on the Dyesub backend: use gutenprint52+usb in the cups URL and Backend=dyesub as configuration parameter. Otherwise the printer won't work!
+* In order to offload successfully to https you need to import certificates: `mozroots --import --machine --sync` or 
+```bash
+cd /
+sudo mozroots --import --sync --machine --url "http://hg.mozilla.org/releases/mozilla-release/raw-file/default/security/nss/lib/ckfw/builtins/certdata.txt"
+```
 
 * Deployment instructions
 
