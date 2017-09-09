@@ -30,6 +30,7 @@ using com.prodg.photobooth.infrastructure.hardware;
 using com.prodg.photobooth.infrastructure.serialization;
 using CommandMessenger.TransportLayer;
 using ItsMyParty.Photobooth.Api;
+using ItsMyParty.Photobooth.Client;
 
 namespace com.prodg.photobooth.domain
 {
@@ -77,8 +78,11 @@ namespace com.prodg.photobooth.domain
 
             if (Settings.OffloadSessions)
             {
-                var sessionApi = new SessionApiApi(Settings.OffloadAddress);
-                var shotApi = new ShotApiApi(Settings.OffloadAddress);
+                var config = Configuration.Default;
+                config.ApiClient = new ApiClient(Settings.OffloadAddress);
+                config.Timeout = 20000;
+                var sessionApi = new SessionApiApi(config);
+                var shotApi = new ShotApiApi(config);
                 var offloadContextFileHandler = new OffloadContextFileHandler(serializer, Logger);
                 Offloader = new PhotoboothOffloader(sessionApi, shotApi, Settings, Logger,
                     offloadContextFileHandler);
