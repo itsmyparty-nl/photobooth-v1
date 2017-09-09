@@ -58,14 +58,16 @@ namespace com.prodg.photobooth.domain.offload
             var context = new OffloadContext();
             try
             {
-                if (Directory.EnumerateFiles(folder).Contains(FileName))
+                var contextFile = Path.Combine(folder, FileName);
+                if (File.Exists(contextFile))
                 {
-                    using (var fileStream = File.OpenRead(Path.Combine(folder, FileName)))
+                    using (var fileStream = File.OpenRead(contextFile))
                     {
                         //Load offload status from file
                         context = serializer.Deserialize<OffloadContext>(fileStream);
                     }
                 }
+
             }
             catch (IOException e)
             {

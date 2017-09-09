@@ -176,10 +176,10 @@ namespace com.prodg.photobooth.domain
             {
                 try
                 {
-                    using (var fileStream = File.Create(Path.Combine(session.StoragePath, "session." + serializer.Type)))
-                    {
-                        serializer.Serialize(fileStream, session);
-                    }
+                    // using (var fileStream = File.Create(Path.Combine(session.StoragePath, "session." + serializer.Type)))
+                    // {
+                    //     serializer.Serialize(fileStream, session);
+                    // }
                     offloader.OffloadSession(session.Id);
                 }
                 catch (Exception ex)
