@@ -17,8 +17,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PhotoBoothGUI", "PhotoBooth
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PhotoBoothConsole", "PhotoBoothConsole\PhotoBoothConsole.csproj", "{9308315E-4BBF-458D-BDF9-55D5C4F54884}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PhotoBoothOffloader", "PhotoBoothOffloader\PhotoBoothOffloader.csproj", "{86169A3E-902D-40C2-B704-21B9788B57C7}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Photobooth-Api-Client", "PhotoboothApiClient\Photobooth-Api-Client.csproj", "{C9CC764C-DE7A-4966-91B3-ED8305E61A69}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PhotoUploader", "PhotoBoothUploader\PhotoUploader.csproj", "{45D765F2-9A0F-4804-B733-F3C1DF394B06}"
@@ -109,14 +107,6 @@ Global
 		{9308315E-4BBF-458D-BDF9-55D5C4F54884}.Release|Mixed Platforms.Build.0 = Release|Mixed Platforms
 		{9308315E-4BBF-458D-BDF9-55D5C4F54884}.Release|x86.ActiveCfg = Release|Mixed Platforms
 		{9308315E-4BBF-458D-BDF9-55D5C4F54884}.Release|x86.Build.0 = Release|Mixed Platforms
-		{86169A3E-902D-40C2-B704-21B9788B57C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{86169A3E-902D-40C2-B704-21B9788B57C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{86169A3E-902D-40C2-B704-21B9788B57C7}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{86169A3E-902D-40C2-B704-21B9788B57C7}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{86169A3E-902D-40C2-B704-21B9788B57C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{86169A3E-902D-40C2-B704-21B9788B57C7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{86169A3E-902D-40C2-B704-21B9788B57C7}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{86169A3E-902D-40C2-B704-21B9788B57C7}.Release|x86.ActiveCfg = Release|Any CPU
 		{C9CC764C-DE7A-4966-91B3-ED8305E61A69}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C9CC764C-DE7A-4966-91B3-ED8305E61A69}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C9CC764C-DE7A-4966-91B3-ED8305E61A69}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
