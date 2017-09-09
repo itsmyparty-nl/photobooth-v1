@@ -24,7 +24,6 @@ using System.IO;
 using System.Linq;
 using com.prodg.photobooth.common;
 using com.prodg.photobooth.config;
-using com.prodg.photobooth.domain.offload;
 using ItsMyParty.Photobooth.Api;
 
 namespace com.prodg.photobooth.domain.offload
@@ -68,7 +67,7 @@ namespace com.prodg.photobooth.domain.offload
             var context = offloadContextFileHandler.Load(sessionFolder);
             try
             {
-                var index = Convert.ToInt32(sessionFolder.Replace(eventFolder + @"\", ""));
+                var index = Convert.ToInt32(sessionFolder.Replace(eventFolder+Path.DirectorySeparatorChar, ""));
 
                 SessionDTO session;
                 if (context.EventCreated)
