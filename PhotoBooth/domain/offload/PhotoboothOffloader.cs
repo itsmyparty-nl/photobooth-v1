@@ -87,11 +87,11 @@ namespace com.prodg.photobooth.domain.offload
                 }
 
 
-                foreach (var file in Directory.GetFiles(sessionFolder, "*.jpg"))
+                foreach (var fullFilePath in Directory.GetFiles(sessionFolder, "*.jpg"))
                 {
-                    if (!context.ShotsOffloaded.ContainsKey(file) || context.ShotsOffloaded[file] == false)
+                    if (!context.IsShotOffloaded(fullFilePath))
                     {
-                        var fullFilename = Path.Combine(sessionFolder, file);
+                        var fullFilename = Path.Combine(sessionFolder, fullFilePath);
                         UploadShot(fullFilename, session, context);
                         GC.Collect();
                     }
@@ -130,12 +130,12 @@ namespace com.prodg.photobooth.domain.offload
                 };
 
                 shotApi.CreateEventSessionShot(eventId, session.Index, shot);
-                context.ShotsOffloaded.Add(shotFileName, true);
+                context.ShotOffloadFinished(fullFilename, true);
             }
             catch (Exception e)
             {
                 logger.LogException("Error while offloading shot:" + fullFilename, e);
-                context.ShotsOffloaded.Add(shotFileName, false);
+                context.ShotOffloadFinished(fullFilename, false);
                 context.Errors.Add(e.Message);
             }
         }

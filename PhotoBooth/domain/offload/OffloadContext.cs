@@ -19,6 +19,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using Newtonsoft.Json;
 
 namespace com.prodg.photobooth.domain.offload
@@ -39,6 +40,22 @@ namespace com.prodg.photobooth.domain.offload
         public Dictionary<string, bool> ShotsOffloaded { get; private set; }
 
         [JsonProperty]
-        public List<String> Errors { get; private set; }       
+        public List<String> Errors { get; private set; }
+
+        public bool IsShotOffloaded(string fullFilePath)
+        {
+            var fileName = Path.GetFileName(fullFilePath);  
+            return ShotsOffloaded.ContainsKey(fileName) && ShotsOffloaded[fileName];
+        }
+
+        public void ShotOffloadFinished(string fullFilePath, bool succeeded)
+        {
+            var fileName = Path.GetFileName(fullFilePath);
+            if (ShotsOffloaded.ContainsKey(fileName))
+            {
+                ShotsOffloaded.Remove(fileName);
+            }
+            ShotsOffloaded[fileName] = succeeded;
+        }
     }
 }
