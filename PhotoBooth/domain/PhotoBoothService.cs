@@ -172,7 +172,7 @@ namespace com.prodg.photobooth.domain
         {
             logger.LogInfo(string.Format(CultureInfo.InvariantCulture, "Start saving session {0}", session.StoragePath));
 
-            await Task.Run(() =>
+            Task.Run(() =>
             {
                 try
                 {
