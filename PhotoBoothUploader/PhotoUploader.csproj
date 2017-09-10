@@ -34,6 +34,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="NLog, Version=2.1.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
+      <HintPath>..\packages\NLog.2.1.0\lib\net45\NLog.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
@@ -50,11 +53,16 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\PhotoboothApiClient\Photobooth-Api-Client.csproj">
       <Project>{C9CC764C-DE7A-4966-91B3-ED8305E61A69}</Project>
       <Name>Photobooth-Api-Client</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\PhotoBooth\PhotoBooth.csproj">
+      <Project>{532E283C-98AA-417B-8F31-7BD2DA8EA090}</Project>
+      <Name>PhotoBooth</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -93,6 +93,7 @@ namespace com.prodg.photobooth.domain.offload
                     {
                         var fullFilename = Path.Combine(sessionFolder, file);
                         UploadShot(fullFilename, session, context);
+                        GC.Collect();
                     }
                 }
             }

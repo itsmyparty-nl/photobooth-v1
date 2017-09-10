@@ -1,6 +1,28 @@
-﻿using System;
-using System.IO;
-using System.Linq;
+﻿#region PhotoBooth - MIT - (c) 2017 Patrick Bronneberg
+/*
+  PhotoBooth - an application to control a DIY photobooth
+
+  Permission is hereby granted, free of charge, to any person obtaining
+  a copy of this software and associated documentation files (the
+  "Software"), to deal in the Software without restriction, including
+  without limitation the rights to use, copy, modify, merge, publish,
+  distribute, sublicense, and/or sell copies of the Software, and to
+  permit persons to whom the Software is furnished to do so, subject to
+  the following conditions:
+
+  The above copyright notice and this permission notice shall be
+  included in all copies or substantial portions of the Software.
+  
+  Copyright 2017 Patrick Bronneberg
+*/
+#endregion
+
+using System;
+using System.Threading;
+using com.prodg.photobooth.common;
+using com.prodg.photobooth.config;
+using com.prodg.photobooth.domain.offload;
+using com.prodg.photobooth.infrastructure.serialization;
 using ItsMyParty.Photobooth.Api;
 using ItsMyParty.Photobooth.Client;
 
@@ -8,67 +30,52 @@ namespace PhotoUploader
 {
     class Program
     {
+        public static IPhotoboothOffloader Offloader { get; private set; }
+
+        public static ILogger Logger { get; private set; }
+
+        public static ISettings Settings { get; private set; }
+
+        public static bool ExitRequested { get; private set; }
+
         static void Main(string[] args)
         {
-            if (args == null || args.Length < 1 || string.IsNullOrWhiteSpace(args[0]))
-            {
-                Console.WriteLine("Provide a valid folder as argument!");
-                return;
-            }
-            var eventFolder = args[0];
-            if (!Directory.Exists(eventFolder))
-            {
-                Console.WriteLine("Provided folder does not exist: "+ eventFolder);
-                return;
-            }
-            //var apiUri = "https://photobooth.itsmyparty.nl";
-            var apiUri = "http://localhost:50353";
-            var eventApi = new EventApiApi(apiUri);
-            var sessionApi = new SessionApiApi(apiUri);
-            var shotApi = new ShotApiApi(apiUri);
+            Logger = new NLogger();
+            Logger.LogInfo("[Application Started]");
 
-            int eventId = 1440;
+            Settings = new Settings(Logger);
+            if (!Settings.OffloadSessions)
+            {
+                Logger.LogWarning("Ignoring setting. Offloading sessions anyway");
+            }
 
-            foreach (var subFolder in Directory.EnumerateDirectories(eventFolder).OrderBy(f => f))
+            var serializer = new JsonStreamSerializer(Logger);
+            var config = Configuration.Default;
+            config.ApiClient = new ApiClient(Settings.OffloadAddress);
+            config.Timeout = 20000;
+            var sessionApi = new SessionApiApi(config);
+            var shotApi = new ShotApiApi(config);
+
+            var offloadContextFileHandler = new OffloadContextFileHandler(serializer, Logger);
+            Offloader = new PhotoboothOffloader(sessionApi, shotApi, Settings, Logger,
+                offloadContextFileHandler);
+
+            while (!ExitRequested)
             {
                 try
                 {
-                    var index = Convert.ToInt32(subFolder.Replace(eventFolder + @"\", ""));
-                    var timestamp = Directory.GetCreationTime(subFolder);
-                    var session = new SessionDTO() {Index = index, Timestamp = timestamp, EventId = eventId};
-                    var createdSession = sessionApi.CreateEventSession(eventId, session);
-                    Console.WriteLine("Sweeping folder: " + subFolder);
-                    foreach (var file in Directory.GetFiles(subFolder, "*.jpg"))
-                    {
-                        try
-                        {
-                            var fullFilename = Path.Combine(subFolder, file);
-                            Console.WriteLine("Adding file: "+fullFilename);
-                            var isCollage = file.Contains("collage");
-                            var shot = new ShotDTO() {SessionId = createdSession.Id, IsCollage = isCollage};
-
-                            using (FileStream stream = new FileStream(fullFilename, FileMode.Open))
-                            {
-                                using (MemoryStream ms = new MemoryStream())
-                                {
-                                    stream.CopyTo(ms);
-                                    shot.Image = Base64ImageConverter.ToBase64Jpg(ms.ToArray());
-                                }
-                            }
-
-                            shotApi.CreateEventSessionShot(eventId, createdSession.Index, shot);
-                        }
-                        catch (Exception e)
-                        {
-                            Console.WriteLine("Error while adding file:" + file + ". Exception: " + e.Message);
-                        }
-                    }
+                    Logger.LogInfo("[Offload sweep started]");
+                    Offloader.OffloadEvent();
+                    Logger.LogInfo("[Offload sweep finished]");
+                    Thread.Sleep(60000);
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine("skipping subfolder: "+subFolder+". Exception: "+e.Message);
-                }
+                    Logger.LogException("Error while offloading data", e);
+                    throw;
+                }   
             }
+            Logger.LogInfo("[Application Exit]");
         }
     }
 }
