@@ -69,7 +69,7 @@ namespace com.prodg.photobooth.domain.offload
             }
             catch (Exception e)
             {
-                LogException("Error while offloading session: ", e);
+                logger.LogException("Error while offloading session: ", e);
             }
         }
 
