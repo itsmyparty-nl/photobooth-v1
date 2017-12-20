@@ -64,7 +64,13 @@ namespace com.prodg.photobooth.domain.offload
 
         public void OffloadSession(int sessionIndex)
         {
-            OffloadSessionFolder(Path.Combine(eventFolder, sessionIndex.ToString(CultureInfo.InvariantCulture)));
+            try{
+                OffloadSessionFolder(Path.Combine(eventFolder, sessionIndex.ToString(CultureInfo.InvariantCulture)));
+            }
+            catch (Exception e)
+            {
+                LogException("Error while offloading session: ", e);
+            }
         }
 
         private void OffloadSessionFolder(string sessionFolder)
