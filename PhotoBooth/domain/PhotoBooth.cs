@@ -184,8 +184,8 @@ namespace com.prodg.photobooth.domain
             commandMessenger.Initialize();
             consoleReceiver.Initialize();
             //Initial sweep for offloading data
-            Task.Run(() => Offloader.OffloadEvent())
-                .ContinueWith((t) => Logger.LogInfo(string.Format("Offloading sweep finished: {0}", t)));
+            //Task.Run(() => Offloader.OffloadEvent())
+            //    .ContinueWith((t) => Logger.LogInfo(string.Format("Offloading sweep finished: {0}", t)));
             //Start
             Model.Start();
         }
