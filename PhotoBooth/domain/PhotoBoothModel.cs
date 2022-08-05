@@ -17,13 +17,9 @@
 */
 #endregion
 
-using System;
-using System.Globalization;
-using System.Threading;
-using System.Threading.Tasks;
-using com.prodg.photobooth.common;
 using com.prodg.photobooth.config;
 using com.prodg.photobooth.infrastructure.hardware;
+using Microsoft.Extensions.Logging;
 
 namespace com.prodg.photobooth.domain
 {
@@ -38,7 +34,7 @@ namespace com.prodg.photobooth.domain
         private readonly IPhotoBoothService service;
         private readonly SemaphoreSlim sessionLock;
 	    private readonly ISettings settings;
-		private PhotoSession currentSession;
+		private PhotoSession? currentSession;
 
         /// <summary>
         /// Event to signal that shutdown is requested
@@ -59,7 +55,7 @@ namespace com.prodg.photobooth.domain
         /// <param name="hardware"></param>
         /// <param name="logger"></param>
         /// <param name="settings"></param>
-        public PhotoBoothModel(IPhotoBoothService service, IHardware hardware, ILogger logger, ISettings settings)
+        public PhotoBoothModel(IPhotoBoothService service, IHardware hardware, ILogger<PhotoBoothModel> logger, ISettings settings)
         {
             this.hardware = hardware;
             this.logger = logger;
@@ -77,8 +73,7 @@ namespace com.prodg.photobooth.domain
         /// </summary>
         public void Start()
         {
-            logger.LogInfo(string.Format(CultureInfo.InvariantCulture,
-                "Starting Photobooth application model for event {0}", settings.EventId));
+            logger.LogInformation("Starting Photobooth application model for event {EventId}", settings.EventId);
 
             //Acquire the hardware
             hardware.Acquire();
@@ -99,7 +94,7 @@ namespace com.prodg.photobooth.domain
         /// </summary>
         public void Stop()
         {
-            logger.LogInfo("Stopping Photobooth application model");
+            logger.LogInformation("Stopping Photobooth application model");
 
             //Unsubscribe from all hardware events
             hardware.Camera.StateChanged -= OnCameraStateChanged;
@@ -132,7 +127,7 @@ namespace com.prodg.photobooth.domain
 
         private void OnPowerControlTriggered(object sender, TriggerControlEventArgs e)
         {
-            logger.LogInfo("Power control fired");
+            logger.LogInformation("Power control fired");
 
             try
             {
@@ -143,7 +138,7 @@ namespace com.prodg.photobooth.domain
             catch (Exception ex)
             {
                 //Log the exception
-                logger.LogException("Error while handling shutdown", ex);
+                logger.LogError(ex, "Error while handling shutdown");
                 //Rethrow since no mitigation is possible
                 throw;
             }
@@ -151,7 +146,7 @@ namespace com.prodg.photobooth.domain
 
         private async void OnPrintControlTriggered(object sender, TriggerControlEventArgs e)
 		{
-			logger.LogInfo ("Print control fired");
+			logger.LogInformation("Print control fired");
            
 			//lock both buttons but only indicate that the first is printing
 			var lockId = hardware.PrintControl.Lock (true);
@@ -182,7 +177,7 @@ namespace com.prodg.photobooth.domain
             }
             catch (Exception ex)
             {
-                logger.LogException("Error while printing", ex);
+                logger.LogError(ex, "Error while printing");
                 if (ErrorOccurred != null)
                 {
                     ErrorOccurred.Invoke(this, new ErrorEventArgs("Error while printing"));
@@ -198,7 +193,7 @@ namespace com.prodg.photobooth.domain
 
         private async void OnPrintTwiceControlTriggered(object sender, TriggerControlEventArgs e)
 		{
-			logger.LogInfo ("Print twice control fired");
+			logger.LogInformation("Print twice control fired");
 
 			//Release the print button to prevent printing twice
 			//hardware.PrintControl.Release ();
@@ -219,7 +214,7 @@ namespace com.prodg.photobooth.domain
                     }
                     else
                     {
-                        logger.LogInfo("Nothing to print");
+                        logger.LogInformation("Nothing to print");
                         return;
                     }
 
@@ -233,7 +228,7 @@ namespace com.prodg.photobooth.domain
             }
             catch (Exception ex)
             {
-                logger.LogException("Error while printing twice", ex);
+                logger.LogError(ex, "Error while printing twice");
                 if (ErrorOccurred != null)
                 {
                     ErrorOccurred.Invoke(this, new ErrorEventArgs("Error while printing twice"));
@@ -249,7 +244,7 @@ namespace com.prodg.photobooth.domain
 
         private async void OnTriggerControlTriggered(object sender, TriggerControlEventArgs e)
 		{
-			logger.LogInfo ("Trigger control fired");
+			logger.LogInformation("Trigger control fired");
 
 			//Release the trigger to prevent double sessions
 			var lockId = hardware.TriggerControl.Lock (true);
@@ -304,7 +299,7 @@ namespace com.prodg.photobooth.domain
             }
             catch (Exception ex)
             {
-                logger.LogException("Error while capturing images", ex);
+                logger.LogError(ex, "Error while capturing images");
                 if (ErrorOccurred != null)
                 {
                     ErrorOccurred.Invoke(this, new ErrorEventArgs("Error while capturing images"));

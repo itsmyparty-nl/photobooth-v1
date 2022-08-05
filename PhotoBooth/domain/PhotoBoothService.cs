@@ -17,17 +17,13 @@
 */
 #endregion
 
-using System;
-using System.Drawing;
-using System.Globalization;
-using System.IO;
-using System.Threading.Tasks;
-using com.prodg.photobooth.common;
 using com.prodg.photobooth.config;
 using com.prodg.photobooth.domain.image;
 using com.prodg.photobooth.domain.offload;
 using com.prodg.photobooth.infrastructure.hardware;
 using com.prodg.photobooth.infrastructure.serialization;
+using Microsoft.Extensions.Logging;
+using SixLabors.ImageSharp;
 
 namespace com.prodg.photobooth.domain
 {
@@ -47,10 +43,10 @@ namespace com.prodg.photobooth.domain
 			SessionSize = sessionSize;
         }
 
-        public Image Picture { get; private set; }
+        public Image Picture { get; }
 		public bool IsFinal { get { return Index >= SessionSize; } }
-		public int Index { get; private set; }
-		public int SessionSize { get; private set; }
+		public int Index { get; }
+		public int SessionSize { get; }
     }
 
     #endregion
@@ -65,14 +61,14 @@ namespace com.prodg.photobooth.domain
     /// </summary>
     public class PhotoBoothService : IPhotoBoothService
     {
-        private readonly ILogger logger;
-        private readonly IHardware hardware;
-        private readonly IMultiImageProcessor imageProcessor;
-        private readonly IStreamSerializer serializer;
-        private readonly PhotoSessionFactory sessionFactory;
-        private readonly IPhotoboothOffloader offloader;
+        private readonly ILogger<PhotoBoothService> _logger;
+        private readonly IHardware _hardware;
+        private readonly IMultiImageProcessor _imageProcessor;
+        private readonly IStreamSerializer _serializer;
+        private readonly PhotoSessionFactory _sessionFactory;
+        private readonly IPhotoboothOffloader _offloader;
 
-        public event EventHandler<PictureAddedEventArgs> PictureAdded;
+        public event EventHandler<PictureAddedEventArgs>? PictureAdded;
 
         /// <summary>
         /// C'tor
@@ -83,62 +79,63 @@ namespace com.prodg.photobooth.domain
         /// <param name="logger"></param>
         /// <param name="settings"></param>
         /// <param name="offloader"></param>
-        public PhotoBoothService(IHardware hardware, IMultiImageProcessor imageProcessor, IStreamSerializer serializer, ILogger logger, ISettings settings, IPhotoboothOffloader offloader)
+        public PhotoBoothService(IHardware hardware, IMultiImageProcessor imageProcessor, IStreamSerializer serializer,
+	        ILogger<PhotoBoothService> logger, ISettings settings, IPhotoboothOffloader offloader)
         {
-            
-            this.hardware = hardware;
-            this.logger = logger;
-            this.serializer = serializer;
-            this.imageProcessor = imageProcessor;
-            this.offloader = offloader;
 
-            logger.LogDebug("Creating PhotoBooth Service");
+	        _hardware = hardware;
+	        _logger = logger;
+	        _serializer = serializer;
+	        _imageProcessor = imageProcessor;
+	        _offloader = offloader;
 
-            sessionFactory = new PhotoSessionFactory(settings);
+	        logger.LogDebug("Creating PhotoBooth Service");
+
+	        _sessionFactory = new PhotoSessionFactory(settings);
         }
 
         /// <summary>
         /// Capture a photo session
         /// </summary>
         /// <returns>The session containing the captured and processed images</returns>
-        public async Task<PhotoSession> Capture()
+        public async Task<PhotoSession?> Capture()
 		{
-            var session = sessionFactory.CreateSession();
-            logger.LogInfo(string.Format(CultureInfo.InvariantCulture, "Start Capturing images for event {0}, session {1}",
-                session.EventId, session.Id));
+            var session = _sessionFactory.CreateSession();
+            _logger.LogInformation("Start Capturing images for event {EventId}, session {Id}",
+                session.EventId, session.Id);
                 
 			return await Task.Run (() => {
 				try {
 					int failureCount = 0;
 
-					while (session.ImageCount < imageProcessor.RequiredImages && failureCount < 10) {
+					while (session.ImageCount < _imageProcessor.RequiredImages && failureCount < 10) {
 						string imagePath = session.GetNextImagePath ();
-						if (hardware.Camera.Capture (imagePath)) {
+						if (_hardware.Camera.Capture (imagePath)) {
 							Image image = session.AddPicture (imagePath);
 							//Signal that a new picture was added
 							if (PictureAdded != null) {
 								PictureAdded(this, new PictureAddedEventArgs (image, session.ImageCount - 1, 
-									imageProcessor.RequiredImages));
+									_imageProcessor.RequiredImages));
 							}
 						} else {
 							failureCount++;
 						}
 					}
-					session.ResultImage = imageProcessor.Process (session);
+					session.ResultImage = _imageProcessor.Process (session);
 					//Signal that a new picture was added
 					if (PictureAdded != null) {
 						PictureAdded(this, new PictureAddedEventArgs (session.ResultImage, session.ImageCount, 
-							imageProcessor.RequiredImages));
+							_imageProcessor.RequiredImages));
 					}
 
 					//Return the session
 					return session;
 				} catch (Exception ex) {
-					logger.LogException ("Error while capturing images", ex);
+					_logger.LogError(ex, "Error while capturing images");
 					return null;
 				} finally {
 					//Clean all images from the camera buffer
-					hardware.Camera.Clean ();
+					_hardware.Camera.Clean ();
 				}
 			});
 		}
@@ -147,19 +144,20 @@ namespace com.prodg.photobooth.domain
         /// Print a photo session
         /// </summary>
         /// <param name="session"></param>
-        public async Task Print(PhotoSession session)
+        public async Task Print(PhotoSession? session)
 		{
-			logger.LogInfo (string.Format (CultureInfo.InvariantCulture, "Start Printing result image for session {0}", session.StoragePath));
+			_logger.LogInformation("Start Printing result image for session {StoragePath}", session.StoragePath);
 
             await Task.Run(() =>
             {
                 try
                 {
-                    hardware.Printer.Print(session.ResultImage);
+	                _hardware.Printer.Print(session.ResultImage ??
+	                                        throw new InvalidOperationException("Cannot print: ResultImage is null"));
                 }
                 catch (Exception ex)
                 {
-                    logger.LogException("Error while printing image", ex);
+                    _logger.LogError(ex, "Error while printing image");
                 }
             });
 		}
@@ -168,23 +166,19 @@ namespace com.prodg.photobooth.domain
         /// Save a photo session
         /// </summary>
         /// <param name="session"></param>
-        public async Task Save(PhotoSession session)
+        public async Task Save(PhotoSession? session)
         {
-            logger.LogInfo(string.Format(CultureInfo.InvariantCulture, "Start saving session {0}", session.StoragePath));
+            _logger.LogInformation("Start saving session {StoragePath}", session.StoragePath);
 
-            Task.Run(() =>
+            await Task.Run(() =>
             {
                 try
                 {
-                    // using (var fileStream = File.Create(Path.Combine(session.StoragePath, "session." + serializer.Type)))
-                    // {
-                    //     serializer.Serialize(fileStream, session);
-                    // }
-                    offloader.OffloadSession(session.Id);
+                    _offloader.OffloadSession(session.Id);
                 }
                 catch (Exception ex)
                 {
-                    logger.LogException("Error while saving session", ex);
+                    _logger.LogError(ex, "Error while saving session");
                 }
             });
         }

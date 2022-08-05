@@ -1,183 +1,24 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
-    <ProjectGuid>{532E283C-98AA-417B-8F31-7BD2DA8EA090}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <Company>ItsMyParty.nl</Company>
     <RootNamespace>com.prodg.photobooth</RootNamespace>
-    <AssemblyName>PhotoBooth</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <FileUpgradeFlags>
-    </FileUpgradeFlags>
-    <UpgradeBackupLocation>
-    </UpgradeBackupLocation>
-    <OldToolsVersion>3.5</OldToolsVersion>
-    <PublishUrl>publish\</PublishUrl>
-    <Install>true</Install>
-    <InstallFrom>Disk</InstallFrom>
-    <UpdateEnabled>false</UpdateEnabled>
-    <UpdateMode>Foreground</UpdateMode>
-    <UpdateInterval>7</UpdateInterval>
-    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
-    <UpdatePeriodically>false</UpdatePeriodically>
-    <UpdateRequired>false</UpdateRequired>
-    <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
-    <UseApplicationTrust>false</UseApplicationTrust>
-    <BootstrapperEnabled>true</BootstrapperEnabled>
-    <TargetFrameworkProfile />
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>%24%28SolutionDir%29\bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <PlatformTarget>x86</PlatformTarget>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
-    <DebugType>none</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>%24%28SolutionDir%29\bin\Release\</OutputPath>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <PlatformTarget>x86</PlatformTarget>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>..\bin\debug\</OutputPath>
-    <DefineConstants>DEBUG</DefineConstants>
-    <DebugType>full</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <WarningLevel>4</WarningLevel>
-    <Optimize>false</Optimize>
-    <LangVersion>5</LangVersion>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
-    <OutputPath>..\bin\release\</OutputPath>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <WarningLevel>4</WarningLevel>
-    <Optimize>false</Optimize>
-  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="NLog">
-      <HintPath>..\packages\NLog.2.1.0\lib\net45\NLog.dll</HintPath>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.ComponentModel.DataAnnotations" />
-    <Reference Include="System.Configuration" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Drawing" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="6.0.0" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="2.1.2" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="6.0.0" />
   </ItemGroup>
+
   <ItemGroup>
-    <Compile Include="common\NLogger.cs" />
-    <Compile Include="config\Settings.cs" />
-    <Compile Include="domain\image\FixedImageCollageImageProcessor.cs" />
-    <Compile Include="domain\image\OverlayImageProcessor.cs" />
-    <Compile Include="domain\image\ImageFileSink.cs" />
-    <Compile Include="domain\image\FilterImageProcessor.cs" />
-    <Compile Include="domain\image\FilterType.cs" />
-    <Compile Include="domain\image\FilterFactory.cs" />
-    <Compile Include="domain\image\CollageImageProcessor.cs" />
-    <Compile Include="config\ISettings.cs" />
-    <Compile Include="domain\converters\ImageConverter.cs" />
-    <Compile Include="domain\image\ImageProcessingChain.cs" />
-    <Compile Include="domain\image\ISingleImageProcessor.cs" />
-    <Compile Include="domain\IPhotoBoothModel.cs" />
-    <Compile Include="domain\offload\IPhotoboothOffloader.cs" />
-    <Compile Include="domain\IPhotoBoothService.cs" />
-    <Compile Include="domain\offload\IOffloadContextFileHandler.cs" />
-    <Compile Include="domain\offload\OffloadContext.cs" />
-    <Compile Include="domain\offload\OffloadContextFileHandler.cs" />
-    <Compile Include="domain\offload\OffloadStub.cs" />
-    <Compile Include="domain\offload\PhotoboothOffloader.cs" />
-    <Compile Include="domain\PhotoBoothService.cs" />
-    <Compile Include="domain\PhotoBoothModel.cs" />
-    <Compile Include="AssemblyInfo.cs" />
-    <Compile Include="domain\PhotoBooth.cs" />
-    <Compile Include="domain\PhotoSessionFactory.cs" />
-    <Compile Include="infrastructure\command\ConsoleCommandReceiver.cs" />
-    <Compile Include="infrastructure\command\CommandMessengerTransceiver.cs" />
-    <Compile Include="infrastructure\hardware\CameraStub.cs" />
-    <Compile Include="infrastructure\hardware\HardwareException.cs" />
-    <Compile Include="infrastructure\hardware\ICamera.cs" />
-    <Compile Include="infrastructure\hardware\Camera.cs" />
-    <Compile Include="common\ILogger.cs" />
-    <Compile Include="common\ConsoleLogger.cs" />
-    <Compile Include="domain\image\IMultiImageProcessor.cs" />
-    <Compile Include="infrastructure\command\ICommandReceiver.cs" />
-    <Compile Include="infrastructure\hardware\ITriggerControl.cs" />
-    <Compile Include="domain\PhotoSession.cs" />
-    <Compile Include="infrastructure\hardware\RemoteTrigger.cs" />
-    <Compile Include="infrastructure\hardware\Hardware.cs" />
-    <Compile Include="infrastructure\hardware\IHardware.cs" />
-    <Compile Include="infrastructure\hardware\IHardwareController.cs" />
-    <Compile Include="infrastructure\command\ICommandTransmitter.cs" />
-    <Compile Include="infrastructure\command\Command.cs" />
-    <Compile Include="infrastructure\hardware\IPrinter.cs" />
-    <Compile Include="infrastructure\hardware\PrinterStub.cs" />
-    <Compile Include="infrastructure\hardware\NetPrinter.cs" />
-    <Compile Include="infrastructure\hardware\TriggerControlStub.cs" />
-    <Compile Include="infrastructure\serialization\IStreamSerializer.cs" />
-    <Compile Include="infrastructure\serialization\JsonStreamSerializer.cs" />
+    <ProjectReference Include="..\CommandMessenger\CommandMessenger.csproj" />
+    <ProjectReference Include="..\GPhotoWrapperInterface\GPhotoWrapperInterface.csproj" />
+    <ProjectReference Include="..\GPhotoWrapper\GPhotoWrapper.csproj" />
+    <ProjectReference Include="..\PhotoboothApiClient\Photobooth-Api-Client.csproj" />
   </ItemGroup>
-  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <ItemGroup>
-    <Content Include="PhotoBooth.dll.config">
-      <DeployService-Deploy>True</DeployService-Deploy>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <SubType>Designer</SubType>
-    </Content>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\CommandMessenger\CommandMessenger.csproj">
-      <Project>{3CF8F8FC-6F5C-46F8-94DC-C2E4C505ECA4}</Project>
-      <Name>CommandMessenger</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\GPhotoWrapperInterface\GPhotoWrapperInterface.csproj">
-      <Project>{4C1198A2-3418-4CCB-AAB0-1D15E1E741D8}</Project>
-      <Name>GPhotoWrapperInterface</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\GPhotoWrapper\GPhotoWrapper.csproj">
-      <Project>{E4DCFEAB-A4B4-4EBC-A2AA-E33901C74235}</Project>
-      <Name>GPhotoWrapper</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\PhotoboothApiClient\Photobooth-Api-Client.csproj">
-      <Project>{c9cc764c-de7a-4966-91b3-ed8305e61a69}</Project>
-      <Name>Photobooth-Api-Client</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
-      <Install>false</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1</ProductName>
-      <Install>true</Install>
-    </BootstrapperPackage>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="app.config">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="packages.config" />
-  </ItemGroup>
+  
 </Project>

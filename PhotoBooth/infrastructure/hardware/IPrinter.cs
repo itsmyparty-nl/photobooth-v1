@@ -17,7 +17,7 @@
 */
 #endregion
 
-using System.Drawing;
+using SixLabors.ImageSharp;
 
 namespace com.prodg.photobooth.infrastructure.hardware
 {

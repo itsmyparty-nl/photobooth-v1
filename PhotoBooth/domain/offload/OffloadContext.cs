@@ -17,10 +17,7 @@
 */
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace com.prodg.photobooth.domain.offload
 {
@@ -33,14 +30,14 @@ namespace com.prodg.photobooth.domain.offload
             Errors = new List<string>();
         }
 
-        [JsonProperty]
+        [JsonPropertyName("EventCreated")]
         public bool EventCreated { get; set; }
 
-        [JsonProperty]
-        public Dictionary<string, bool> ShotsOffloaded { get; private set; }
+        [JsonPropertyName("ShotsOffloaded")]
+        public Dictionary<string, bool> ShotsOffloaded { get; }
 
-        [JsonProperty]
-        public List<String> Errors { get; private set; }
+        [JsonPropertyName("Errors")]
+        public List<String> Errors { get; }
 
         public bool IsShotOffloaded(string fullFilePath)
         {

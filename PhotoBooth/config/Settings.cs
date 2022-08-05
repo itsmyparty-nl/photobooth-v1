@@ -17,12 +17,10 @@
 */
 #endregion
 
-using System;
-using System.IO;
 using System.Collections.Specialized;
 using System.Configuration;
-using com.prodg.photobooth.common;
 using com.prodg.photobooth.domain.image;
+using Microsoft.Extensions.Logging;
 
 namespace com.prodg.photobooth.config
 {
@@ -99,7 +97,7 @@ namespace com.prodg.photobooth.config
         /// Reads in all settings from the app config file of the current application
         /// </para>
         /// </summary>
-        public Settings(ILogger logger)
+        public Settings(ILogger<Settings> logger)
         {
             logger.LogDebug("Initializing application settings");
             try
@@ -148,12 +146,12 @@ namespace com.prodg.photobooth.config
                 {
                     if (!Directory.Exists(StoragePath))
                     {
-                        Directory.CreateDirectory(StoragePath);
+                        Directory.CreateDirectory(StoragePath!);
                     }
                 }
                 catch (Exception ex)
                 {
-                    logger.LogException(string.Format(@"Error while creating directory {0}", StoragePath), ex);
+                    logger.LogError(ex, "Error while creating directory {StoragePath}", StoragePath);
                 }
 
             }

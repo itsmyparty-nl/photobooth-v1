@@ -1,4 +1,3 @@
-using System;
 using System.Runtime.InteropServices;
 
 namespace LibGPhoto2
@@ -13,59 +12,6 @@ namespace LibGPhoto2
 	{
 	}
 	
-#if false
-	[StructLayout(LayoutKind.Sequential)]
-	internal unsafe struct CameraFunctions
-	{
-		internal delegate ErrorCode _CameraExitFunc (_Camera *camera, HandleRef context);
-
-		internal delegate ErrorCode _CameraGetConfigFunc (_Camera *camera, out IntPtr widget, HandleRef context);
-
-		internal delegate ErrorCode _CameraSetConfigFunc (_Camera *camera, HandleRef widget, HandleRef context);
-
-		internal delegate ErrorCode _CameraCaptureFunc (_Camera *camera, CameraCaptureType type, IntPtr path, HandleRef context);
-
-		internal delegate ErrorCode _CameraCapturePreviewFunc (_Camera *camera, _CameraFile *file, HandleRef context);
-		
-		internal delegate ErrorCode _CameraSummaryFunc (_Camera *camera, IntPtr text, HandleRef context);
-		
-		internal delegate ErrorCode _CameraManualFunc (_Camera *camera, IntPtr text, HandleRef context);
-		
-		internal delegate ErrorCode _CameraAboutFunc (_Camera *camera, IntPtr text, HandleRef context);
-		
-		internal delegate ErrorCode _CameraPrePostFunc (_Camera *camera, HandleRef context);
-                                             
-		/* Those will be called before and after each operation */
-		_CameraPrePostFunc pre_func;
-		_CameraPrePostFunc post_func;
-
-		_CameraExitFunc exit;
-
-		/* Configuration */
-		_CameraGetConfigFunc       get_config;
-		_CameraSetConfigFunc       set_config;
-
-		/* Capturing */
-		_CameraCaptureFunc        capture;
-		_CameraCapturePreviewFunc capture_preview;
-
-		/* Textual information */
-		_CameraSummaryFunc summary;
-		_CameraManualFunc  manual;
-		_CameraAboutFunc   about;
-		
-		/* Reserved space to use in the future without changing the struct size */
-		IntPtr reserved1;
-		IntPtr reserved2;
-		IntPtr reserved3;
-		IntPtr reserved4;
-		IntPtr reserved5;
-		IntPtr reserved6;
-		IntPtr reserved7;
-		IntPtr reserved8;
-	}
-#endif
-
 	[StructLayout(LayoutKind.Sequential)]
 	internal unsafe struct _Camera
 	{

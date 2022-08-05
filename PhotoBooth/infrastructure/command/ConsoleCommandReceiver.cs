@@ -16,12 +16,7 @@
 */
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Threading;
-using com.prodg.photobooth.common;
+using Microsoft.Extensions.Logging;
 
 namespace com.prodg.photobooth.infrastructure.command
 {
@@ -29,19 +24,19 @@ namespace com.prodg.photobooth.infrastructure.command
     {
         private const string Id = "ConsoleCommandReceiver";
 
-        private readonly ILogger logger;
-        private readonly Dictionary<Command, ConsoleKey> commandKeyMapping;
-        private readonly List<ConsoleKey> subscriptions = new List<ConsoleKey>();
-        private Thread listenerThread;
-        private bool running;
+        private readonly ILogger<ConsoleCommandReceiver> _logger;
+        private readonly Dictionary<Command, ConsoleKey> _commandKeyMapping;
+        private readonly List<ConsoleKey> _subscriptions = new();
+        private Thread? _listenerThread;
+        private bool _running;
 
-        public ConsoleCommandReceiver(ILogger logger)
+        public ConsoleCommandReceiver(ILogger<ConsoleCommandReceiver> logger)
         {
-            this.logger = logger;
-            running = false;
+            _logger = logger;
+            _running = false;
 
             //Create a mapping between console keys and remote control buttons
-            commandKeyMapping = new Dictionary<Command, ConsoleKey>
+            _commandKeyMapping = new Dictionary<Command, ConsoleKey>
                 {
                     {Command.Trigger, ConsoleKey.T},
                     {Command.Print, ConsoleKey.NumPad1},
@@ -54,50 +49,50 @@ namespace com.prodg.photobooth.infrastructure.command
 
         public void Initialize()
         {
-            if (running || listenerThread != null)
+            if (_running || _listenerThread != null)
             {
                 throw new InvalidOperationException("Not allowed to start twice");
             }
-            listenerThread = new Thread(ListenToConsoleWorker);
-            running = true;
-            listenerThread.Start();
-            logger.LogInfo(String.Format(CultureInfo.InvariantCulture, "{0}: Started", Id));
+            _listenerThread = new Thread(ListenToConsoleWorker);
+            _running = true;
+            _listenerThread.Start();
+            _logger.LogInformation("{Id}: Started", Id);
         }
 
         public void DeInitialize()
         {
-            if (running && listenerThread != null)
+            if (_running && _listenerThread != null)
             {
-                running = false;
-                listenerThread.Join();
+                _running = false;
+                _listenerThread.Join();
             }
-            logger.LogInfo(String.Format(CultureInfo.InvariantCulture, "{0}: Stopped", Id));
-            listenerThread = null;
+            _logger.LogInformation("{Id}: Stopped", Id);
+            _listenerThread = null;
         }
 
-        public event EventHandler<CommandReceivedEventArgs> CommandReceived;
+        public event EventHandler<CommandReceivedEventArgs>? CommandReceived;
 
         public void Subscribe(Command command)
         {
-            if (!commandKeyMapping.ContainsKey(command))
+            if (!_commandKeyMapping.ContainsKey(command))
             {
                 throw new NotSupportedException("The provided command is not supported: " + command);
             }
-            if (!subscriptions.Contains(commandKeyMapping[command]))
+            if (!_subscriptions.Contains(_commandKeyMapping[command]))
             {
-                subscriptions.Add(commandKeyMapping[command]);
+                _subscriptions.Add(_commandKeyMapping[command]);
             }
         }
 
         public void UnSubscribe(Command command)
         {
-            if (!commandKeyMapping.ContainsKey(command))
+            if (!_commandKeyMapping.ContainsKey(command))
             {
                 throw new NotSupportedException("The provided command is not supported: " + command);
             }
-            if (subscriptions.Contains(commandKeyMapping[command]))
+            if (_subscriptions.Contains(_commandKeyMapping[command]))
             {
-                subscriptions.Remove(commandKeyMapping[command]);
+                _subscriptions.Remove(_commandKeyMapping[command]);
             }            
         }
 
@@ -105,20 +100,20 @@ namespace com.prodg.photobooth.infrastructure.command
 
         private void ListenToConsoleWorker()
         {
-            while (running)
+            while (_running)
             {
-                while (!Console.KeyAvailable && running)
+                while (!Console.KeyAvailable && _running)
                 {
                     Thread.Sleep(50);
                 }
-                if (running)
+                if (_running)
                 {
                     var consoleKeyInfo = Console.ReadKey();
-                    if (subscriptions.Contains(consoleKeyInfo.Key))
+                    if (_subscriptions.Contains(consoleKeyInfo.Key))
                     {
-                        KeyValuePair<Command, ConsoleKey> commandKey = commandKeyMapping.First(kvp => kvp.Value == consoleKeyInfo.Key);
-                        logger.LogInfo(String.Format(CultureInfo.InvariantCulture, "{0}: {1} command received", Id,
-                                                     commandKey.Key));
+                        KeyValuePair<Command, ConsoleKey> commandKey =
+                            _commandKeyMapping.First(kvp => kvp.Value == consoleKeyInfo.Key);
+                        _logger.LogInformation("{Id}: {CommandKey} command received", Id, commandKey.Key);
 
                         //Only trigger if we have listeners
                         if (CommandReceived != null)
@@ -132,7 +127,7 @@ namespace com.prodg.photobooth.infrastructure.command
 
         #region IDisposable Implementation
 
-        bool disposed;
+        bool _disposed;
 
         public void Dispose()
         {
@@ -142,7 +137,7 @@ namespace com.prodg.photobooth.infrastructure.command
 
         private void Dispose(bool disposing)
         {
-            if (!disposed)
+            if (!_disposed)
             {
                 if (disposing)
                 {
@@ -150,7 +145,7 @@ namespace com.prodg.photobooth.infrastructure.command
                     DeInitialize();
                 }
                 // clean up any unmanaged objects
-                disposed = true;
+                _disposed = true;
             }
             else
             {

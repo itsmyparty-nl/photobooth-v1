@@ -17,64 +17,53 @@
 */
 #endregion
 
-using System;
-using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
-using System.Globalization;
-using com.prodg.photobooth.common;
 using com.prodg.photobooth.config;
+using Microsoft.Extensions.Logging;
+using SixLabors.ImageSharp;
+using Color = System.Drawing.Color;
+using Rectangle = System.Drawing.Rectangle;
 
 namespace com.prodg.photobooth.domain.image
 {
     /// <summary>
     /// An image processor processes a collection of images into a single image
     /// </summary>
-    public class CollageImageProcessor : IMultiImageProcessor, IDisposable
+    public class CollageImageProcessor : IMultiImageProcessor
     {
-        private readonly ILogger logger;
-        private readonly ISettings settings;
+        private readonly ILogger<CollageImageProcessor> _logger;
+        private readonly ISettings _settings;
 
         private readonly Color backgroundColor = Color.White;
-        private ImageAttributes attributes;
 
-        /// <summary>
-        /// <see cref="IMultiImageProcessor.RequiredImages"/>
-        /// </summary>
-        public int RequiredImages { get; private set; }
+        public int RequiredImages { get; }
 
-        /// <summary>
-        /// C'tor
-        /// </summary>
-        /// <param name="logger"></param>
-        /// <param name="settings"></param>
-        public CollageImageProcessor(ILogger logger, ISettings settings)
+        public CollageImageProcessor(ILogger<CollageImageProcessor> logger, ISettings settings)
         {
-            this.logger = logger;
-            this.settings = settings;
+            _logger = logger;
+            _settings = settings;
 
             logger.LogDebug("Creating CollageImageProcessor");
             
-            //create some image attributes
-            attributes = new ImageAttributes();
-
             RequiredImages = settings.CollageGridHeight*settings.CollageGridWidth;
         }
 
         /// <summary>
         /// Processes the images into a single image
         /// </summary>
-        public Image Process(PhotoSession session)
+        public Image Process(PhotoSession? session)
         {
-            logger.LogInfo(string.Format("Creating a collage of {0}: {1} images", session.StoragePath, session.ImageCount));
-            if (session.ImageCount != RequiredImages)
+	        if (session == null) { throw new ArgumentNullException(nameof(session));}
+
+	        _logger.LogInformation("Creating a collage of {StoragePath}: {ImageCount} images",
+		        session.StoragePath, session.ImageCount);
+            
+	        if (session.ImageCount != RequiredImages)
             {
-                throw new InvalidOperationException(String.Format(CultureInfo.InvariantCulture,
-                    "Expected exactly {0} images to process", RequiredImages));
+                throw new InvalidOperationException($"Expected exactly {RequiredImages} images to process");
             }
 
             //Calculate output width & height while maintaining aspect ratio
-            var collageWidth = CalculateCollageWidth(session.Images[0].Width);
+            var collageWidth = CalculateCollageWidth(session.Images.First().Width);
             var croppedImageHeight = CalculateCroppedImageHeight(collageWidth);
             var collageHeight = CalculateCollageHeight(croppedImageHeight);
 
@@ -100,14 +89,14 @@ namespace com.prodg.photobooth.domain.image
         private void DrawCroppedImageOnCollage(Image image, int croppedImageHeight, int imageIndex, Graphics g)
         {
             var srcStartY = image.Height == croppedImageHeight ? 0 : image.Height - croppedImageHeight - 1;
-            var dstWidth = (int)Math.Floor(image.Width * settings.CollageScalePercentage);
-            var dstHeight = (int)Math.Floor((image.Height - srcStartY) * settings.CollageScalePercentage);
+            var dstWidth = (int)Math.Floor(image.Width * _settings.CollageScalePercentage);
+            var dstHeight = (int)Math.Floor((image.Height - srcStartY) * _settings.CollageScalePercentage);
 
             //Note: Start at double padding
-            var dstStartX = (imageIndex%settings.CollageGridWidth)*(dstWidth + settings.CollagePaddingPixels) +
-                         2*settings.CollagePaddingPixels;
-            var dstStartY = (imageIndex / settings.CollageGridWidth) * (dstHeight + settings.CollagePaddingPixels) +
-                         2*settings.CollagePaddingPixels;
+            var dstStartX = (imageIndex%_settings.CollageGridWidth)*(dstWidth + _settings.CollagePaddingPixels) +
+                         2*_settings.CollagePaddingPixels;
+            var dstStartY = (imageIndex / _settings.CollageGridWidth) * (dstHeight + _settings.CollagePaddingPixels) +
+                         2*_settings.CollagePaddingPixels;
 
             //draw the original image on the new image using the grayscale color matrix
             g.SmoothingMode = SmoothingMode.HighQuality;
@@ -121,8 +110,8 @@ namespace com.prodg.photobooth.domain.image
             //Gridwidth - 1 to get the padding in between. +4 to get double size borders outside the image
             var collageHeight =
                 (int)
-                    ((croppedImageHeight*settings.CollageGridHeight*settings.CollageScalePercentage) +
-                     (settings.CollageGridHeight + 3)*settings.CollagePaddingPixels);
+                    ((croppedImageHeight*_settings.CollageGridHeight*_settings.CollageScalePercentage) +
+                     (_settings.CollageGridHeight + 3)*_settings.CollagePaddingPixels);
             return collageHeight;
         }
 
@@ -131,57 +120,22 @@ namespace com.prodg.photobooth.domain.image
             //Gridwidth - 1 to get the padding in between. +4 to get double size borders outside the image
             return
                 (int)
-                    ((imageWidth*settings.CollageGridWidth*settings.CollageScalePercentage) +
-                     (settings.CollageGridWidth + 3)*settings.CollagePaddingPixels);
+                    ((imageWidth*_settings.CollageGridWidth*_settings.CollageScalePercentage) +
+                     (_settings.CollageGridWidth + 3)*_settings.CollagePaddingPixels);
         }
 
         private int CalculateCroppedImageHeight(int collageWidth)
         {
             //Calculate the desired height according to the aspect ratio
-            var desiredCollageHeight = (int) (collageWidth/settings.CollageAspectRatio);
+            var desiredCollageHeight = (int) (collageWidth/_settings.CollageAspectRatio);
 
             //totalHeight = (height*n*scale) + (n+3)*padpx
             //height = (totalHeight - padpx*(n + 3))/(n*scale)
             var croppedImageHeight =
-                (int) ((desiredCollageHeight - settings.CollagePaddingPixels*(settings.CollageGridHeight + 3))/
-                       (settings.CollageGridHeight*settings.CollageScalePercentage));
+                (int) ((desiredCollageHeight - _settings.CollagePaddingPixels*(_settings.CollageGridHeight + 3))/
+                       (_settings.CollageGridHeight*_settings.CollageScalePercentage));
             return croppedImageHeight;
         }
-
-        #region IDisposable Implementation
-
-		bool disposed;
-
-		public void Dispose ()
-		{
-			Dispose (true);
-			GC.SuppressFinalize (this);
-		}
-
-		private void Dispose (bool disposing)
-		{
-		    if (!disposed)
-		    {
-		        if (disposing)
-		        {
-		            // Clean up managed objects
-		            if (attributes != null)
-		            {
-		               attributes.Dispose();
-                       attributes = null;
-		            }
-		        }
-		        // clean up any unmanaged objects
-		        disposed = true;
-		    }
-		}
-
-        ~CollageImageProcessor()
-		{
-			Dispose (false);
-		}
-		
-		#endregion
 
     }
 }

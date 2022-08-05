@@ -1,4 +1,3 @@
-using System;
 using System.Runtime.InteropServices;
 
 namespace LibGPhoto2
@@ -41,15 +40,15 @@ namespace LibGPhoto2
         OsFailure           = -114
 	}
 
-	public class Error
+	public static class Error
 	{
-		private static string GetErrorAsString(ErrorCode e)
+		private static string? GetErrorAsString(ErrorCode e)
 		{
 			IntPtr raw_message = gp_result_as_string(e);
 			return Marshal.PtrToStringAnsi(raw_message);
 		}
 
-		private static string GetIOErrorAsString(ErrorCode e)
+		private static string? GetIoErrorAsString(ErrorCode e)
 		{
 			IntPtr raw_message = gp_port_result_as_string(e);
 			return Marshal.PtrToStringAnsi(raw_message);
@@ -62,13 +61,13 @@ namespace LibGPhoto2
 		
 		public static GPhotoException ErrorException (ErrorCode error_code)
 		{
-			string message = "Unknown Error";
+			string? message = "Unknown Error";
 			int error_code_int = (int)error_code;
 			
 			if (error_code_int <= -102 && error_code_int >= -111)
 				message = GetErrorAsString(error_code);
 			else if (error_code_int <= -1 && error_code_int >= -60)
-				message = GetIOErrorAsString(error_code);
+				message = GetIoErrorAsString(error_code);
 
 			return new GPhotoException(error_code, message);
 		}
@@ -98,7 +97,7 @@ namespace LibGPhoto2
 			error = error_code;
 		}
 		
-		public GPhotoException (ErrorCode error_code, string message)
+		public GPhotoException (ErrorCode error_code, string? message)
 		: base (message)
 		{
 			error = error_code;

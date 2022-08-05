@@ -17,74 +17,44 @@
 */
 #endregion
 
-using System;
-using com.prodg.photobooth.common;
+
+using Microsoft.Extensions.Logging;
 
 namespace com.prodg.photobooth.infrastructure.hardware
 {
 	public class CameraStub : ICamera
 	{
-		private readonly ILogger logger;
+		private readonly ILogger<CameraStub> _logger;
 
         public event EventHandler<CameraStateChangedEventArgs> StateChanged;
 	    public event EventHandler<CameraBatteryWarningEventArgs> BatteryWarning;
-	    public string Id { get; private set; }
+	    public string Id { get; }
 
-		public CameraStub (ILogger logger)
+		public CameraStub (ILogger<CameraStub> logger)
 		{
-			this.logger = logger;
+			_logger = logger;
 		    Id = "Dummy";
 		}
 
 		public void Initialize ()
 		{
-			logger.LogInfo ("Initializing DUMMY camera");
+			_logger.LogInformation("Initializing DUMMY camera");
 		}
 
 	    public void DeInitialize()
 	    {
-            logger.LogInfo("DeInitializing DUMMY camera");
+            _logger.LogInformation("DeInitializing DUMMY camera");
 	    }
 
 	    public bool Capture(string capturePath)
 	    {
-	        logger.LogInfo("Starting capture to: "+capturePath);
+	        _logger.LogInformation("Starting capture to: {Path}", capturePath);
 	        return true;
 	    }
 
 	    public void Clean ()
 		{
-	        logger.LogInfo("Cleaning camera");
+	        _logger.LogInformation("Cleaning camera");
 		}
-
-	    #region IDisposable Implementation
-
-		bool disposed;
-
-		public void Dispose ()
-		{
-			Dispose (true);
-			GC.SuppressFinalize (this);
-		}
-
-		private void Dispose (bool disposing)
-		{
-			if (!disposed) {
-				if (disposing) {
-					// Clean up managed objects
-					
-				}
-				// clean up any unmanaged objects
-				disposed = true;
-			}
-		}
-
-		~CameraStub ()
-		{
-			Dispose (false);
-		}
-		
-		#endregion
-		
 	}
 }

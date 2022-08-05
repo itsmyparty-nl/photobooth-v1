@@ -17,12 +17,9 @@
 */
 #endregion
 
-using System;
 using System.ComponentModel;
 using System.IO.Ports;
 using System.Reflection;
-using System.Linq;
-using System.Threading;
 
 namespace CommandMessenger.TransportLayer
 {
@@ -51,7 +48,6 @@ namespace CommandMessenger.TransportLayer
         /// <summary> Initializes this object. </summary>
         public void Initialize()
         {            
-           // _queueSpeed.Name = "Serial";
             // Find installed serial ports on hardware
             _currentSerialSettings.PortNameCollection = SerialPort.GetPortNames();
             _currentSerialSettings.PropertyChanged += CurrentSerialSettingsPropertyChanged;
@@ -94,8 +90,7 @@ namespace CommandMessenger.TransportLayer
         {
             get { return _serialPort; }
         }
-
-
+        
         #endregion
 
         #region Event handlers
@@ -106,11 +101,13 @@ namespace CommandMessenger.TransportLayer
         private void CurrentSerialSettingsPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             // if serial port is changed, a new baud query is issued
-            if (e.PropertyName.Equals("PortName"))
+            if (e.PropertyName is "PortName")
+            {
                 UpdateBaudRateCollection();
+            }
         }
 
-        protected  void ProcessQueue()
+        protected void ProcessQueue()
         {
             // Endless loop
             while (ThreadRunState == ThreadRunStates.Start)

@@ -17,36 +17,33 @@
 */
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.IO;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
+using com.prodg.photobooth.domain.converters;
+using SixLabors.ImageSharp;
 
 namespace com.prodg.photobooth.domain
 {
     /// <summary>
     /// A single session in which pictures are taken which are processed into a single result image
     /// </summary>
-    [JsonObject(MemberSerialization.OptIn)]
     public class PhotoSession: IDisposable
     {
-        [JsonProperty]
-        public string EventId { get; private set; }
+        [JsonPropertyName("EventId")]
+        public string EventId { get;} = String.Empty;
 
-        [JsonProperty]
-        public int Id { get; private set; }
+        [JsonPropertyName("Id")]
+        public int Id { get; }
 
-        [JsonProperty]
-        public string StoragePath { get; private set; }
-        
-        [JsonProperty(ItemConverterType = typeof(ImageConverter))]
+        [JsonPropertyName("StoragePath")]
+        public string StoragePath { get; } = String.Empty;
+
+        [JsonConverter(typeof(ImageConverter))]
         public List<Image> Images { get; private set; }
 
-        [JsonProperty(ItemConverterType = typeof(ImageConverter))]
-        public Image ResultImage { get; set; }
+        [JsonConverter(typeof(ImageConverter))]
+        public Image? ResultImage { get; set; }
 
-        public int ImageCount { get { return Images.Count; } }
+        public int ImageCount => Images.Count;
 
         /// <summary>
         /// Serialization constructor
@@ -54,7 +51,7 @@ namespace com.prodg.photobooth.domain
         [JsonConstructor]
         private PhotoSession()
         {
-            Images = new List<Image>();
+	        Images = new List<Image>();
         }
 
         /// <summary>
@@ -73,7 +70,7 @@ namespace com.prodg.photobooth.domain
 
         public string GetNextImagePath()
         {
-			return Path.Combine(StoragePath, String.Format("{0}.jpg",ImageCount +1));
+			return Path.Combine(StoragePath, $"{ImageCount + 1}.jpg");
         }
 
         public Image AddPicture(string path)
@@ -82,7 +79,7 @@ namespace com.prodg.photobooth.domain
             {
                 throw new ArgumentException("Cannot resolve an image from an empty path");
             }
-            Image image = Image.FromFile(path);
+            Image image = Image.Load(path);
             Images.Add(image);
 
             return image;
@@ -105,15 +102,12 @@ namespace com.prodg.photobooth.domain
 		        if (disposing)
 		        {
 		            // Clean up managed objects
-		            if (Images != null)
+		            foreach (var image in Images)
 		            {
-		                foreach (var image in Images)
-		                {
-		                    image.Dispose();
-		                }
-		                Images.Clear();
-		                Images = null;
+			            image.Dispose();
 		            }
+		            Images.Clear();
+		            Images = null;
 
 		            if (ResultImage != null)
 		            {

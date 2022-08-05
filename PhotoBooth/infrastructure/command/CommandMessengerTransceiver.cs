@@ -19,13 +19,9 @@
 */
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using com.prodg.photobooth.common;
-using com.prodg.photobooth.config;
 using CommandMessenger;
 using CommandMessenger.TransportLayer;
+using Microsoft.Extensions.Logging;
 
 namespace com.prodg.photobooth.infrastructure.command
 {
@@ -37,47 +33,41 @@ namespace com.prodg.photobooth.infrastructure.command
     /// </summary>
     public class CommandMessengerTransceiver : ICommandReceiver, ICommandTransmitter
     {
-        private readonly ILogger logger;
-        private bool running;
+        private readonly ILogger<CommandMessengerTransceiver> _logger;
+        private bool _running;
 
-        private readonly List<Command> subscriptions = new List<Command>();
-        private CmdMessenger messenger;
-        private ITransport transport;
+        private readonly List<Command> _subscriptions = new();
+        private readonly CmdMessenger _messenger;
 
-        /// <summary>
-        /// C'tor
-        /// </summary>
-        /// <param name="logger"></param>
-        /// <param name="transport"></param>
-        public CommandMessengerTransceiver(ILogger logger, ITransport transport)
+        public CommandMessengerTransceiver(ILogger<CommandMessengerTransceiver> logger, ITransport transport)
         {
-            this.logger = logger;
+            _logger = logger;
             
             // Initialize the command messenger with the Serial Port transport layer
-            messenger = new CmdMessenger(transport) {PrintLfCr = true};
+            _messenger = new CmdMessenger(transport) {PrintLfCr = true};
 
             // Attach to NewLinesReceived for logging purposes
-            messenger.NewLineReceived += NewLineReceived;
+            _messenger.NewLineReceived += NewLineReceived!;
             // Attach to NewLineSent for logging purposes
-            messenger.NewLineSent += NewLineSent;
+            _messenger.NewLineSent += NewLineSent!;
 
             AttachCommandCallBacks();
 
-            messenger.StartListening();
+            _messenger.StartListening();
         }
 
         #region ICommandReceiver Members
 
-        public event EventHandler<CommandReceivedEventArgs> CommandReceived;
+        public event EventHandler<CommandReceivedEventArgs>? CommandReceived;
 
         public void Subscribe(Command command)
         {
-            subscriptions.Add(command);
+            _subscriptions.Add(command);
         }
 
         public void UnSubscribe(Command command)
         {
-            subscriptions.Remove(command);
+            _subscriptions.Remove(command);
         }
 
         #endregion
@@ -86,34 +76,34 @@ namespace com.prodg.photobooth.infrastructure.command
 
         public void Initialize()
         {
-            if (running)
+            if (_running)
             {
                 throw new InvalidOperationException("Not allowed to start twice");
             }
 
-            logger.LogInfo("Starting serial command transceiver");
+            _logger.LogInformation("Starting serial command transceiver");
             // Start listening
-            messenger.StartListening();
+            _messenger.StartListening();
 
             SendCommand(Command.Initialize, "Initialize");
-            running = true;
+            _running = true;
         }
 
         public void DeInitialize()
         {
-            logger.LogInfo("Stopping serial command transceiver");
+            _logger.LogInformation("Stopping serial command transceiver");
 
             SendCommand(Command.Initialize, "DeInitialize");
 
-            messenger.StopListening();
-            running = false;
+            _messenger.StopListening();
+            _running = false;
         }
 
         #endregion
 
         #region IDisposable Implementation
 
-        bool disposed;
+        bool _disposed;
 
         public void Dispose()
         {
@@ -123,26 +113,17 @@ namespace com.prodg.photobooth.infrastructure.command
 
         private void Dispose(bool disposing)
         {
-            if (!disposed)
+            if (!_disposed)
             {
                 if (disposing)
                 {
                     // Clean up managed objects
                     DeInitialize();
-                    
-                    if (messenger != null)
-                    {
-                        messenger.Dispose();
-                        messenger = null;
-                    }
-                    if (transport != null)
-                    {
-                        transport.Dispose();
-                        transport = null;
-                    }
+
+                    _messenger.Dispose();
                 }
                 // clean up any unmanaged objects
-                disposed = true;
+                _disposed = true;
             }
             else
             {
@@ -160,9 +141,9 @@ namespace com.prodg.photobooth.infrastructure.command
         /// Attach command call backs. 
         private void AttachCommandCallBacks()
         {
-            messenger.Attach(OnReceivedCommand);
-            messenger.Attach((int)Command.Acknowledge, OnAcknowledge);
-            messenger.Attach((int)Command.Error, OnError);
+            _messenger.Attach(OnReceivedCommand);
+            _messenger.Attach((int)Command.Acknowledge, OnAcknowledge);
+            _messenger.Attach((int)Command.Error, OnError);
         }
 
         // Called when a received command has no internally attached function.
@@ -170,24 +151,22 @@ namespace com.prodg.photobooth.infrastructure.command
         {
             try
             {
-                var command = (Command)arguments.CmdId;
-                if (subscriptions.Contains(command))
+                var command = (Command) arguments.CmdId;
+                if (_subscriptions.Contains(command))
                 {
-                   
-                    logger.LogDebug(String.Format(CultureInfo.InvariantCulture, "Received Command: {0}",
-                            command));
+                    _logger.LogDebug("Received Command: {Command}", command);
 
-                    CommandReceived.Invoke(this, new CommandReceivedEventArgs(command));
+                    CommandReceived?.Invoke(this, new CommandReceivedEventArgs(command));
 
                 }
                 else
                 {
-                    logger.LogWarning("Received command without subscribers: " + command);                    
+                    _logger.LogWarning("Received command without subscribers: {Command}", command);
                 }
             }
             catch (InvalidCastException)
             {
-                logger.LogWarning("Received unsupported command: "+arguments.rawString);
+                _logger.LogWarning("Received unsupported command: {Arguments}", arguments.rawString);
             }
         }
 
@@ -199,10 +178,9 @@ namespace com.prodg.photobooth.infrastructure.command
             var command = new SendCommand((int)commandType, context);
 
             // Send command
-            messenger.SendCommand(command);
+            _messenger.SendCommand(command);
 
-            logger.LogDebug(String.Format(CultureInfo.InvariantCulture, "Sent Command: {0}",
-                                         commandType));
+            _logger.LogDebug("Sent Command: {CommandType}", commandType);
         }
 
         #endregion
@@ -210,25 +188,25 @@ namespace com.prodg.photobooth.infrastructure.command
         // Callback function that prints that the Arduino has acknowledged
         private void OnAcknowledge(ReceivedCommand arguments)
         {
-            logger.LogDebug("Acknowledged: " + arguments.CmdId);
+            _logger.LogDebug("Acknowledged: {Command}", arguments.CmdId);
         }
 
         // Callback function that prints that the Arduino has experienced an error
         private void OnError(ReceivedCommand arguments)
         {
-            logger.LogError("Remote side has experienced an error");
+            _logger.LogError("Remote side has experienced an error");
         }
 
         // Log received line to console
         private void NewLineReceived(object sender, EventArgs e)
         {
-            logger.LogDebug("Received > " + messenger.CurrentReceivedLine);
+            _logger.LogDebug("Received > {Received}", _messenger.CurrentReceivedLine);
         }
 
         // Log sent line to console
         private void NewLineSent(object sender, EventArgs e)
         {
-            logger.LogDebug("Sent > " + messenger.CurrentSentLine);
+            _logger.LogDebug("Sent > {Sent}", _messenger.CurrentSentLine);
         }
     }
 }

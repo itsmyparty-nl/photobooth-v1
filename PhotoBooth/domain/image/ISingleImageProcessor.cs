@@ -17,15 +17,14 @@
 */
 #endregion
 
-using System;
-using System.Drawing;
+using SixLabors.ImageSharp;
 
 namespace com.prodg.photobooth.domain.image
 {
 	/// <summary>
 	/// An image processor processes a single image
 	/// </summary>
-	public interface ISingleImageProcessor: IDisposable
+	public interface ISingleImageProcessor
 	{        
         /// <summary>
 		/// Processes the image and outputs the processed image
@@ -33,6 +32,6 @@ namespace com.prodg.photobooth.domain.image
 		/// <returns>
 		/// The resulting image
 		/// </returns>
-		Image Process(PhotoSession session, Image image);
+		Image Process(PhotoSession? session, Image image);
 	}
 }

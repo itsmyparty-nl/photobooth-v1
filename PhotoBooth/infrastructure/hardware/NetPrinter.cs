@@ -17,14 +17,14 @@
 */
 #endregion
 
-using System;
-using System.Drawing.Drawing2D;
-using com.prodg.photobooth.config;
-using com.prodg.photobooth.common;
-using System.Drawing.Printing;
-using System.Drawing.Imaging;
 using System.Drawing;
-using System.Threading;
+using System.Drawing.Drawing2D;
+using System.Drawing.Printing;
+using com.prodg.photobooth.config;
+using Microsoft.Extensions.Logging;
+using SixLabors.ImageSharp.Processing;
+using Image = SixLabors.ImageSharp.Image;
+using RectangleF = System.Drawing.RectangleF;
 
 namespace com.prodg.photobooth.infrastructure.hardware
 {
@@ -34,21 +34,19 @@ namespace com.prodg.photobooth.infrastructure.hardware
     public class NetPrinter : IPrinter
     {
 		private const int ImageDpi = 72; 
-		private PrintAction printAction = PrintAction.PrintToPrinter;
-        private readonly ISettings settings;
-        private readonly ILogger logger;
-        private Image storedImage;
-        private Image rotatedImage;
-        private PrintDocument pd;
-		private ManualResetEvent printFinished;
-		private ImageAttributes attributes;
+		private PrintAction _printAction = PrintAction.PrintToPrinter;
+        private readonly ISettings _settings;
+        private readonly ILogger<NetPrinter> _logger;
+        private Image _storedImage;
+        private Image _rotatedImage;
+        private PrintDocument _pd;
+		private readonly ManualResetEvent _printFinished;
 
-        public NetPrinter(ISettings settings, ILogger logger)
+        public NetPrinter(ISettings settings, ILogger<NetPrinter> logger)
         {
-            this.settings = settings;
-            this.logger = logger;
-			printFinished = new ManualResetEvent (false);
-			attributes = new ImageAttributes();
+            _settings = settings;
+            _logger = logger;
+			_printFinished = new ManualResetEvent (false);
         }
 
         /// <summary>
@@ -60,39 +58,38 @@ namespace com.prodg.photobooth.infrastructure.hardware
             try
             {
                 //Store variables for printing
-				storedImage = image;
-				rotatedImage = (Image) storedImage.Clone();
-				rotatedImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
-				printFinished.Reset();
+				_storedImage = image;
+                _rotatedImage = _storedImage.Clone(context => context.RotateFlip(RotateMode.Rotate90, FlipMode.None));
+				_printFinished.Reset();
 
 				//Initialize the print document
-				pd = new PrintDocument();
+				_pd = new PrintDocument();
 
-                pd.PrintPage += printDocument_PrintPage;
-                pd.BeginPrint += printDocument_BeginPrint;
-				pd.EndPrint += printDocument_EndPrint;
-                pd.PrinterSettings.PrinterName = settings.PrinterName;
+                _pd.PrintPage += printDocument_PrintPage;
+                _pd.BeginPrint += printDocument_BeginPrint;
+				_pd.EndPrint += printDocument_EndPrint;
+                _pd.PrinterSettings.PrinterName = _settings.PrinterName;
                 //Set the paper settings before calling print in order to get the correct graphics object
 
-                pd.DefaultPageSettings.PrinterResolution = new PrinterResolution
+                _pd.DefaultPageSettings.PrinterResolution = new PrinterResolution
                 {
                     X = 300,
                     Y = 300,
                     Kind = PrinterResolutionKind.High
                 };
                 //Pick the first papersize
-                pd.DefaultPageSettings.PaperSize = pd.PrinterSettings.PaperSizes[0];
+                _pd.DefaultPageSettings.PaperSize = _pd.PrinterSettings.PaperSizes[0];
                 //pd.DefaultPageSettings.Landscape = true;
-                pd.DefaultPageSettings.Margins = new Margins(settings.PrintMarginLeft, settings.PrintMarginRight,
-                    settings.PrintMarginTop, settings.PrintMarginBottom);
+                _pd.DefaultPageSettings.Margins = new Margins(_settings.PrintMarginLeft, _settings.PrintMarginRight,
+                    _settings.PrintMarginTop, _settings.PrintMarginBottom);
 
-				pd.Print();
+				_pd.Print();
 
-				printFinished.WaitOne();
+				_printFinished.WaitOne();
             }
             catch (Exception ex)
             {
-                logger.LogException("Error while printing", ex);
+                _logger.LogError(ex, "Error while printing");
 				throw;
             }
         }
@@ -100,43 +97,43 @@ namespace com.prodg.photobooth.infrastructure.hardware
         void printDocument_EndPrint (object sender, PrintEventArgs e)
         {
 			//Free all stored variables for this print
-			storedImage = null;
-			rotatedImage.Dispose();
-			rotatedImage = null;
+			_storedImage = null;
+			_rotatedImage.Dispose();
+			_rotatedImage = null;
 
 			//Trigger that the print is finished
-			printFinished.Set ();
+			_printFinished.Set ();
         }
 
         public void Initialize()
         {
-            pd = null;
-            storedImage = null;
-            rotatedImage = null;
+            _pd = null;
+            _storedImage = null;
+            _rotatedImage = null;
         }
 
         public void DeInitialize()
         {
-            pd = null;
-            storedImage = null;
-            rotatedImage = null;
+            _pd = null;
+            _storedImage = null;
+            _rotatedImage = null;
         }
 
         private void printDocument_BeginPrint(object sender, PrintEventArgs e)
         {
             // Save our print action so we know if we are printing 
             // a preview or a real document.
-            printAction = e.PrintAction;
+            _printAction = e.PrintAction;
 
             // Set some preferences, our method should print a box with any 
             // combination of these properties being true/false.
-            pd.OriginAtMargins = true;   //true = soft margins, false = hard margins
-            pd.DefaultPageSettings.Landscape = false;
+            _pd.OriginAtMargins = true;   //true = soft margins, false = hard margins
+            _pd.DefaultPageSettings.Landscape = false;
         }
 
         private void printDocument_PrintPage(object sender, PrintPageEventArgs e)
         {
-            Graphics g = e.Graphics;
+            Graphics? g = e.Graphics;
 
             // If you set printDocumet.OriginAtMargins to 'false' this event 
             // will print the largest rectangle your printer is physically 
@@ -165,7 +162,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
             // been automatically adjusted for the printer's physical limitations. 
             // So let's adjust the origin for preview to reflect the printer's 
             // hard margins.
-            if (printAction == PrintAction.PrintToPreview)
+            if (_printAction == PrintAction.PrintToPreview)
                 g.TranslateTransform(printableArea.X, printableArea.Y);
 
             // Are we using soft margins or hard margins? Lets grab the correct 
@@ -179,19 +176,19 @@ namespace com.prodg.photobooth.infrastructure.hardware
             // rotate in software for landscape)
             var availableWidth =
                 (int)
-                    Math.Floor(pd.OriginAtMargins
+                    Math.Floor(_pd.OriginAtMargins
                         ? marginBounds.Width
                         : (e.PageSettings.Landscape ? printableArea.Height : printableArea.Width));
             var availableHeight =
                 (int)
-                    Math.Floor(pd.OriginAtMargins
+                    Math.Floor(_pd.OriginAtMargins
                         ? marginBounds.Height
                         : (e.PageSettings.Landscape ? printableArea.Width : printableArea.Height));
 
-            logger.LogInfo(
-                String.Format("Printing image ({2}x{3}) on {0}, printable area ({1}), bounds ({4}), dpi ({5},{6})",
-                    e.PageSettings.PrinterSettings.PrinterName, printableArea, rotatedImage.Width,
-                    rotatedImage.Height, e.MarginBounds, e.Graphics.DpiX, e.Graphics.DpiY));
+            _logger.LogInformation(
+                "Printing image on {PrinterName}, printable area ({Area}), ({Width}x{Height})  bounds ({Bounds}), dpi ({DpiX},{DpiY})",
+                e.PageSettings.PrinterSettings.PrinterName, printableArea, _rotatedImage.Width,
+                _rotatedImage.Height, e.MarginBounds, e.Graphics!.DpiX, e.Graphics!.DpiY);
 
             // Draw our rectangle which will either be the soft margin rectangle 
             // or the hard margin (printer capabilities) rectangle.
@@ -203,9 +200,9 @@ namespace com.prodg.photobooth.infrastructure.hardware
             g.InterpolationMode = InterpolationMode.HighQualityBicubic;
             g.SmoothingMode = SmoothingMode.HighQuality;
             //g.DrawImage(rotatedImage, new Rectangle(0, 0, availableWidth, availableHeight));
-			g.DrawImage (rotatedImage, new Rectangle (0, 0, availableWidth, availableHeight),
-				0, 0, (int)(Math.Round (rotatedImage.Width / (ImageDpi / 100f))), (int)(Math.Round (rotatedImage.Height / (ImageDpi / 100f))),
-				GraphicsUnit.Pixel, attributes);
+			// g.DrawImage (_rotatedImage, new Rectangle (0, 0, availableWidth, availableHeight),
+			// 	0, 0, (int)(Math.Round (_rotatedImage.Width / (ImageDpi / 100f))), (int)(Math.Round (_rotatedImage.Height / (ImageDpi / 100f))),
+			// 	GraphicsUnit.Pixel, new ImageAttributes());
         }
     }
 }

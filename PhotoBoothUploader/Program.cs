@@ -17,65 +17,65 @@
 */
 #endregion
 
-using System;
-using System.Threading;
-using com.prodg.photobooth.common;
 using com.prodg.photobooth.config;
 using com.prodg.photobooth.domain.offload;
 using com.prodg.photobooth.infrastructure.serialization;
 using ItsMyParty.Photobooth.Api;
 using ItsMyParty.Photobooth.Client;
+using Microsoft.Extensions.Logging;
 
-namespace PhotoUploader
+namespace com.prodg.photobooth
 {
-    class Program
+    public class Program
     {
         public static IPhotoboothOffloader Offloader { get; private set; }
 
-        public static ILogger Logger { get; private set; }
+        public static ILogger<Program> Logger { get; private set; }
 
         public static ISettings Settings { get; private set; }
 
-        public static bool ExitRequested { get; private set; }
+        public static bool ExitRequested { get; set; }
 
         static void Main(string[] args)
         {
-            Logger = new NLogger();
-            Logger.LogInfo("[Application Started]");
+            var factory = new LoggerFactory();
+            Logger = new Logger<Program>(factory);
+            Logger.LogInformation("[Application Started]");
 
-            Settings = new Settings(Logger);
+            Settings = new Settings(new Logger<Settings>(factory));
             if (!Settings.OffloadSessions)
             {
                 Logger.LogWarning("Ignoring setting. Offloading sessions anyway");
             }
 
-            var serializer = new JsonStreamSerializer(Logger);
+            var serializer = new JsonStreamSerializer(new Logger<JsonStreamSerializer>(factory));
             var config = Configuration.Default;
             config.ApiClient = new ApiClient(Settings.OffloadAddress);
             config.Timeout = 20000;
             var sessionApi = new SessionApiApi(config);
             var shotApi = new ShotApiApi(config);
 
-            var offloadContextFileHandler = new OffloadContextFileHandler(serializer, Logger);
-            Offloader = new PhotoboothOffloader(sessionApi, shotApi, Settings, Logger,
+            var offloadContextFileHandler =
+                new OffloadContextFileHandler(serializer, new Logger<OffloadContextFileHandler>(factory));
+            Offloader = new PhotoboothOffloader(sessionApi, shotApi, Settings, new Logger<PhotoboothOffloader>(factory),
                 offloadContextFileHandler);
 
             while (!ExitRequested)
             {
                 try
                 {
-                    Logger.LogInfo("[Offload sweep started]");
+                    Logger.LogInformation("[Offload sweep started]");
                     Offloader.OffloadEvent();
-                    Logger.LogInfo("[Offload sweep finished]");
+                    Logger.LogInformation("[Offload sweep finished]");
                     Thread.Sleep(60000);
                 }
                 catch (Exception e)
                 {
-                    Logger.LogException("Error while offloading data", e);
+                    Logger.LogError(e,"Error while offloading data");
                     throw;
                 }   
             }
-            Logger.LogInfo("[Application Exit]");
+            Logger.LogInformation("[Application Exit]");
         }
     }
 }

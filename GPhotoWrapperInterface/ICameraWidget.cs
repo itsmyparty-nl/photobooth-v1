@@ -22,8 +22,8 @@ namespace LibGPhoto2
         int ChildCount { get; }
         void Append(ICameraWidget child);
         void Prepend(ICameraWidget child);
-        ICameraWidget GetChild (int n);
-        ICameraWidget GetChild (string label);
+        ICameraWidget? GetChild (int n);
+        ICameraWidget? GetChild (string label);
         ICameraWidget GetChildByID (int id);
         ICameraWidget GetRoot ();
         void SetInfo (string info);

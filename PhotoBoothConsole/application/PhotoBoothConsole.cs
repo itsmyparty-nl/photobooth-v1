@@ -17,9 +17,7 @@
 */
 #endregion
 
-using System;
 using System.Globalization;
-using System.Threading;
 using com.prodg.photobooth.domain;
 using com.prodg.photobooth.infrastructure.hardware;
 
@@ -34,7 +32,7 @@ namespace com.prodg.photobooth.application
         {
             using (var photoBooth = new PhotoBooth())
             {
-                photoBooth.Hardware.Camera.BatteryWarning += OnCameraBatteryWarning;
+                photoBooth.Hardware.Camera.BatteryWarning += OnCameraBatteryWarning!;
                 
                 photoBooth.Start();
                 
@@ -43,7 +41,7 @@ namespace com.prodg.photobooth.application
 
                 photoBooth.Stop();
 
-                photoBooth.Hardware.Camera.BatteryWarning -= OnCameraBatteryWarning;
+                photoBooth.Hardware.Camera.BatteryWarning -= OnCameraBatteryWarning!;
             }
         }
 

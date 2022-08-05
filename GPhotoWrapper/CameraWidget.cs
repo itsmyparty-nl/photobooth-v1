@@ -1,4 +1,3 @@
-using System;
 using System.Runtime.InteropServices;
 
 namespace LibGPhoto2
@@ -108,7 +107,7 @@ namespace LibGPhoto2
 		[DllImport ("libgphoto2.so")]
 		private static extern ErrorCode gp_widget_get_child (HandleRef widget, int child_number, out IntPtr child);
 		
-		public ICameraWidget GetChild (int n)
+		public ICameraWidget? GetChild (int n)
 		{
 			ErrorCode result;
 			IntPtr native;
@@ -117,7 +116,7 @@ namespace LibGPhoto2
 			
 			if (native != IntPtr.Zero)
 			{
-				CameraWidget child = new CameraWidget (native);
+				CameraWidget? child = new CameraWidget (native);
 			
 			if (Error.IsError(result)) throw Error.ErrorException(result);
 			return child;
@@ -128,7 +127,7 @@ namespace LibGPhoto2
 		[DllImport ("libgphoto2.so")]
 		private static extern ErrorCode gp_widget_get_child_by_label (HandleRef widget, string label, out IntPtr child);
 		
-		public ICameraWidget GetChild (string label)
+		public ICameraWidget? GetChild (string label)
 		{
 			ErrorCode result;
 			IntPtr native;
@@ -136,7 +135,7 @@ namespace LibGPhoto2
 			result = gp_widget_get_child_by_label(this.Handle, label, out native);
 			if (native != IntPtr.Zero)
 			{
-				CameraWidget child = new CameraWidget (native);
+				CameraWidget? child = new CameraWidget (native);
 			
 			if (Error.IsError(result)) throw Error.ErrorException(result);
 			return child;

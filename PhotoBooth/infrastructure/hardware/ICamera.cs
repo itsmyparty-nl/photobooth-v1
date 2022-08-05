@@ -17,8 +17,6 @@
 */
 #endregion
 
-using System;
-
 namespace com.prodg.photobooth.infrastructure.hardware
 {
     public class CameraBatteryWarningEventArgs : EventArgs
@@ -28,7 +26,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
             Level = level;
         }
 
-        public int Level { get; private set; }
+        public int Level { get; }
     }
 
     public class CameraStateChangedEventArgs : EventArgs
@@ -41,7 +39,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
         public bool NewState { get; private set; }
     }
 
-    public interface ICamera: IHardwareController, IDisposable
+    public interface ICamera: IHardwareController
     {
         /// <summary>
         /// Emits an event when the camera state changed (from ready to connection lost and vice versa)

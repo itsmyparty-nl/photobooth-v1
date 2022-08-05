@@ -17,8 +17,6 @@
 */
 #endregion
 
-using System;
-
 namespace com.prodg.photobooth.infrastructure.hardware
 {
 	public class TriggerControlEventArgs : EventArgs
@@ -28,7 +26,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
 			RemoteControlId = id;
 		}
 		
-		public string RemoteControlId {get; private set;}
+		public string RemoteControlId {get; }
     }
 	
 	public interface ITriggerControl: IHardwareController

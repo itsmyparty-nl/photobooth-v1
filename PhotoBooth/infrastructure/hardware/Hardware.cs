@@ -17,16 +17,16 @@
 */
 #endregion
 
-using com.prodg.photobooth.common;
+using Microsoft.Extensions.Logging;
 
 namespace com.prodg.photobooth.infrastructure.hardware
 {
     public class Hardware : IHardware
     {
-        private readonly ILogger logger;
+        private readonly ILogger<Hardware> _logger;
 
 		public Hardware(ICamera camera, IPrinter printer, ITriggerControl triggerControl, ITriggerControl printControl,
-             ITriggerControl printTwiceControl, ITriggerControl powerControl, ILogger logger)
+             ITriggerControl printTwiceControl, ITriggerControl powerControl, ILogger<Hardware> logger)
         {
             Camera = camera;
 			Printer = printer;
@@ -34,7 +34,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
             PrintControl = printControl;
             PrintTwiceControl = printTwiceControl;
             PowerControl = powerControl;
-            this.logger = logger;
+            _logger = logger;
         }
 
         #region IHardware Members
@@ -53,7 +53,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
 
         public void Acquire()
         {
-            logger.LogInfo("Initializing hardware");
+            _logger.LogInformation("Initializing hardware");
 
             Camera.Initialize();
 			Printer.Initialize ();
@@ -65,7 +65,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
 
         public void Release()
         {
-            logger.LogInfo("Releasing hardware");
+            _logger.LogInformation("Releasing hardware");
 
             TriggerControl.Release();
             PowerControl.Release();

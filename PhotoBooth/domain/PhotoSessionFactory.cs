@@ -48,7 +48,7 @@ namespace com.prodg.photobooth.domain
         /// Pick a path and create a new session for this path
         /// </summary>
         /// <returns>The new photosession</returns>
-        public PhotoSession CreateSession()
+        public PhotoSession? CreateSession()
         {
             int sessionIndex = GetNextSessionIndex();
             string storagePath = GetSessionPath(sessionIndex);
