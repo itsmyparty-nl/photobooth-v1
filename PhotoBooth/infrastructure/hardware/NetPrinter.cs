@@ -84,12 +84,12 @@ namespace com.prodg.photobooth.infrastructure.hardware
                 //     Kind = PrinterResolutionKind.High
                 // };
                 //Pick the first papersize
-                //pd.DefaultPageSettings.PaperSize = pd.PrinterSettings.PaperSizes[0];
+                pd.DefaultPageSettings.PaperSize = pd.PrinterSettings.PaperSizes[0];
                 //pd.DefaultPageSettings.Landscape = true;
                 pd.DefaultPageSettings.Margins = new Margins(settings.PrintMarginLeft, settings.PrintMarginRight,
                     settings.PrintMarginTop, settings.PrintMarginBottom);
 
-                //pd.DefaultPageSettings.Color = true;
+                pd.DefaultPageSettings.Color = true;
                 
                 logger.LogInfo(pd.DefaultPageSettings.ToString());
                 logger.LogInfo(pd.PrinterSettings.ToString());
