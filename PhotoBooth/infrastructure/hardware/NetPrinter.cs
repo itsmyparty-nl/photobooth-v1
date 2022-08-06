@@ -85,7 +85,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
                 };
                 //Pick the first papersize
                 pd.DefaultPageSettings.PaperSize = pd.PrinterSettings.PaperSizes[0];
-                pd.DefaultPageSettings.PaperSize = new PaperSize("Photo", 624, 416);
+                pd.DefaultPageSettings.PaperSize = new PaperSize("Photo", 394, 583);
                 //pd.DefaultPageSettings.Landscape = true;
                 pd.DefaultPageSettings.Margins = new Margins(settings.PrintMarginLeft, settings.PrintMarginRight,
                     settings.PrintMarginTop, settings.PrintMarginBottom);
