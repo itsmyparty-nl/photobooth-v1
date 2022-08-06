@@ -77,14 +77,14 @@ namespace com.prodg.photobooth.infrastructure.hardware
                 logger.LogInfo(pd.DefaultPageSettings.ToString());
                 logger.LogInfo(pd.PrinterSettings.ToString());
                 
-                pd.DefaultPageSettings.PrinterResolution = new PrinterResolution
-                {
-                    X = 300,
-                    Y = 300,
-                    Kind = PrinterResolutionKind.High
-                };
+                // pd.DefaultPageSettings.PrinterResolution = new PrinterResolution
+                // {
+                //     X = 300,
+                //     Y = 300,
+                //     Kind = PrinterResolutionKind.High
+                // };
                 //Pick the first papersize
-                pd.DefaultPageSettings.PaperSize = pd.PrinterSettings.PaperSizes[0];
+                //pd.DefaultPageSettings.PaperSize = pd.PrinterSettings.PaperSizes[0];
                 //pd.DefaultPageSettings.Landscape = true;
                 pd.DefaultPageSettings.Margins = new Margins(settings.PrintMarginLeft, settings.PrintMarginRight,
                     settings.PrintMarginTop, settings.PrintMarginBottom);
