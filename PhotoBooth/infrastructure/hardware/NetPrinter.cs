@@ -73,7 +73,10 @@ namespace com.prodg.photobooth.infrastructure.hardware
 				pd.EndPrint += printDocument_EndPrint;
                 pd.PrinterSettings.PrinterName = settings.PrinterName;
                 //Set the paper settings before calling print in order to get the correct graphics object
-
+                
+                logger.LogInfo(pd.DefaultPageSettings.ToString());
+                logger.LogInfo(pd.PrinterSettings.ToString());
+                
                 pd.DefaultPageSettings.PrinterResolution = new PrinterResolution
                 {
                     X = 300,
@@ -144,6 +147,8 @@ namespace com.prodg.photobooth.infrastructure.hardware
         private void printDocument_PrintPage(object sender, PrintPageEventArgs e)
         {
             logger.LogInfo("printDocument_PrintPage");
+            logger.LogInfo(e.ToString());
+            logger.LogInfo(pd.ToString());
             Graphics g = e.Graphics;
 
             // If you set printDocumet.OriginAtMargins to 'false' this event 
