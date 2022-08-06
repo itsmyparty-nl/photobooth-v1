@@ -86,7 +86,12 @@ namespace com.prodg.photobooth.infrastructure.hardware
                 pd.DefaultPageSettings.Margins = new Margins(settings.PrintMarginLeft, settings.PrintMarginRight,
                     settings.PrintMarginTop, settings.PrintMarginBottom);
 
-				pd.Print();
+                //pd.DefaultPageSettings.Color = true;
+                
+                logger.LogInfo(pd.DefaultPageSettings.ToString());
+                logger.LogInfo(pd.PrinterSettings.ToString());
+                
+                pd.Print();
 
 				printFinished.WaitOne();
             }
@@ -99,6 +104,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
 
         void printDocument_EndPrint (object sender, PrintEventArgs e)
         {
+            logger.LogInfo("printDocument_EndPrint");
 			//Free all stored variables for this print
 			storedImage = null;
 			rotatedImage.Dispose();
@@ -124,6 +130,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
 
         private void printDocument_BeginPrint(object sender, PrintEventArgs e)
         {
+            logger.LogInfo("printDocument_BeginPrint");
             // Save our print action so we know if we are printing 
             // a preview or a real document.
             printAction = e.PrintAction;
@@ -136,6 +143,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
 
         private void printDocument_PrintPage(object sender, PrintPageEventArgs e)
         {
+            logger.LogInfo("printDocument_PrintPage");
             Graphics g = e.Graphics;
 
             // If you set printDocumet.OriginAtMargins to 'false' this event 
@@ -206,6 +214,8 @@ namespace com.prodg.photobooth.infrastructure.hardware
 			g.DrawImage (rotatedImage, new Rectangle (0, 0, availableWidth, availableHeight),
 				0, 0, (int)(Math.Round (rotatedImage.Width / (ImageDpi / 100f))), (int)(Math.Round (rotatedImage.Height / (ImageDpi / 100f))),
 				GraphicsUnit.Pixel, attributes);
+            
+            logger.LogInfo("printDocument_PrintPage finished");
         }
     }
 }
