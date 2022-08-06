@@ -77,14 +77,15 @@ namespace com.prodg.photobooth.infrastructure.hardware
                 logger.LogInfo(pd.DefaultPageSettings.ToString());
                 logger.LogInfo(pd.PrinterSettings.ToString());
                 
-                // pd.DefaultPageSettings.PrinterResolution = new PrinterResolution
-                // {
-                //     X = 300,
-                //     Y = 300,
-                //     Kind = PrinterResolutionKind.High
-                // };
+                pd.DefaultPageSettings.PrinterResolution = new PrinterResolution
+                {
+                    X = 300,
+                    Y = 300,
+                    Kind = PrinterResolutionKind.High
+                };
                 //Pick the first papersize
                 pd.DefaultPageSettings.PaperSize = pd.PrinterSettings.PaperSizes[0];
+                pd.DefaultPageSettings.PaperSize = new PaperSize("Photo", 624, 416);
                 //pd.DefaultPageSettings.Landscape = true;
                 pd.DefaultPageSettings.Margins = new Margins(settings.PrintMarginLeft, settings.PrintMarginRight,
                     settings.PrintMarginTop, settings.PrintMarginBottom);
@@ -202,9 +203,9 @@ namespace com.prodg.photobooth.infrastructure.hardware
                         : (e.PageSettings.Landscape ? printableArea.Width : printableArea.Height));
 
             logger.LogInfo(
-                String.Format("Printing image ({2}x{3}) on {0}, printable area ({1}), bounds ({4}), dpi ({5},{6})",
+                String.Format("Printing image ({2}x{3}) on {0}, printable area ({1}), bounds ({4}), dpi ({5},{6}), g.size ({7}, {8})",
                     e.PageSettings.PrinterSettings.PrinterName, printableArea, rotatedImage.Width,
-                    rotatedImage.Height, e.MarginBounds, e.Graphics.DpiX, e.Graphics.DpiY));
+                    rotatedImage.Height, e.MarginBounds, e.Graphics.DpiX, e.Graphics.DpiY, availableWidth, availableHeight));
 
             // Draw our rectangle which will either be the soft margin rectangle 
             // or the hard margin (printer capabilities) rectangle.
@@ -213,11 +214,11 @@ namespace com.prodg.photobooth.infrastructure.hardware
             // zero based co-ordinates system. This will put the rectangle just 
             // inside the available width and height.            
 
-            //g.InterpolationMode = InterpolationMode.HighQualityBicubic;
-            //g.SmoothingMode = SmoothingMode.HighQuality;
+            g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+            g.SmoothingMode = SmoothingMode.HighQuality;
             //g.DrawImage(rotatedImage, new Rectangle(0, 0, availableWidth, availableHeight));
 			g.DrawImage (rotatedImage, new Rectangle (0, 0, availableWidth, availableHeight),
-				0, 0, (int)(Math.Round (rotatedImage.Width / (ImageDpi / 100f))), (int)(Math.Round (rotatedImage.Height / (ImageDpi / 100f))),
+			    0, 0, (int)(Math.Round (rotatedImage.Width / (ImageDpi / 100f))), (int)(Math.Round (rotatedImage.Height / (ImageDpi / 100f))),
 				GraphicsUnit.Pixel, attributes);
             
             logger.LogInfo("printDocument_PrintPage finished");
