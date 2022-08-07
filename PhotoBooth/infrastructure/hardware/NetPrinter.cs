@@ -73,6 +73,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
                 pd.BeginPrint += printDocument_BeginPrint;
                 pd.EndPrint += printDocument_EndPrint;
                 pd.PrinterSettings.PrinterName = settings.PrinterName;
+                pd.PrinterSettings.PrintFileName = "PhotoPrint";
                 //Set the paper settings before calling print in order to get the correct graphics object
 
                 logger.LogInfo(pd.DefaultPageSettings.ToString());
