@@ -76,9 +76,6 @@ namespace com.prodg.photobooth.infrastructure.hardware
                 pd.DocumentName = "PhotoPrint";
                 //Set the paper settings before calling print in order to get the correct graphics object
 
-                logger.LogInfo(pd.DefaultPageSettings.ToString());
-                logger.LogInfo(pd.PrinterSettings.ToString());
-
                 pd.DefaultPageSettings.PrinterResolution = new PrinterResolution
                 {
                     X = PrinterDpi,
@@ -101,9 +98,6 @@ namespace com.prodg.photobooth.infrastructure.hardware
 
                 pd.DefaultPageSettings.Color = true;
 
-                logger.LogInfo(pd.DefaultPageSettings.ToString());
-                logger.LogInfo(pd.PrinterSettings.ToString());
-
                 pd.Print();
 
                 printFinished.WaitOne();
@@ -117,7 +111,6 @@ namespace com.prodg.photobooth.infrastructure.hardware
 
         void printDocument_EndPrint(object sender, PrintEventArgs e)
         {
-            logger.LogInfo("printDocument_EndPrint");
             //Free all stored variables for this print
             storedImage = null;
             rotatedImage.Dispose();
@@ -143,7 +136,6 @@ namespace com.prodg.photobooth.infrastructure.hardware
 
         private void printDocument_BeginPrint(object sender, PrintEventArgs e)
         {
-            logger.LogInfo("printDocument_BeginPrint");
             // Save our print action so we know if we are printing 
             // a preview or a real document.
             printAction = e.PrintAction;
@@ -156,9 +148,6 @@ namespace com.prodg.photobooth.infrastructure.hardware
 
         private void printDocument_PrintPage(object sender, PrintPageEventArgs e)
         {
-            logger.LogInfo("printDocument_PrintPage");
-            logger.LogInfo(e.ToString());
-            logger.LogInfo(pd.ToString());
             Graphics g = e.Graphics;
 
             // If you set printDocumet.OriginAtMargins to 'false' this event 
