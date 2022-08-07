@@ -34,6 +34,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
     public class NetPrinter : IPrinter
     {
         private const int ImageDpi = 72;
+        private const int PrinterDpi = 300;
         private PrintAction printAction = PrintAction.PrintToPrinter;
         private readonly ISettings settings;
         private readonly ILogger logger;
@@ -63,9 +64,6 @@ namespace com.prodg.photobooth.infrastructure.hardware
                 storedImage = image;
                 rotatedImage = (Image) storedImage.Clone();
                 rotatedImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
-                var img = ResizeImage(rotatedImage, rotatedImage.Width / 2, rotatedImage.Height / 2);
-                rotatedImage.Dispose();
-                rotatedImage = img;
                 printFinished.Reset();
 
                 //Initialize the print document
@@ -82,13 +80,20 @@ namespace com.prodg.photobooth.infrastructure.hardware
 
                 pd.DefaultPageSettings.PrinterResolution = new PrinterResolution
                 {
-                    X = 300,
-                    Y = 300,
+                    X = PrinterDpi,
+                    Y = PrinterDpi,
                     Kind = PrinterResolutionKind.High
                 };
                 //Pick the first papersize
                 pd.DefaultPageSettings.PaperSize = pd.PrinterSettings.PaperSizes[0];
                 pd.DefaultPageSettings.PaperSize = new PaperSize("Photo", 394, 583);
+
+                int maxHeight = pd.DefaultPageSettings.PaperSize.Height * PrinterDpi / 100;
+                int maxWidth = pd.DefaultPageSettings.PaperSize.Width * PrinterDpi / 100;
+                var img = ResizeImage(rotatedImage, maxWidth, maxHeight);
+                rotatedImage.Dispose();
+                rotatedImage = img;
+                
                 //pd.DefaultPageSettings.Landscape = true;
                 pd.DefaultPageSettings.Margins = new Margins(settings.PrintMarginLeft, settings.PrintMarginRight,
                     settings.PrintMarginTop, settings.PrintMarginBottom);
@@ -233,6 +238,11 @@ namespace com.prodg.photobooth.infrastructure.hardware
 
         public static Bitmap ResizeImage(Image image, int width, int height)
         {
+            // Keep aspect ratio
+            float scale = Math.Min(1.0f, Math.Min((float) height / image.Height, (float) width / image.Width));
+            width = (int)Math.Round(image.Width * scale);
+            height = (int)Math.Round(image.Height * scale);
+
             var destRect = new Rectangle(0, 0, width, height);
             var destImage = new Bitmap(width, height);
 
