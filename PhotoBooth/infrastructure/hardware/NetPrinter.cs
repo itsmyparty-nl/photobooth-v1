@@ -236,7 +236,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
             var destRect = new Rectangle(0, 0, width, height);
             var destImage = new Bitmap(width, height);
 
-            destImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
+            destImage.SetResolution(ImageDpi, ImageDpi);
 
             using (var graphics = Graphics.FromImage(destImage))
             {
