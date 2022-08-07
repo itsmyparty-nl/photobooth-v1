@@ -87,7 +87,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
                 };
                 //Pick the first papersize
                 pd.DefaultPageSettings.PaperSize = pd.PrinterSettings.PaperSizes[0];
-                pd.DefaultPageSettings.PaperSize = new PaperSize("Photo", 394, 583);
+                //pd.DefaultPageSettings.PaperSize = new PaperSize("Photo", 394, 583);
 
                 int maxHeight = pd.DefaultPageSettings.PaperSize.Height * PrinterDpi / 100;
                 int maxWidth = pd.DefaultPageSettings.PaperSize.Width * PrinterDpi / 100;
