@@ -19,7 +19,6 @@
     <ProjectReference Include="..\CommandMessenger\CommandMessenger.csproj" />
     <ProjectReference Include="..\GPhotoWrapperInterface\GPhotoWrapperInterface.csproj" />
     <ProjectReference Include="..\GPhotoWrapper\GPhotoWrapper.csproj" />
-    <ProjectReference Include="..\PhotoboothApiClient\Photobooth-Api-Client.csproj" />
   </ItemGroup>
   
 </Project>

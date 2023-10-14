@@ -20,8 +20,8 @@
 using com.prodg.photobooth.config;
 using com.prodg.photobooth.domain.offload;
 using com.prodg.photobooth.infrastructure.serialization;
-using ItsMyParty.Photobooth.Api;
-using ItsMyParty.Photobooth.Client;
+// using ItsMyParty.Photobooth.Api;
+// using ItsMyParty.Photobooth.Client;
 using Microsoft.Extensions.Logging;
 
 namespace com.prodg.photobooth
@@ -49,16 +49,17 @@ namespace com.prodg.photobooth
             }
 
             var serializer = new JsonStreamSerializer(new Logger<JsonStreamSerializer>(factory));
-            var config = Configuration.Default;
-            config.ApiClient = new ApiClient(Settings.OffloadAddress);
-            config.Timeout = 20000;
-            var sessionApi = new SessionApiApi(config);
-            var shotApi = new ShotApiApi(config);
+            // var config = Configuration.Default;
+            // config.ApiClient = new ApiClient(Settings.OffloadAddress);
+            // config.Timeout = 20000;
+            // var sessionApi = new SessionApiApi(config);
+            // var shotApi = new ShotApiApi(config);
 
-            var offloadContextFileHandler =
-                new OffloadContextFileHandler(serializer, new Logger<OffloadContextFileHandler>(factory));
-            Offloader = new PhotoboothOffloader(sessionApi, shotApi, Settings, new Logger<PhotoboothOffloader>(factory),
-                offloadContextFileHandler);
+            // var offloadContextFileHandler =
+                // new OffloadContextFileHandler(serializer, new Logger<OffloadContextFileHandler>(factory));
+            // Offloader = new PhotoboothOffloader(sessionApi, shotApi, Settings, new Logger<PhotoboothOffloader>(factory),
+                // offloadContextFileHandler);
+            Offloader = new OffloadStub();
 
             while (!ExitRequested)
             {

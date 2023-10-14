@@ -24,10 +24,10 @@ using com.prodg.photobooth.infrastructure.command;
 using com.prodg.photobooth.infrastructure.hardware;
 using com.prodg.photobooth.infrastructure.serialization;
 using CommandMessenger.TransportLayer;
-using ItsMyParty.Photobooth.Api;
-using ItsMyParty.Photobooth.Client;
+//using ItsMyParty.Photobooth.Api;
+//using ItsMyParty.Photobooth.Client;
 using Microsoft.Extensions.Logging;
-using Configuration = ItsMyParty.Photobooth.Client.Configuration;
+//using Configuration = ItsMyParty.Photobooth.Client.Configuration;
 
 namespace com.prodg.photobooth.domain
 {
@@ -36,7 +36,6 @@ namespace com.prodg.photobooth.domain
     /// </summary>
     public class PhotoBooth : IDisposable
     {
-        private readonly ICamera _camera;
         private readonly CommandMessengerTransceiver _commandMessenger;
         private readonly ConsoleCommandReceiver _consoleReceiver;
         private ITransport _transport;
@@ -51,7 +50,7 @@ namespace com.prodg.photobooth.domain
 
         public IPhotoboothOffloader Offloader { get; }
 
-        private ILogger<PhotoBooth> _logger;
+        private readonly ILogger<PhotoBooth> _logger;
 
         public ISettings Settings { get; }
 
@@ -67,9 +66,9 @@ namespace com.prodg.photobooth.domain
 
             Settings = new Settings(new Logger<Settings>(factory));
 
-            _camera = new Camera(new Logger<Camera>(factory));
+            ICamera camera = new Camera(new Logger<Camera>(factory));
 
-            CreateTransport();
+            _transport = CreateTransport();
 
             //transport = new StubbedTransport ();
             _commandMessenger =
@@ -77,31 +76,29 @@ namespace com.prodg.photobooth.domain
             _consoleReceiver = new ConsoleCommandReceiver(new Logger<ConsoleCommandReceiver>(factory));
             ShutdownRequested = new AutoResetEvent(false);
 
-            if (Settings.OffloadSessions)
-            {
-                var config = Configuration.Default;
-                config.ApiClient = new ApiClient(Settings.OffloadAddress);
-                config.Timeout = 20000;
-                var sessionApi = new SessionApiApi(config);
-                var shotApi = new ShotApiApi(config);
-                var offloadContextFileHandler =
-                    new OffloadContextFileHandler(serializer, new Logger<OffloadContextFileHandler>(factory));
-                Offloader = new PhotoboothOffloader(sessionApi, shotApi, Settings, new Logger<PhotoboothOffloader>(factory),
-                    offloadContextFileHandler);
-            }
-            else
-            {
+            // if (Settings.OffloadSessions)
+            // {
+            //     var config = Configuration.Default;
+            //     config.ApiClient = new ApiClient(Settings.OffloadAddress);
+            //     config.Timeout = 20000;
+            //     var sessionApi = new SessionApiApi(config);
+            //     var shotApi = new ShotApiApi(config);
+            //     var offloadContextFileHandler =
+            //         new OffloadContextFileHandler(serializer, new Logger<OffloadContextFileHandler>(factory));
+            //     Offloader = new PhotoboothOffloader(sessionApi, shotApi, Settings, new Logger<PhotoboothOffloader>(factory),
+            //         offloadContextFileHandler);
+            // }
+            // else
+            // {
                 Offloader = new OffloadStub();
-            }
+            // }
 
-            ITriggerControl printControl;
             ITriggerControl triggerControl = CreateTriggerControl(factory);
-            ITriggerControl printTwiceControl;
-            IPrinter printer = CreatePrinterControls(factory, out printControl, out printTwiceControl);
+            IPrinter printer = CreatePrinterControls(factory, out var printControl, out var printTwiceControl);
             ITriggerControl powerControl = new RemoteTrigger(Command.Power, _consoleReceiver, _commandMessenger,
                 new Logger<RemoteTrigger>(factory));
 
-            Hardware = new Hardware(_camera, printer, triggerControl, printControl, printTwiceControl,
+            Hardware = new Hardware(camera, printer, triggerControl, printControl, printTwiceControl,
                 powerControl, new Logger<Hardware>(factory));
 
             var imageProcessor = new ImageProcessingChain(factory, new Logger<ImageProcessingChain>(factory), Settings);
@@ -117,7 +114,7 @@ namespace com.prodg.photobooth.domain
 
         private ITriggerControl CreateTriggerControl(ILoggerFactory factory)
         {
-            if (!String.IsNullOrWhiteSpace(Settings.SerialPortName))
+            if (!string.IsNullOrWhiteSpace(Settings.SerialPortName))
             {
                 return new RemoteTrigger(Command.Trigger, _commandMessenger, _commandMessenger,
                     new Logger<RemoteTrigger>(factory));
@@ -159,7 +156,7 @@ namespace com.prodg.photobooth.domain
             return printer;
         }
 
-        private void CreateTransport()
+        private ITransport CreateTransport()
         {
             // Create Serial Port object
             // Note that for some boards (e.g. Sparkfun Pro Micro) DtrEnable may need to be true.
@@ -167,7 +164,7 @@ namespace com.prodg.photobooth.domain
             {
                 _logger.LogDebug("Creating serial transport {SerialPortName}:{SerialPortBaudRate}:{SerialPortDtrEnable}",
                     Settings.SerialPortName, Settings.SerialPortBaudRate, Settings.SerialPortDtrEnable);
-                _transport = new SerialTransport
+                return new SerialTransport
                 {
                     CurrentSerialSettings =
                     {
@@ -180,7 +177,7 @@ namespace com.prodg.photobooth.domain
             else
             {
                 _logger.LogDebug("Creating stubbed transport");
-                _transport = new StubbedTransport();
+                return new StubbedTransport();
             }
         }
 
