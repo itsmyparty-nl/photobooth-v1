@@ -33,22 +33,23 @@ namespace com.prodg.photobooth.infrastructure.hardware
     /// </summary>
     public class NetPrinter : IPrinter
     {
-		private const int ImageDpi = 72; 
-		private PrintAction printAction = PrintAction.PrintToPrinter;
+        private const int ImageDpi = 72;
+        private const int PrinterDpi = 300;
+        private PrintAction printAction = PrintAction.PrintToPrinter;
         private readonly ISettings settings;
         private readonly ILogger logger;
         private Image storedImage;
         private Image rotatedImage;
         private PrintDocument pd;
-		private ManualResetEvent printFinished;
-		private ImageAttributes attributes;
+        private ManualResetEvent printFinished;
+        private ImageAttributes attributes;
 
         public NetPrinter(ISettings settings, ILogger logger)
         {
             this.settings = settings;
             this.logger = logger;
-			printFinished = new ManualResetEvent (false);
-			attributes = new ImageAttributes();
+            printFinished = new ManualResetEvent(false);
+            attributes = new ImageAttributes();
         }
 
         /// <summary>
@@ -60,52 +61,63 @@ namespace com.prodg.photobooth.infrastructure.hardware
             try
             {
                 //Store variables for printing
-				storedImage = image;
-				rotatedImage = (Image) storedImage.Clone();
-				rotatedImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
-				printFinished.Reset();
+                storedImage = image;
+                rotatedImage = (Image) storedImage.Clone();
+                rotatedImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
+                printFinished.Reset();
 
-				//Initialize the print document
-				pd = new PrintDocument();
+                //Initialize the print document
+                pd = new PrintDocument();
 
                 pd.PrintPage += printDocument_PrintPage;
                 pd.BeginPrint += printDocument_BeginPrint;
-				pd.EndPrint += printDocument_EndPrint;
+                pd.EndPrint += printDocument_EndPrint;
                 pd.PrinterSettings.PrinterName = settings.PrinterName;
+                pd.DocumentName = "PhotoPrint";
                 //Set the paper settings before calling print in order to get the correct graphics object
 
                 pd.DefaultPageSettings.PrinterResolution = new PrinterResolution
                 {
-                    X = 300,
-                    Y = 300,
+                    X = PrinterDpi,
+                    Y = PrinterDpi,
                     Kind = PrinterResolutionKind.High
                 };
                 //Pick the first papersize
                 pd.DefaultPageSettings.PaperSize = pd.PrinterSettings.PaperSizes[0];
+                //pd.DefaultPageSettings.PaperSize = new PaperSize("Photo", 394, 583);
+
+                int maxHeight = pd.DefaultPageSettings.PaperSize.Height * PrinterDpi / 100;
+                int maxWidth = pd.DefaultPageSettings.PaperSize.Width * PrinterDpi / 100;
+                var img = ResizeImage(rotatedImage, maxWidth, maxHeight);
+                rotatedImage.Dispose();
+                rotatedImage = img;
+                
                 //pd.DefaultPageSettings.Landscape = true;
                 pd.DefaultPageSettings.Margins = new Margins(settings.PrintMarginLeft, settings.PrintMarginRight,
                     settings.PrintMarginTop, settings.PrintMarginBottom);
 
-				pd.Print();
+                pd.DefaultPageSettings.Color = true;
 
-				printFinished.WaitOne();
+                pd.Print();
+
+                printFinished.WaitOne();
             }
             catch (Exception ex)
             {
                 logger.LogException("Error while printing", ex);
-				throw;
+                throw;
             }
         }
 
-        void printDocument_EndPrint (object sender, PrintEventArgs e)
+        void printDocument_EndPrint(object sender, PrintEventArgs e)
         {
-			//Free all stored variables for this print
-			storedImage = null;
-			rotatedImage.Dispose();
-			rotatedImage = null;
+            //Free all stored variables for this print
+            storedImage = null;
+            rotatedImage.Dispose();
+            rotatedImage = null;
 
-			//Trigger that the print is finished
-			printFinished.Set ();
+            //Trigger that the print is finished
+            printFinished.Set();
         }
 
         public void Initialize()
@@ -130,7 +142,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
 
             // Set some preferences, our method should print a box with any 
             // combination of these properties being true/false.
-            pd.OriginAtMargins = true;   //true = soft margins, false = hard margins
+            pd.OriginAtMargins = true; //true = soft margins, false = hard margins
             pd.DefaultPageSettings.Landscape = false;
         }
 
@@ -179,19 +191,21 @@ namespace com.prodg.photobooth.infrastructure.hardware
             // rotate in software for landscape)
             var availableWidth =
                 (int)
-                    Math.Floor(pd.OriginAtMargins
-                        ? marginBounds.Width
-                        : (e.PageSettings.Landscape ? printableArea.Height : printableArea.Width));
+                Math.Floor(pd.OriginAtMargins
+                    ? marginBounds.Width
+                    : (e.PageSettings.Landscape ? printableArea.Height : printableArea.Width));
             var availableHeight =
                 (int)
-                    Math.Floor(pd.OriginAtMargins
-                        ? marginBounds.Height
-                        : (e.PageSettings.Landscape ? printableArea.Width : printableArea.Height));
+                Math.Floor(pd.OriginAtMargins
+                    ? marginBounds.Height
+                    : (e.PageSettings.Landscape ? printableArea.Width : printableArea.Height));
 
             logger.LogInfo(
-                String.Format("Printing image ({2}x{3}) on {0}, printable area ({1}), bounds ({4}), dpi ({5},{6})",
+                String.Format(
+                    "Printing image ({2}x{3}) on {0}, printable area ({1}), bounds ({4}), dpi ({5},{6}), g.size ({7}, {8})",
                     e.PageSettings.PrinterSettings.PrinterName, printableArea, rotatedImage.Width,
-                    rotatedImage.Height, e.MarginBounds, e.Graphics.DpiX, e.Graphics.DpiY));
+                    rotatedImage.Height, e.MarginBounds, e.Graphics.DpiX, e.Graphics.DpiY, availableWidth,
+                    availableHeight));
 
             // Draw our rectangle which will either be the soft margin rectangle 
             // or the hard margin (printer capabilities) rectangle.
@@ -203,9 +217,43 @@ namespace com.prodg.photobooth.infrastructure.hardware
             g.InterpolationMode = InterpolationMode.HighQualityBicubic;
             g.SmoothingMode = SmoothingMode.HighQuality;
             //g.DrawImage(rotatedImage, new Rectangle(0, 0, availableWidth, availableHeight));
-			g.DrawImage (rotatedImage, new Rectangle (0, 0, availableWidth, availableHeight),
-				0, 0, (int)(Math.Round (rotatedImage.Width / (ImageDpi / 100f))), (int)(Math.Round (rotatedImage.Height / (ImageDpi / 100f))),
-				GraphicsUnit.Pixel, attributes);
+            g.DrawImage(rotatedImage, new Rectangle(0, 0, availableWidth, availableHeight),
+                0, 0, (int) (Math.Round(rotatedImage.Width / (ImageDpi / 100f))),
+                (int) (Math.Round(rotatedImage.Height / (ImageDpi / 100f))),
+                GraphicsUnit.Pixel, attributes);
+
+            logger.LogInfo("printDocument_PrintPage finished");
+        }
+
+
+        public static Bitmap ResizeImage(Image image, int width, int height)
+        {
+            // Keep aspect ratio
+            float scale = Math.Min(1.0f, Math.Min((float) height / image.Height, (float) width / image.Width));
+            width = (int)Math.Round(image.Width * scale);
+            height = (int)Math.Round(image.Height * scale);
+
+            var destRect = new Rectangle(0, 0, width, height);
+            var destImage = new Bitmap(width, height);
+
+            destImage.SetResolution(ImageDpi, ImageDpi);
+
+            using (var graphics = Graphics.FromImage(destImage))
+            {
+                graphics.CompositingMode = CompositingMode.SourceCopy;
+                graphics.CompositingQuality = CompositingQuality.HighQuality;
+                graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                graphics.SmoothingMode = SmoothingMode.HighQuality;
+                graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+
+                using (var wrapMode = new ImageAttributes())
+                {
+                    wrapMode.SetWrapMode(WrapMode.TileFlipXY);
+                    graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, wrapMode);
+                }
+            }
+
+            return destImage;
         }
     }
 }
