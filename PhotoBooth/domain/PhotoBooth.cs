@@ -27,7 +27,7 @@ using CommandMessenger.TransportLayer;
 using ItsMyParty.Photobooth.Api;
 using ItsMyParty.Photobooth.Client;
 using Microsoft.Extensions.Logging;
-using Configuration = SixLabors.ImageSharp.Configuration;
+using Configuration = ItsMyParty.Photobooth.Client.Configuration;
 
 namespace com.prodg.photobooth.domain
 {
@@ -97,7 +97,7 @@ namespace com.prodg.photobooth.domain
             ITriggerControl printControl;
             ITriggerControl triggerControl = CreateTriggerControl(factory);
             ITriggerControl printTwiceControl;
-            IPrinter printer = CreatePrinterControls(Logger<>, out printControl, out printTwiceControl);
+            IPrinter printer = CreatePrinterControls(factory, out printControl, out printTwiceControl);
             ITriggerControl powerControl = new RemoteTrigger(Command.Power, _consoleReceiver, _commandMessenger,
                 new Logger<RemoteTrigger>(factory));
 

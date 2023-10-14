@@ -41,22 +41,22 @@ namespace com.prodg.photobooth.domain.image
                 new FilterImageProcessor(new Logger<FilterImageProcessor>(loggerFactory), settings.Filter)
             };
 
-            if (!string.IsNullOrWhiteSpace(settings.FixedImageFilename))
-            {
-	            _imageCombiner = new FixedImageCollageImageProcessor(
-		            new Logger<FixedImageCollageImageProcessor>(loggerFactory), settings, settings.FixedImageFilename);
-            }
-            else
-            {
+            // if (!string.IsNullOrWhiteSpace(settings.FixedImageFilename))
+            // {
+	           //  _imageCombiner = new FixedImageCollageImageProcessor(
+		          //   new Logger<FixedImageCollageImageProcessor>(loggerFactory), settings, settings.FixedImageFilename);
+            // }
+            // else
+            // {
 	            _imageCombiner = new CollageImageProcessor(new Logger<CollageImageProcessor>(loggerFactory), settings);
-            }
+            //}
 
             _imagePostProcessors = new List<ISingleImageProcessor>();
-            if (!string.IsNullOrWhiteSpace(settings.OverlayImageFilename))
-            {
-	            _imagePostProcessors.Add(new OverlayImageProcessor(new Logger<OverlayImageProcessor>(loggerFactory),
-		            settings.OverlayImageFilename));
-            }
+            // if (!string.IsNullOrWhiteSpace(settings.OverlayImageFilename))
+            // {
+	           //  _imagePostProcessors.Add(new OverlayImageProcessor(new Logger<OverlayImageProcessor>(loggerFactory),
+		          //   settings.OverlayImageFilename));
+            // }
 
             _imagePostProcessors.Add(new ImageFileSink(new Logger<ImageFileSink>(loggerFactory), "collage.jpg",
 	            new JpegEncoder()));

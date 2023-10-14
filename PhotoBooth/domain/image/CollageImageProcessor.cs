@@ -17,11 +17,18 @@
 */
 #endregion
 
+using System.Diagnostics;
 using com.prodg.photobooth.config;
 using Microsoft.Extensions.Logging;
-using SixLabors.ImageSharp;
-using Color = System.Drawing.Color;
-using Rectangle = System.Drawing.Rectangle;
+using SixLabors.ImageSharp.Drawing.Processing;
+using SixLabors.ImageSharp.Formats.Bmp;
+using SixLabors.ImageSharp.Formats.Jpeg;
+using SixLabors.ImageSharp.Formats.Png;
+using Color = SixLabors.ImageSharp.Color;
+using Image = SixLabors.ImageSharp.Image;
+
+//using Color = System.Drawing.Color;
+//using Rectangle = System.Drawing.Rectangle;
 
 namespace com.prodg.photobooth.domain.image
 {
@@ -33,8 +40,12 @@ namespace com.prodg.photobooth.domain.image
         private readonly ILogger<CollageImageProcessor> _logger;
         private readonly ISettings _settings;
 
-        private readonly Color backgroundColor = Color.White;
-
+        
+        private readonly Configuration _configuration = new(
+            new PngConfigurationModule(),
+            new JpegConfigurationModule(),
+            new BmpConfigurationModule());
+       
         public int RequiredImages { get; }
 
         public CollageImageProcessor(ILogger<CollageImageProcessor> logger, ISettings settings)
@@ -52,12 +63,15 @@ namespace com.prodg.photobooth.domain.image
         /// </summary>
         public Image Process(PhotoSession? session)
         {
-	        if (session == null) { throw new ArgumentNullException(nameof(session));}
+            if (session == null)
+            {
+                throw new ArgumentNullException(nameof(session));
+            }
 
-	        _logger.LogInformation("Creating a collage of {StoragePath}: {ImageCount} images",
-		        session.StoragePath, session.ImageCount);
-            
-	        if (session.ImageCount != RequiredImages)
+            _logger.LogInformation("Creating a collage of {StoragePath}: {ImageCount} images",
+                session.StoragePath, session.ImageCount);
+
+            if (session.ImageCount != RequiredImages)
             {
                 throw new InvalidOperationException($"Expected exactly {RequiredImages} images to process");
             }
@@ -68,41 +82,33 @@ namespace com.prodg.photobooth.domain.image
             var collageHeight = CalculateCollageHeight(croppedImageHeight);
 
             //create a bitmap to hold the combined image
-            Image finalImage = new Bitmap(collageWidth, collageHeight);
-            //get a graphics object from the image so we can draw on it
-            using (var graphics = Graphics.FromImage(finalImage))
+            Image<Rgb24> finalImage = new Image<Rgb24>(_configuration, collageWidth, collageHeight);
+            finalImage.Mutate(x => x.Fill(Color.White));
+            //go through each image and draw it on the final image
+            var imageIndex = 0;
+            foreach (var currentImage in session.Images)
             {
-                //set background color
-                graphics.Clear(backgroundColor);
+                using var image = currentImage.CloneAs<Rgb24>();
+                
+                var dstWidth = (int)Math.Floor(image.Width * _settings.CollageScalePercentage);
+                image.Mutate(x => x.Resize(dstWidth, 0, KnownResamplers.Lanczos3));
 
-                //go through each image and draw it on the final image
-                var imageIndex = 0;
-                foreach (var currentImage in session.Images)
+                var dstStartX = (imageIndex % _settings.CollageGridWidth) *
+                                (image.Width + _settings.CollagePaddingPixels) +
+                                2 * _settings.CollagePaddingPixels;
+                var dstStartY = (imageIndex / _settings.CollageGridWidth) *
+                                (image.Height + _settings.CollagePaddingPixels) +
+                                2 * _settings.CollagePaddingPixels;
+
+                finalImage.Mutate(x =>
                 {
-                    DrawCroppedImageOnCollage(currentImage, croppedImageHeight, imageIndex, graphics);
-                    imageIndex++;
-                }
+                    Debug.Assert(image != null, nameof(image) + " != null");
+                    x.DrawImage(image, new Point(dstStartX, dstStartY), 1);
+                });
+                imageIndex++;
             }
+
             return finalImage;
-        }
-
-        private void DrawCroppedImageOnCollage(Image image, int croppedImageHeight, int imageIndex, Graphics g)
-        {
-            var srcStartY = image.Height == croppedImageHeight ? 0 : image.Height - croppedImageHeight - 1;
-            var dstWidth = (int)Math.Floor(image.Width * _settings.CollageScalePercentage);
-            var dstHeight = (int)Math.Floor((image.Height - srcStartY) * _settings.CollageScalePercentage);
-
-            //Note: Start at double padding
-            var dstStartX = (imageIndex%_settings.CollageGridWidth)*(dstWidth + _settings.CollagePaddingPixels) +
-                         2*_settings.CollagePaddingPixels;
-            var dstStartY = (imageIndex / _settings.CollageGridWidth) * (dstHeight + _settings.CollagePaddingPixels) +
-                         2*_settings.CollagePaddingPixels;
-
-            //draw the original image on the new image using the grayscale color matrix
-            g.SmoothingMode = SmoothingMode.HighQuality;
-            g.InterpolationMode = InterpolationMode.HighQualityBicubic;
-            g.DrawImage(image, new Rectangle(dstStartX, dstStartY, dstWidth, dstHeight),
-                0, srcStartY, image.Width, image.Height, GraphicsUnit.Pixel, attributes);
         }
 
         private int CalculateCollageHeight(int croppedImageHeight)
@@ -137,5 +143,36 @@ namespace com.prodg.photobooth.domain.image
             return croppedImageHeight;
         }
 
+        #region IDisposable Implementation
+
+        bool _disposed;
+
+        public void Dispose ()
+        {
+            Dispose (true);
+            GC.SuppressFinalize (this);
+        }
+
+        private void Dispose (bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    // Clean up managed objects
+                }
+                // clean up any unmanaged objects
+                _disposed = true;
+            }
+        }
+
+        ~CollageImageProcessor()
+        {
+            Dispose (false);
+        }
+		
+        #endregion
+
+        
     }
 }
