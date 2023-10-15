@@ -26,6 +26,14 @@
     <Content Include="resources\testimages\4.JPG">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <None Remove="resources\overlay\halloween.png" />
+    <Content Include="resources\overlay\halloween.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <None Remove="resources\overlay\halloween-small.png" />
+    <Content Include="resources\overlay\halloween-small.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 

@@ -67,6 +67,34 @@ namespace Test_Photobooth.domain
             Assert.That(image.Width, Is.GreaterThan(100));
             image.SaveAsJpeg($"out-{filterType}.jpg");
         }
+        
+        [TestCase("halloween")]
+        [TestCase("halloween-small")]
+        public void TestProcessImagesOverlay(string overlayPath)
+        {
+            Mock<ILoggerFactory> loggerFactoryStub = new MockRepository(MockBehavior.Loose).Create<ILoggerFactory>();
+            Mock<ILogger<ImageProcessingChain>> loggerStub = new MockRepository(MockBehavior.Loose).Create<ILogger<ImageProcessingChain>>();
+            Mock<ISettings> settingsStub = new MockRepository(MockBehavior.Loose).Create<ISettings>();
+
+            var overlayFullPath = Path.Combine($"resources", "overlay", $"{overlayPath}.png");
+            settingsStub.SetupGet(s => s.CollageGridWidth).Returns(2);
+            settingsStub.SetupGet(s => s.CollageGridHeight).Returns(2);
+            settingsStub.SetupGet(s => s.CollageScalePercentage).Returns(1.0f);
+            settingsStub.SetupGet(s => s.CollagePaddingPixels).Returns(20);
+            settingsStub.SetupGet(s => s.CollageAspectRatio).Returns(1.32);
+            settingsStub.SetupGet(s => s.OverlayImageFilename).Returns(overlayFullPath);
+        
+            var imageProcessingChain = new ImageProcessingChain(loggerFactoryStub.Object,loggerStub.Object, settingsStub.Object);
+        
+            var session = LoadPhotoSession(@"resources/testImages", imageProcessingChain.RequiredImages);
+            
+            //Act
+            var image = imageProcessingChain.Process(session);
+            Assert.That(image, Is.Not.Null);
+            Assert.That(image.Height, Is.GreaterThan(100));
+            Assert.That(image.Width, Is.GreaterThan(100));
+            image.SaveAsJpeg($"out-overlay-{overlayPath}.jpg");
+        }
 
         [Test]
         public void TestProcessImagesCollage()

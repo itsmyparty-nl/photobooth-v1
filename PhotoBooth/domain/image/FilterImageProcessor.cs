@@ -18,8 +18,6 @@
 #endregion
 
 using Microsoft.Extensions.Logging;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Processing;
 
 namespace com.prodg.photobooth.domain.image
 {

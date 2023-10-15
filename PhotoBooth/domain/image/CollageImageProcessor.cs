@@ -135,8 +135,6 @@ namespace com.prodg.photobooth.domain.image
             //Calculate the desired height according to the aspect ratio
             var desiredCollageHeight = (int) (collageWidth/_settings.CollageAspectRatio);
 
-            //totalHeight = (height*n*scale) + (n+3)*padpx
-            //height = (totalHeight - padpx*(n + 3))/(n*scale)
             var croppedImageHeight =
                 (int) ((desiredCollageHeight - _settings.CollagePaddingPixels*(_settings.CollageGridHeight + 3))/
                        (_settings.CollageGridHeight*_settings.CollageScalePercentage));
