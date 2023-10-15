@@ -53,7 +53,7 @@ namespace com.prodg.photobooth.domain.image
             _logger = logger;
             _settings = settings;
 
-            logger.LogDebug("Creating CollageImageProcessor");
+            //logger.LogDebug("Creating CollageImageProcessor");
             
             RequiredImages = settings.CollageGridHeight*settings.CollageGridWidth;
         }
@@ -68,8 +68,8 @@ namespace com.prodg.photobooth.domain.image
                 throw new ArgumentNullException(nameof(session));
             }
 
-            _logger.LogInformation("Creating a collage of {StoragePath}: {ImageCount} images",
-                session.StoragePath, session.ImageCount);
+            //_logger.LogInformation("Creating a collage of {StoragePath}: {ImageCount} images",
+            //    session.StoragePath, session.ImageCount);
 
             if (session.ImageCount != RequiredImages)
             {

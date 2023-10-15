@@ -35,15 +35,19 @@ namespace com.prodg.photobooth.domain.image
                     return ColorMatrix.Identity;
                 case FilterType.Polaroid:
                     return KnownFilterMatrices.PolaroidFilter;
+                case FilterType.Grayscale:
+                    return KnownFilterMatrices.CreateGrayscaleBt709Filter(1.0f);
                 case FilterType.DarkGrayscale:
-                    return KnownFilterMatrices.BlackWhiteFilter;
+                    return KnownFilterMatrices.CreateGrayscaleBt601Filter(1.0f)*
+                           KnownFilterMatrices.CreateContrastFilter(1.5f)*
+                           KnownFilterMatrices.CreateBrightnessFilter(0.8f);
                 case FilterType.Sepia:
-                    return KnownFilterMatrices.CreateSepiaFilter(0.5f);
+                    return KnownFilterMatrices.CreateSepiaFilter(1.0f);
                 case FilterType.Brownie:
                     return ColorMatrix.Identity;
                 case FilterType.DesaturateLuminance:
                     return KnownFilterMatrices.CreateSaturateFilter(0.5f) *
-                           KnownFilterMatrices.CreateLightnessFilter(0.5f);
+                           KnownFilterMatrices.CreateLightnessFilter(1.1f);
                 case FilterType.Kodachrome:
                     return KnownFilterMatrices.KodachromeFilter;
                 case FilterType.Technicolor:
@@ -51,7 +55,7 @@ namespace com.prodg.photobooth.domain.image
                 case FilterType.VintagePinhole:
                     return KnownFilterMatrices.LomographFilter;
                 case FilterType.AlternativePolaroid:
-                    return KnownFilterMatrices.PolaroidFilter;
+                    return KnownFilterMatrices.CreateGrayscaleBt601Filter(0.6f);
                 default:
                     throw new NotSupportedException("The provided transformation matrix is not supported");
             }

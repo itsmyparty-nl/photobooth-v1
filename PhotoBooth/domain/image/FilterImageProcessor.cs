@@ -42,7 +42,7 @@ namespace com.prodg.photobooth.domain.image
             _logger = logger;
             _filterType = filterType;
 
-            _logger.LogDebug("Creating FilterImageProcessor for {FilterType}", filterType);
+            //_logger.LogDebug("Creating FilterImageProcessor for {FilterType}", filterType);
             
             //create the grayscale ColorMatrix
             _colorMatrix = FilterFactory.Create(filterType);
@@ -53,7 +53,7 @@ namespace com.prodg.photobooth.domain.image
         /// </summary>
         public Image Process(PhotoSession? session, Image image)
         {            
-            _logger.LogInformation("Applying filter {FilterType} on image", _filterType);
+            //_logger.LogInformation("Applying filter {FilterType} on image", _filterType);
 
             if (image == null)
             {

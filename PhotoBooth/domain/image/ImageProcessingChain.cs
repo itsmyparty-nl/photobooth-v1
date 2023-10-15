@@ -64,7 +64,7 @@ namespace com.prodg.photobooth.domain.image
 
         public Image Process(PhotoSession? session)
         {
-            _logger.LogInformation("Process session");
+            //_logger.LogInformation("Process session");
 	        PreProcessImages(session);
 
             var combinedImage = _imageCombiner.Process(session);
@@ -74,7 +74,7 @@ namespace com.prodg.photobooth.domain.image
 
         private void PreProcessImages(PhotoSession? session)
         {
-	        _logger.LogInformation("Preprocessing images");
+	        //_logger.LogInformation("Preprocessing images");
 	        if (_imagePreProcessors.Any())
             {
                 for (var imageIndex = 0; imageIndex < session.ImageCount; imageIndex++)

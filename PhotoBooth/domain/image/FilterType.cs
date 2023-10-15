@@ -23,6 +23,7 @@ namespace com.prodg.photobooth.domain.image
     {
         Original,
         DarkGrayscale,
+        Grayscale,
         Polaroid,
         DesaturateLuminance,
         Brownie,

@@ -20,6 +20,7 @@
 using System.Text.Json.Serialization;
 using com.prodg.photobooth.domain.converters;
 using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats;
 
 namespace com.prodg.photobooth.domain
 {
@@ -52,6 +53,13 @@ namespace com.prodg.photobooth.domain
         private PhotoSession()
         {
 	        Images = new List<Image>();
+	        _decoderOptions = new DecoderOptions()
+	        {
+		        SkipMetadata = true,
+		        MaxFrames = 1,
+		        //Optimize for displaying
+		        TargetSize = new Size(1920, 1080)
+	        };
         }
 
         /// <summary>
@@ -79,7 +87,7 @@ namespace com.prodg.photobooth.domain
             {
                 throw new ArgumentException("Cannot resolve an image from an empty path");
             }
-            Image image = Image.Load(path);
+            Image image = Image.Load(_decoderOptions, path);
             Images.Add(image);
 
             return image;
@@ -88,6 +96,7 @@ namespace com.prodg.photobooth.domain
         #region IDisposable Implementation
 
 		bool disposed;
+		private DecoderOptions _decoderOptions;
 
 		public void Dispose ()
 		{
