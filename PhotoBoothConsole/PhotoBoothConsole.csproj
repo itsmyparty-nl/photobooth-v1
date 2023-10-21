@@ -7,6 +7,7 @@
     <Company>ItsMyParty.nl</Company>
     <RootNamespace>com.prodg.photobooth</RootNamespace>
     <OutputType>Exe</OutputType>
+    <LangVersion>12</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>

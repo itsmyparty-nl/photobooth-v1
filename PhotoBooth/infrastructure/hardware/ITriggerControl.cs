@@ -17,6 +17,8 @@
 */
 #endregion
 
+using com.prodg.photobooth.infrastructure.command;
+
 namespace com.prodg.photobooth.infrastructure.hardware
 {
 	public class TriggerControlEventArgs : EventArgs
@@ -29,9 +31,44 @@ namespace com.prodg.photobooth.infrastructure.hardware
 		public string RemoteControlId {get; }
     }
 	
+	/// <summary>
+	/// The states in which the trigger can reside
+	/// </summary>
+	public enum TriggerState
+	{
+		Released,
+		Armed,
+	}
+
+	public class TriggerStateEventArgs : TriggerControlEventArgs
+	{
+		public TriggerStateEventArgs(string id, TriggerState triggerState) :
+			base(id)
+		{
+			TriggerState = triggerState;
+		}
+
+		public TriggerState TriggerState { get; private set; }
+	}
+    
+	public class TriggerCommandEventArgs : TriggerControlEventArgs
+	{
+		public TriggerCommandEventArgs(string id, Command command):
+			base(id)
+		{
+			Command = command;
+		}
+
+		public Command Command { get; private set; }
+	}
+	
 	public interface ITriggerControl: IHardwareController
 	{
+		Command Command { get; }
+		
 		string Id {get;}
+		
+		bool Locked { get; }
 		
 		void Arm();
 		
@@ -40,7 +77,14 @@ namespace com.prodg.photobooth.infrastructure.hardware
 	    int Lock(bool indicateLock);
 
 	    void Unlock(int lockId);
+
+	    void Fire();
 		
-		event EventHandler<TriggerControlEventArgs> Fired;
+		event EventHandler<TriggerControlEventArgs>? Fired;
+		
+		event EventHandler<TriggerCommandEventArgs>? Triggered;
+
+		event EventHandler<TriggerStateEventArgs>? StateChanged;
+		
 	}
 }

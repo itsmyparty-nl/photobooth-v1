@@ -20,7 +20,7 @@ using Microsoft.Extensions.Logging;
 
 namespace com.prodg.photobooth.infrastructure.command
 {
-    public class ConsoleCommandReceiver : ICommandReceiver
+    public class ConsoleCommandReceiver : IConsoleCommandReceiver
     {
         private const string Id = "ConsoleCommandReceiver";
 

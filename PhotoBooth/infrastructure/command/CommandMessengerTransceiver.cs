@@ -19,6 +19,7 @@
 */
 #endregion
 
+using com.prodg.photobooth.infrastructure.hardware;
 using CommandMessenger;
 using CommandMessenger.TransportLayer;
 using Microsoft.Extensions.Logging;
@@ -31,7 +32,7 @@ namespace com.prodg.photobooth.infrastructure.command
     /// This class acts as an adapter between the photobooth application and the command messenger
     /// </para>
     /// </summary>
-    public class CommandMessengerTransceiver : ICommandReceiver, ICommandTransmitter
+    public class CommandMessengerTransceiver : ICommandMessengerTransceiver
     {
         private readonly ILogger<CommandMessengerTransceiver> _logger;
         private bool _running;
