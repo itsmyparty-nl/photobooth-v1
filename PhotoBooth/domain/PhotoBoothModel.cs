@@ -74,13 +74,13 @@ namespace com.prodg.photobooth.domain
         public void Start()
         {
             logger.LogInformation("Starting Photobooth application model for event {EventId}", settings.EventId);
-
+            
             //Acquire the hardware
             hardware.Acquire();
 
             //Start with only the power control armed
             hardware.PowerControl.Arm();
-   
+            
             //Register events
             hardware.Camera.StateChanged += OnCameraStateChanged;
             hardware.TriggerControl.Fired += OnTriggerControlTriggered;

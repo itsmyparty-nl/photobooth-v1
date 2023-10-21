@@ -64,7 +64,6 @@ namespace com.prodg.photobooth.domain
         private readonly ILogger<PhotoBoothService> _logger;
         private readonly IHardware _hardware;
         private readonly IMultiImageProcessor _imageProcessor;
-        private readonly IStreamSerializer _serializer;
         private readonly PhotoSessionFactory _sessionFactory;
         private readonly IPhotoboothOffloader _offloader;
 
@@ -73,19 +72,11 @@ namespace com.prodg.photobooth.domain
         /// <summary>
         /// C'tor
         /// </summary>
-        /// <param name="hardware"></param>
-        /// <param name="imageProcessor"></param>
-        /// <param name="serializer"></param>
-        /// <param name="logger"></param>
-        /// <param name="settings"></param>
-        /// <param name="offloader"></param>
-        public PhotoBoothService(IHardware hardware, IMultiImageProcessor imageProcessor, IStreamSerializer serializer,
-	        ILogger<PhotoBoothService> logger, ISettings settings, IPhotoboothOffloader offloader)
+        public PhotoBoothService(IHardware hardware, IMultiImageProcessor imageProcessor,
+	         ISettings settings, IPhotoboothOffloader offloader, ILogger<PhotoBoothService> logger)
         {
-
 	        _hardware = hardware;
 	        _logger = logger;
-	        _serializer = serializer;
 	        _imageProcessor = imageProcessor;
 	        _offloader = offloader;
 

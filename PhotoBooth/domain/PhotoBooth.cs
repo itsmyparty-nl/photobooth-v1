@@ -18,6 +18,7 @@
 #endregion
 
 using com.prodg.photobooth.infrastructure.command;
+using com.prodg.photobooth.infrastructure.hardware;
 using CommandMessenger.TransportLayer;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -31,18 +32,21 @@ namespace com.prodg.photobooth.domain
     {
         public IPhotoBoothModel Model { get; }
 
+        private readonly IHardware _hardware;
         private readonly ICommandMessengerTransceiver _commandMessenger;
         private readonly IConsoleCommandReceiver _consoleReceiver;
+        private readonly IRemoteTriggerService _triggerService;
         private readonly ILogger<PhotoBooth> _logger;
-
-        public PhotoBooth(IPhotoBoothModel model, ICommandMessengerTransceiver commandMessenger,
-            IConsoleCommandReceiver consoleReceiver, ILogger<PhotoBooth> logger)
+        
+        public PhotoBooth(IPhotoBoothModel model, IHardware hardware, ICommandMessengerTransceiver commandMessenger,
+            IConsoleCommandReceiver consoleReceiver, IRemoteTriggerService triggerService, ILogger<PhotoBooth> logger)
         {
             Model = model;
+            _hardware = hardware;
             _commandMessenger = commandMessenger;
             _consoleReceiver = consoleReceiver;
+            _triggerService = triggerService;
             _logger = logger;
-            
 
             _logger.LogInformation("Creating PhotoBooth application");
             this.
@@ -68,6 +72,11 @@ namespace com.prodg.photobooth.domain
         {
             _logger.LogInformation("Starting PhotoBooth application");
             //Start
+            _triggerService.Register(_hardware.TriggerControl);
+            _triggerService.Register(_hardware.PowerControl);
+            _triggerService.Register(_hardware.PrintControl);
+            _triggerService.Register(_hardware.PrintTwiceControl);
+            
             _commandMessenger.Initialize();
             _consoleReceiver.Initialize();
             Model.Start();
@@ -81,6 +90,11 @@ namespace com.prodg.photobooth.domain
             _logger.LogInformation("Stopping PhotoBooth application");
             //Stop
             Model.Stop();
+            _triggerService.DeRegister(_hardware.TriggerControl);
+            _triggerService.DeRegister(_hardware.PowerControl);
+            _triggerService.DeRegister(_hardware.PrintControl);
+            _triggerService.DeRegister(_hardware.PrintTwiceControl);
+            
             _consoleReceiver.DeInitialize();
             _commandMessenger.DeInitialize();
         }

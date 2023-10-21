@@ -19,9 +19,11 @@
 
 using com.prodg.photobooth.config;
 using com.prodg.photobooth.domain.image;
+using com.prodg.photobooth.domain.offload;
 using com.prodg.photobooth.infrastructure.command;
 using com.prodg.photobooth.infrastructure.hardware;
 using CommandMessenger.TransportLayer;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -33,8 +35,12 @@ namespace com.prodg.photobooth.domain
     public static class PhotoBoothBuilder
     {
 
-        public static IServiceCollection AddPhotoBooth(this IServiceCollection services, ISettings settings)
+        public static IServiceCollection AddPhotoBooth(this IServiceCollection services, IConfiguration configuration)
         {
+            services.AddSingleton<ISettings, Settings>();
+
+            //Todo: replace this by proper use of config
+            var settings = new Settings(configuration);
             AddTransport(services, settings);
 
             services.AddSingleton<ICommandMessengerTransceiver, CommandMessengerTransceiver>();
@@ -44,13 +50,14 @@ namespace com.prodg.photobooth.domain
             services.AddSingleton<IMultiImageProcessor, ImageProcessingChain>();
             services.AddSingleton<ICamera, Camera>();
             CreatePrinterControls(services, settings);
-
+            services.AddSingleton<IPhotoboothOffloader, OffloadStub>();
+            
             services.AddSingleton<IHardware, Hardware>();
             services.AddSingleton<IPhotoBoothService, PhotoBoothService>();
 
             services.AddSingleton<IPhotoBoothModel, PhotoBoothModel>();
 
-            services.AddSingleton<IHostedService, PhotoBooth>();
+            services.AddHostedService<PhotoBooth>();
 
             return services;
         }

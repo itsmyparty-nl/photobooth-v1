@@ -39,26 +39,41 @@ namespace com.prodg.photobooth.infrastructure.hardware
         private readonly IList<ITriggerControl> _triggerControls;
         
         public RemoteTriggerService(
-            ICommandReceiver commandReceiver, ICommandTransmitter commandTransmitter, ILogger<RemoteTriggerService> logger)
+            ICommandMessengerTransceiver transceiver, ILogger<RemoteTriggerService> logger)
         {
-            _commandReceiver = commandReceiver;
-            _commandTransmitter = commandTransmitter;
+            _commandReceiver = transceiver;
+            _commandTransmitter = transceiver;
             _logger = logger;
             _triggerControls = new List<ITriggerControl>();
             
-            commandReceiver.CommandReceived += OnCommandReceived;
+            _commandReceiver.CommandReceived += OnCommandReceived;
         }
 
         public void Register(ITriggerControl triggerControl)
         {
             if (_triggerControls.Contains(triggerControl)){ return; }
             _logger.LogDebug($"Registering control '{triggerControl.Id}'");
-
             
             _triggerControls.Add(triggerControl);
             _commandReceiver.Subscribe(triggerControl.Command);
             triggerControl.StateChanged += TriggerControlOnStateChanged;
             triggerControl.Triggered += TriggerControlOnTriggered;
+        }
+
+        public void DeRegister(ITriggerControl triggerControl)
+        {
+            if (!_triggerControls.Contains(triggerControl))
+            {
+                Debug.Assert(false, $"Trying to deregister non-registered control '{triggerControl.Id}'");
+                return;
+            }
+
+            _logger.LogDebug($"DeRegistering control '{triggerControl.Id}'");
+
+            triggerControl.StateChanged -= TriggerControlOnStateChanged;
+            triggerControl.Triggered -= TriggerControlOnTriggered;
+            _commandReceiver.UnSubscribe(triggerControl.Command);
+            _triggerControls.Remove(triggerControl);
         }
 
         private void TriggerControlOnTriggered(object? sender, TriggerCommandEventArgs e)

@@ -17,6 +17,7 @@
 */
 #endregion
 
+using com.prodg.photobooth.infrastructure.command;
 using Microsoft.Extensions.Logging;
 
 namespace com.prodg.photobooth.infrastructure.hardware
@@ -25,15 +26,15 @@ namespace com.prodg.photobooth.infrastructure.hardware
     {
         private readonly ILogger<Hardware> _logger;
 
-		public Hardware(ICamera camera, IPrinter printer, ITriggerControl triggerControl, ITriggerControl printControl,
-             ITriggerControl printTwiceControl, ITriggerControl powerControl, ILogger<Hardware> logger)
+		public Hardware(ICamera camera, IPrinter printer, ILogger<Hardware> logger)
         {
             Camera = camera;
 			Printer = printer;
-            TriggerControl = triggerControl;
-            PrintControl = printControl;
-            PrintTwiceControl = printTwiceControl;
-            PowerControl = powerControl;
+            
+            TriggerControl = new TriggerControl(Command.Trigger);
+            PrintControl = new TriggerControl(Command.Print);
+            PrintTwiceControl = new TriggerControl(Command.PrintTwice);
+            PowerControl = new TriggerControl(Command.Power);
             _logger = logger;
         }
 
