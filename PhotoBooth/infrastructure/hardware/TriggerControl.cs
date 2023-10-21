@@ -150,7 +150,6 @@ namespace com.prodg.photobooth.infrastructure.hardware
         {
             if (newState.Equals(State))
             {
-                Debug.Assert(false, $"RemoteControl '{Id}': Ignoring transfer to identical trigger state '{newState}'");
                 return false;
             }
 
