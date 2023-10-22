@@ -5,11 +5,11 @@ namespace PhotoBoothService.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class TriggerController : ControllerBase
+    public class PowerController : ControllerBase
     {
         private readonly IHardware _hardware;
 
-        public TriggerController(IHardware hardware)
+        public PowerController(IHardware hardware)
         {
             _hardware = hardware;
         }
@@ -18,14 +18,15 @@ namespace PhotoBoothService.Controllers
         [HttpGet]
         public string Get()
         {
-            return _hardware.TriggerControl.State.ToString();
+            return _hardware.PowerControl.State.ToString();
         }
         
         // POST: api/Trigger
         [HttpPost]
         public void Post()
         {
-            _hardware.TriggerControl.Fire();
+            _hardware.PowerControl.Fire();
         }
+        
     }
 }

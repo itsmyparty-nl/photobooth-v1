@@ -34,7 +34,10 @@ namespace com.prodg.photobooth.infrastructure.hardware
     {
         private readonly Random _lockIdGenerator;
         private readonly List<int> _lockQueue;
-        
+        private readonly Command _command;
+        private readonly string _id;
+        private readonly string _context;
+
         public bool Locked => _lockQueue.Count > 0;
 
         public event EventHandler<TriggerStateEventArgs>? StateChanged;
@@ -45,9 +48,9 @@ namespace com.prodg.photobooth.infrastructure.hardware
         
         public TriggerControl(Command command)
         {
-            Command = command;
-            Id = command.ToString();
-            Context = ((int) command).ToString(CultureInfo.InvariantCulture);
+            _command = command;
+            _id = command.ToString();
+            _context = ((int) command).ToString(CultureInfo.InvariantCulture);
             
             _lockQueue = new List<int>();
             _lockIdGenerator = new Random();
@@ -56,13 +59,12 @@ namespace com.prodg.photobooth.infrastructure.hardware
         
         #region IRemoteControl Members
 
-        public Command Command { get; }
-        public string Id { get; }
-        
-        public string Context {  get; }
+        public Command Command => _command;
+
+        public string Id => _id;
 
         public TriggerState State { get; private set; }
-        
+
         public void Arm()
         {
             if (!ChangeState(TriggerState.Armed)) return;
@@ -187,7 +189,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
         private void Trigger(Command command)
         {
             Debug.Assert(Triggered!=null, "No trigger listener configured for remote trigger '{Id}'" );
-            Triggered?.Invoke(this, new TriggerCommandEventArgs(Context, command));
+            Triggered?.Invoke(this, new TriggerCommandEventArgs(_context, command));
         }
         
         private void SignalStateChange()
@@ -195,7 +197,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
             if (!Locked)
             {
                 Debug.Assert(StateChanged!=null, "No trigger listener configured for remote trigger '{Id}'" );
-                StateChanged?.Invoke(this, new TriggerStateEventArgs(Context, State));
+                StateChanged?.Invoke(this, new TriggerStateEventArgs(_context, State));
             }
         }
     }

@@ -19,6 +19,7 @@
 
 
 using Microsoft.Extensions.Logging;
+using SixLabors.ImageSharp.Drawing.Processing;
 
 namespace com.prodg.photobooth.infrastructure.hardware
 {
@@ -30,25 +31,36 @@ namespace com.prodg.photobooth.infrastructure.hardware
 	    public event EventHandler<CameraBatteryWarningEventArgs> BatteryWarning;
 	    public string Id { get; }
 
+	    public bool IsReady => _initialized;
+
+	    private bool _initialized = false;
+
+	    private readonly Image<Rgb24> _dummyImage;
+
 		public CameraStub (ILogger<CameraStub> logger)
 		{
 			_logger = logger;
+			_dummyImage = new Image<Rgb24>(1500, 1000);
+			_dummyImage.Mutate(x => x.Fill(Color.Plum));
 		    Id = "Dummy";
 		}
 
 		public void Initialize ()
 		{
 			_logger.LogInformation("Initializing DUMMY camera");
+			_initialized = true;
 		}
 
 	    public void DeInitialize()
 	    {
             _logger.LogInformation("DeInitializing DUMMY camera");
+            _initialized = false;
 	    }
 
 	    public bool Capture(string capturePath)
 	    {
 	        _logger.LogInformation("Starting capture to: {Path}", capturePath);
+	        _dummyImage.Save(capturePath);
 	        return true;
 	    }
 

@@ -59,6 +59,7 @@ namespace com.prodg.photobooth.config
         private const string FilterKey = "Filter";
         private const string FixedImageFilenameKey = "FixedImageFilename";
         private const string OverlayImageFilenameKey = "OverlayImageFilename";
+        private const string StubCameraKey = "StubCamera";
         private const string ApiEventIdKey = "ApiEventId";
         #endregion
 
@@ -88,6 +89,8 @@ namespace com.prodg.photobooth.config
         public string FixedImageFilename { get; private set; }
         public string OverlayImageFilename { get; private set; }
         public long ApiEventId { get; private set; }
+        
+        public bool StubCamera { get; private set; }
         
         #endregion
 
@@ -134,6 +137,7 @@ namespace com.prodg.photobooth.config
                 FixedImageFilename = settings[FixedImageFilenameKey]!;
                 OverlayImageFilename = settings[OverlayImageFilenameKey]!;
                 ApiEventId = Convert.ToInt64(settings[ApiEventIdKey]!);
+                StubCamera = settings[StubCameraKey] != null;
 
                 // Check consistency
                 if (!SaveSessions && OffloadSessions)

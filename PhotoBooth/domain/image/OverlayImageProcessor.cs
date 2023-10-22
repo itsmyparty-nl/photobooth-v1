@@ -40,7 +40,7 @@ namespace com.prodg.photobooth.domain.image
             _logger = logger;
             _overlayImageFileName = overlayImageFileName;
 
-            //logger.LogDebug("Creating OverlayImageProcessor with {OverlayImageFileName}", overlayImageFileName);
+            logger.LogDebug("Creating OverlayImageProcessor with {OverlayImageFileName}", overlayImageFileName);
             if (string.IsNullOrWhiteSpace(overlayImageFileName) || !File.Exists(overlayImageFileName))
             {
                 throw new FileNotFoundException("overlay image does not exist: " + overlayImageFileName);
@@ -54,7 +54,7 @@ namespace com.prodg.photobooth.domain.image
         /// </summary>
         public Image Process(PhotoSession? session, Image image)
         {            
-            //_logger.LogInformation("Applying overlay on image: {OverlayImage}" , Path.GetFileNameWithoutExtension(_overlayImageFileName));
+            _logger.LogInformation("Applying overlay on image: {OverlayImage}" , Path.GetFileNameWithoutExtension(_overlayImageFileName));
 
             if (image == null)
             {

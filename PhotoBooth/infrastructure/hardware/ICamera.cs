@@ -41,7 +41,9 @@ namespace com.prodg.photobooth.infrastructure.hardware
 
     public interface ICamera: IHardwareController
     {
-        /// <summary>
+        bool IsReady { get;  }
+	    
+	    /// <summary>
         /// Emits an event when the camera state changed (from ready to connection lost and vice versa)
         /// </summary>
         event EventHandler<CameraStateChangedEventArgs> StateChanged;

@@ -48,7 +48,7 @@ namespace com.prodg.photobooth.domain
             services.AddSingleton<IRemoteTriggerService, RemoteTriggerService>();
 
             services.AddSingleton<IMultiImageProcessor, ImageProcessingChain>();
-            services.AddSingleton<ICamera, Camera>();
+            AddCamera(services, settings);
             CreatePrinterControls(services, settings);
             services.AddSingleton<IPhotoboothOffloader, OffloadStub>();
             
@@ -61,7 +61,7 @@ namespace com.prodg.photobooth.domain
 
             return services;
         }
-
+        
         private static void AddTransport(IServiceCollection services, ISettings settings)
         {
             // Create Serial Port object
@@ -76,6 +76,20 @@ namespace com.prodg.photobooth.domain
             }
         }
 
+        private static void AddCamera(IServiceCollection services, ISettings settings)
+        {
+            // Create Serial Port object
+            // Note that for some boards (e.g. Sparkfun Pro Micro) DtrEnable may need to be true.
+            if (!settings.StubCamera)
+            {
+                services.AddSingleton<ICamera, Camera>();
+            }
+            else
+            {
+                services.AddSingleton<ICamera, CameraStub>();
+            }
+        }
+        
         private static void CreatePrinterControls(IServiceCollection services, ISettings settings)
         {
             // Create Serial Port object

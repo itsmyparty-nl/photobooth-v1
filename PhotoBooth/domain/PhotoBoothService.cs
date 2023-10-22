@@ -94,7 +94,12 @@ namespace com.prodg.photobooth.domain
             var session = _sessionFactory.CreateSession();
             _logger.LogInformation("Start Capturing images for event {EventId}, session {Id}",
                 session.EventId, session.Id);
-                
+
+            if (!_hardware.Camera.IsReady)
+            {
+	            return null;
+            }
+            
 			return await Task.Run (() => {
 				try {
 					int failureCount = 0;

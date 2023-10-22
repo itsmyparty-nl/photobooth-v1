@@ -59,8 +59,15 @@ namespace com.prodg.photobooth.domain
             Start();
             while (!stoppingToken.IsCancellationRequested)
             {
-                _logger.LogInformation("PhotoBooth running at: {time}", DateTimeOffset.Now);
-                await Task.Delay(TimeSpan.FromMinutes(10), stoppingToken);
+                try
+                {
+                    _logger.LogInformation("PhotoBooth running at: {time}", DateTimeOffset.Now);
+                    await Task.Delay(TimeSpan.FromMinutes(10), stoppingToken);
+                }
+                catch (TaskCanceledException e)
+                {
+                    _logger.LogInformation("Execution of PhotoBooth cancelled");
+                }
             }
             Stop();
         }

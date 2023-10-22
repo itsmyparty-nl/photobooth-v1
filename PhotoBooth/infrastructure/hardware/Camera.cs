@@ -25,8 +25,8 @@ namespace com.prodg.photobooth.infrastructure.hardware
 {
 	public class Camera : ICamera
 	{
-		private IContext _context;
-		private LibGPhoto2.ICamera _camera;
+		private IContext? _context;
+		private LibGPhoto2.ICamera? _camera;
 		private readonly ILogger<Camera> _logger;
 		private bool _initialized;
 	    private bool _deinitRequested;
@@ -38,6 +38,8 @@ namespace com.prodg.photobooth.infrastructure.hardware
         private readonly object _cameraLock = new();
 
 		public string Id { get; private set; }
+
+		public bool IsReady => CheckInitialized() && !_deinitRequested;
 
 		public Camera(ILogger<Camera> logger)
 		{
@@ -303,9 +305,9 @@ namespace com.prodg.photobooth.infrastructure.hardware
 	                {
 		                _logger.LogWarning("Could not Exit camera from context");
 	                }
-	                _camera.Dispose();
+	                _camera?.Dispose();
 
-	                _context.Dispose();
+	                _context?.Dispose();
 	            }
 	        }
 	        catch (Exception ex)

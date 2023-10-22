@@ -68,8 +68,8 @@ namespace com.prodg.photobooth.domain.image
                 throw new ArgumentNullException(nameof(session));
             }
 
-            //_logger.LogInformation("Creating a collage of {StoragePath}: {ImageCount} images",
-            //    session.StoragePath, session.ImageCount);
+            _logger.LogInformation("Creating a collage of {StoragePath}: {ImageCount} images",
+                session.StoragePath, session.ImageCount);
 
             if (session.ImageCount != RequiredImages)
             {

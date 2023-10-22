@@ -30,6 +30,7 @@ namespace CommandMessenger
         protected readonly ListQueue<CommandStrategy> Queue = new ListQueue<CommandStrategy>();   // Buffer for commands
         protected readonly List<GeneralStrategy> GeneralStrategies = new List<GeneralStrategy>(); // Buffer for command independent strategies
         protected readonly CmdMessenger CmdMessenger;
+        protected bool stopRequested;
 
         /// <summary> Run state of thread running the queue.  </summary>
         public enum ThreadRunStates
@@ -92,7 +93,8 @@ namespace CommandMessenger
             if (disposing)
             {
                 // Stop polling
-                QueueThread.Abort();
+                Queue.Clear();
+                stopRequested = true;
                 QueueThread.Join();
             }
             base.Dispose(disposing);

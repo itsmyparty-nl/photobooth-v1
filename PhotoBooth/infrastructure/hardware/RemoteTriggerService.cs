@@ -112,7 +112,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
             Debug.Assert(e!=null, "Received command without event arguments");
             _logger.LogTrace($"Received command '{e.Command}'");
             
-            foreach (var control in _triggerControls.Where(control => control.Id.Equals(e.Command.ToString())))
+            foreach (var control in _triggerControls.Where(control => control.Command.Equals(e.Command)))
             {
                 //Only handle a single button type: the one that's configured
                 if (control.Locked)

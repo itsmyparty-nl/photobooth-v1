@@ -66,6 +66,8 @@ namespace com.prodg.photobooth.infrastructure.hardware
 	{
 		Command Command { get; }
 		
+		TriggerState State { get; }
+		
 		string Id {get;}
 		
 		bool Locked { get; }

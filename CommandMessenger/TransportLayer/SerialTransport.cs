@@ -20,6 +20,7 @@
 using System.ComponentModel;
 using System.IO.Ports;
 using System.Reflection;
+using System.Text;
 
 namespace CommandMessenger.TransportLayer
 {
@@ -36,12 +37,14 @@ namespace CommandMessenger.TransportLayer
     {
         private readonly QueueSpeed _queueSpeed = new QueueSpeed(4);
         private Thread _queueThread;
+        private bool _stopRequested;
 
         public ThreadRunStates ThreadRunState = ThreadRunStates.Start;
 
         /// <summary> Default constructor. </summary>
         public SerialTransport()
-        {          
+        {
+            _stopRequested = false;
             Initialize();
         }
 
@@ -110,7 +113,7 @@ namespace CommandMessenger.TransportLayer
         protected void ProcessQueue()
         {
             // Endless loop
-            while (ThreadRunState == ThreadRunStates.Start)
+            while (ThreadRunState == ThreadRunStates.Start && !_stopRequested)
             {
                 var bytes = BytesInBuffer();
                     _queueSpeed.SetCount(bytes);
@@ -310,7 +313,7 @@ namespace CommandMessenger.TransportLayer
         {
             if (disposing)
             {
-                _queueThread.Abort();
+                _stopRequested = true;
                 _queueThread.Join();
                 _currentSerialSettings.PropertyChanged -= CurrentSerialSettingsPropertyChanged;
                 // Releasing serial port 

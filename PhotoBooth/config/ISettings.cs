@@ -120,5 +120,7 @@ namespace com.prodg.photobooth.config
         #endregion
 
         int TriggerDelayMs { get; }
+        
+        bool StubCamera { get; }
     }
 }
