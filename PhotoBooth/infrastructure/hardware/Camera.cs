@@ -24,7 +24,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
 	public class Camera : ICamera, IDisposable
 	{
 		private readonly ILogger<Camera> _logger;
-		private readonly GPhotoCameraProvider _cameraHardware;
+		private readonly ICameraProvider _cameraHardware;
 		private const int WarningBatteryLevel = 25;
 
 		private bool _deinitRequested;
@@ -36,7 +36,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
 
 		public bool IsReady => CheckInitialized() && !_deinitRequested;
 
-		public Camera(ILogger<Camera> logger, GPhotoCameraProvider cameraHardware)
+		public Camera(ILogger<Camera> logger, ICameraProvider cameraHardware)
 		{
             logger.LogDebug("Creating camera interface");
             _logger = logger;
@@ -215,10 +215,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
 		private void Dispose (bool disposing)
 		{
 			if (_disposed) return;
-			if (disposing) {
-				// Clean up managed objects
-				_cameraHardware.Dispose();
-			}
+			if (disposing) { };
 			_disposed = true;
 		}
 
