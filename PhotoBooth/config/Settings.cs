@@ -18,6 +18,7 @@
 #endregion
 
 using System.Configuration;
+using System.Globalization;
 using com.prodg.photobooth.domain.image;
 using Microsoft.Extensions.Configuration;
 
@@ -119,9 +120,9 @@ namespace com.prodg.photobooth.config
                 StoragePath = settings[StoragePathKey]!;
                 CollageGridWidth = Convert.ToInt32(settings[CollageGridWidthKey]!);
                 CollageGridHeight = Convert.ToInt32(settings[CollageGridHeightKey]!);
-                CollageScalePercentage = Convert.ToSingle(settings[CollageScalePercentageKey]!);
+                CollageScalePercentage = Convert.ToSingle(settings[CollageScalePercentageKey]!, CultureInfo.InvariantCulture);
                 CollagePaddingPixels = Convert.ToInt32(settings[CollagePaddingPixelsKey]!);
-                CollageAspectRatio = Convert.ToDouble(settings[CollageAspectRatioKey]!);
+                CollageAspectRatio = Convert.ToDouble(settings[CollageAspectRatioKey]!, CultureInfo.InvariantCulture);
                 Filter = (FilterType)Enum.Parse(typeof(FilterType), settings[FilterKey]!);
                 PrinterName = settings[PrinterNameKey]!;
                 PrintMarginTop = Convert.ToInt32(settings[PrintMarginTopKey]!);
