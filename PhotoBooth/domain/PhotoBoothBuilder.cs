@@ -25,7 +25,6 @@ using com.prodg.photobooth.infrastructure.hardware;
 using CommandMessenger.TransportLayer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 
 namespace com.prodg.photobooth.domain
 {
@@ -82,7 +81,7 @@ namespace com.prodg.photobooth.domain
             // Note that for some boards (e.g. Sparkfun Pro Micro) DtrEnable may need to be true.
             if (!settings.StubCamera)
             {
-                services.AddSingleton<ICameraProvider, GPhotoCameraProvider>();
+                services.AddSingleton<ICameraProvider, SharpCameraProvider>();
             }
             else
             {
