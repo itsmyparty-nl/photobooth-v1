@@ -17,23 +17,22 @@
 */
 #endregion
 
-using System.Text.RegularExpressions;
-using LibGPhoto2;
 using Microsoft.Extensions.Logging;
 
 namespace com.prodg.photobooth.infrastructure.hardware
 {
-	public class Camera : ICamera
+	public class Camera : ICamera, IDisposable
 	{
 		private readonly ILogger<Camera> _logger;
 		private readonly GPhotoCameraProvider _cameraHardware;
+		private const int WarningBatteryLevel = 25;
 
-	    private bool _deinitRequested;
+		private bool _deinitRequested;
 	    private Thread _monitoringThread;
-	    private const int DefaultBatteryLevel = 99;
-	    private const int WarningBatteryLevel = 25;
 
         private readonly object _cameraLock = new();
+
+        public string Id => CheckInitialized() ? _cameraHardware!.Id : "Uninitialized";
 
 		public bool IsReady => CheckInitialized() && !_deinitRequested;
 
@@ -102,8 +101,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
 	        catch (Exception)
 	        {
 	            _logger.LogWarning("Connection with camera lost");
-	            DisposeCameraObjects();
-	            _initialized = false;
+	            _cameraHardware.Clean();
 
                 //Signal that the camera is lost (not within the lock)
                 StateChanged.Invoke(this, new CameraStateChangedEventArgs(false));
@@ -116,11 +114,11 @@ namespace com.prodg.photobooth.infrastructure.hardware
 		    {
 			    lock (_cameraLock)
 			    {
-					_cameraHardware.Initialize();
+				    _cameraHardware.Initialize();
 
 				    //Log the ID
 				    _logger.LogInformation("Found: {Id}", _cameraHardware.Info.Model);
-				    _logger.LogDebug("Status: {Status}", _cameraHardware.Info.status);
+				    _logger.LogDebug("Status: {Status}", _cameraHardware.Info.Status);
 				    _logger.LogDebug("Id: {Id}", _cameraHardware.Info.Id);
 
 			    }
@@ -133,8 +131,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
 			    _logger.LogDebug(exception, "Could not initialize camera: {Message}", exception.Message);
 		    }
 	    }
-
-
+	    
 	    /// <remarks>In all cases that no value can be retrieved a default battery level is returned which
 	    /// indicates a full battery. rationale is that in this case manual checking is needed, and the
 	    /// software should work without issues</remarks>
@@ -142,7 +139,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
 	    {
             lock (_cameraLock)
             {
-                if (!CheckInitialized()) return DefaultBatteryLevel;
+                if (!CheckInitialized()) return WarningBatteryLevel;
 
 	            return _cameraHardware.GetBatteryLevel();
 	        }
@@ -165,7 +162,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
 
 	        lock (_cameraLock)
 	        {
-		        DisposeCameraObjects();
+		        _cameraHardware.Clean();
 	        }
 	    }
 

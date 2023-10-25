@@ -82,12 +82,13 @@ namespace com.prodg.photobooth.domain
             // Note that for some boards (e.g. Sparkfun Pro Micro) DtrEnable may need to be true.
             if (!settings.StubCamera)
             {
-                services.AddSingleton<ICamera, Camera>();
+                services.AddSingleton<ICameraProvider, GPhotoCameraProvider>();
             }
             else
             {
-                services.AddSingleton<ICamera, CameraStub>();
+                services.AddSingleton<ICameraProvider, StubCameraProvider>();
             }
+            services.AddSingleton<ICamera, Camera>();
         }
         
         private static void CreatePrinterControls(IServiceCollection services, ISettings settings)

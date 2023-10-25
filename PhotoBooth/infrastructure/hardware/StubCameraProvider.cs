@@ -23,35 +23,42 @@ using SixLabors.ImageSharp.Drawing.Processing;
 
 namespace com.prodg.photobooth.infrastructure.hardware
 {
-	public class CameraStub : ICamera
+	public class StubCameraProvider : ICameraProvider
 	{
-		private readonly ILogger<CameraStub> _logger;
+		private readonly ILogger<StubCameraProvider> _logger;
 
-        public event EventHandler<CameraStateChangedEventArgs> StateChanged;
-	    public event EventHandler<CameraBatteryWarningEventArgs> BatteryWarning;
 	    public string Id { get; }
 
-	    public bool IsReady => _initialized;
+	    public CameraInfo? Info {get; private set;}
+	    
+	    public bool Initialized => _initialized;
 
-	    private bool _initialized = false;
+	    private bool _initialized;
 
 	    private readonly Image<Rgb24> _dummyImage;
 
-		public CameraStub (ILogger<CameraStub> logger)
+		public StubCameraProvider (ILogger<StubCameraProvider> logger)
 		{
+			Id = "Uninitialized";
 			_logger = logger;
 			_dummyImage = new Image<Rgb24>(1500, 1000);
 			_dummyImage.Mutate(x => x.Fill(Color.Plum));
-		    Id = "Dummy";
 		}
 
 		public void Initialize ()
 		{
 			_logger.LogInformation("Initializing DUMMY camera");
+			Info = new CameraInfo("Dummy Id", "Dummy Model", "Dummy Status");
+			
 			_initialized = true;
 		}
 
-	    public void DeInitialize()
+		public int GetBatteryLevel()
+		{
+			return new Random().Next(25, 99);
+		}
+
+		public void DeInitialize()
 	    {
             _logger.LogInformation("DeInitializing DUMMY camera");
             _initialized = false;

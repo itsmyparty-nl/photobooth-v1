@@ -23,25 +23,10 @@ using Microsoft.Extensions.Logging;
 
 namespace com.prodg.photobooth.infrastructure.hardware
 {
-
-	public class CameraInfo
+	public class GPhotoCameraProvider: IDisposable, ICameraProvider
 	{
-		public string Id {get;}
+		private const int DefaultBatteryLevel = 99;
 
-		public string Model {get;}
-
-		public string Status {get;}
-
-		public CameraInfo(string id, string model, string status)
-		{
-			Id = id;
-			Model = model;
-			Status = status;
-		}
-	}
-
-	public class GPhotoCameraProvider
-	{
 		private IContext? _context;
 		private LibGPhoto2.ICamera? _camera;
 		private readonly ILogger<GPhotoCameraProvider> _logger;
@@ -50,17 +35,16 @@ namespace com.prodg.photobooth.infrastructure.hardware
 
 		public string Id { get; private set; }
 
-		public CameraInfo Info {get; private set;}
+		public CameraInfo? Info {get; private set;}
 
-		public string Initialized => _initialized;
+		public bool Initialized => _initialized;
 
-		public Camera(ILogger<Camera> logger)
+		public GPhotoCameraProvider(ILogger<GPhotoCameraProvider> logger)
 		{
-            logger.LogDebug("Creating camera interface");
-            _logger = logger;
+			Id = "Uninitialized";
+			_logger = logger;
 			_initialized = false;
-            _deinitRequested = false;
-		}
+     	}
 
 		public void Initialize ()
 		{
@@ -75,7 +59,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
 		
 			//Populate metadata
 			CameraAbilities abilities = _camera.GetAbilities();
-			Info = new CameraInfo(abilities.id, abilities.model, abilities.status);
+			Info = new CameraInfo(abilities.id, abilities.model, abilities.status.ToString());
 			Id = abilities.model;
 
 			_initialized = true;
@@ -85,9 +69,15 @@ namespace com.prodg.photobooth.infrastructure.hardware
 	    /// <remarks>In all cases that no value can be retrieved a default battery level is returned which
 	    /// indicates a full battery. rationale is that in this case manual checking is needed, and the
 	    /// software should work without issues</remarks>
-        private int GetBatteryLevel()
+        public int GetBatteryLevel()
 	    {
-            var summary = _camera.GetSummary(_context).Text;
+		    if (_camera == null || _context == null)
+		    {
+			    _logger.LogError("Camera objects not properly initialized");
+			    return DefaultBatteryLevel;
+		    }
+		    
+		    var summary = _camera.GetSummary(_context).Text;
 
 	        using (var reader = new StringReader(summary))
 	        {
@@ -99,7 +89,11 @@ namespace com.prodg.photobooth.infrastructure.hardware
 	                Regex regex = new Regex(@"^.+value\: (?<level>\d+)\%.*");
 	                Match match = regex.Match(line);
 
-	                if (!match.Success) return DefaultBatteryLevel;
+	                if (!match.Success)
+	                {
+		                _logger.LogDebug("no match found for battery level");
+		                return DefaultBatteryLevel;
+	                }
 
 	                try
 	                {
@@ -118,37 +112,46 @@ namespace com.prodg.photobooth.infrastructure.hardware
 	    public bool Capture(string capturePath)
 	    {
 	        _logger.LogDebug("Starting capture");
-	      
+
 	        try
 	        {
-                //Capture and download
-			    ICameraFilePath path = _camera.Capture(CameraCaptureType.Image, _context);
-	            _logger.LogDebug("Capture finished. File {File}", Path.Combine(path.folder, path.name));
-	            ICameraFile cameraFile = _camera.GetFile(path.folder, path.name,
-	                CameraFileType.Normal,
-	                _context);
-                _logger.LogInformation("Saving file to {CapturePath}", capturePath);
-	            cameraFile.Save(capturePath);
-                 //Remove the file from the camera buffer
-	            _camera.DeleteFile(path.folder, path.name, _context);
-	            return true;
+		        //Capture and download
+		        if (_camera == null || _context == null)
+		        {
+			        _logger.LogError("Camera objects not properly initialized");
+			        return false;
+		        }
+
+		        ICameraFilePath path = _camera.Capture(CameraCaptureType.Image, _context);
+		        _logger.LogDebug("Capture finished. File {File}", Path.Combine(path.folder, path.name));
+		        ICameraFile cameraFile = _camera.GetFile(path.folder, path.name,
+			        CameraFileType.Normal,
+			        _context);
+		        _logger.LogInformation("Saving file to {CapturePath}", capturePath);
+		        cameraFile.Save(capturePath);
+		        //Remove the file from the camera buffer
+		        _camera.DeleteFile(path.folder, path.name, _context);
+		        
+		        return true;
 	        }
 	        catch (Exception exception)
 	        {
 		        _logger.LogError(exception, "Camera capture failed");
-	            return false;
+		        return false;
 	        }
-	    
-		}
+	    }
 
 	    public void Clean ()
 		{
 	        //Try to delete all images on the camera
-            _camera.DeleteAll(CameraBaseFolder, _context);
+	        if (_context != null && _camera != null)
+	        {
+		        //Deinitialize to fix slow reponse issues after multiple sessions
+		        DisposeCameraObjects();
+		        _camera?.DeleteAll(CameraBaseFolder, _context);
+	        }
 
-            //Deinitialize to fix slow reponse issues after multiple sessions
-            DisposeCameraObjects();
-			_initialized = false;
+	        _initialized = false;
 		}
 
 		#region IDisposable Implementation
@@ -161,12 +164,11 @@ namespace com.prodg.photobooth.infrastructure.hardware
 			GC.SuppressFinalize (this);
 		}
 
-		private void Dispose (bool disposing)
+		private void Dispose(bool disposing)
 		{
 			if (_disposed) return;
 			if (disposing) {
 				// Clean up managed objects
-					
 			}
 			// clean up any unmanaged objects
 			DisposeCameraObjects();
@@ -175,30 +177,27 @@ namespace com.prodg.photobooth.infrastructure.hardware
 
 	    private void DisposeCameraObjects()
 	    {
-	        try
-	        {
-	            lock (_cameraLock)
-	            {
-		            try
-	                {
-		                _camera.Exit(_context);
-	                }
-	                catch (Exception)
-	                {
-		                _logger.LogWarning("Could not Exit camera from context");
-	                }
-	                _camera?.Dispose();
+		    try
+		    {
+			    try
+			    {
+				    if (_context != null) _camera?.Exit(_context);
+			    }
+			    catch (Exception)
+			    {
+				    _logger.LogWarning("Could not Exit camera from context");
+			    }
 
-	                _context?.Dispose();
-	            }
-	        }
-	        catch (Exception ex)
-	        {
-	            _logger.LogError(ex, "Exception while disposing camera objects");
-	        }
+			    _camera?.Dispose();
+			    _context?.Dispose();
+		    }
+		    catch (Exception ex)
+		    {
+			    _logger.LogError(ex, "Exception while disposing camera objects");
+		    }
 	    }
 
-	    ~Camera ()
+	    ~GPhotoCameraProvider ()
 		{
 			Dispose (false);
 		}
