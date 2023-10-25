@@ -74,19 +74,19 @@ namespace com.prodg.photobooth.domain
         public void Start()
         {
             logger.LogInformation("Starting Photobooth application model for event {EventId}", settings.EventId);
-            
-            //Acquire the hardware
-            hardware.Acquire();
 
-            //Start with only the power control armed
-            hardware.PowerControl.Arm();
-            
             //Register events
             hardware.Camera.StateChanged += OnCameraStateChanged;
             hardware.TriggerControl.Fired += OnTriggerControlTriggered;
             hardware.PrintControl.Fired += OnPrintControlTriggered;
             hardware.PrintTwiceControl.Fired += OnPrintTwiceControlTriggered;
             hardware.PowerControl.Fired += OnPowerControlTriggered;
+            
+            //Acquire the hardware
+            hardware.Acquire();
+
+            //Start with only the power control armed
+            hardware.PowerControl.Arm();
         }
 
         /// <summary>
@@ -95,16 +95,16 @@ namespace com.prodg.photobooth.domain
         public void Stop()
         {
             logger.LogInformation("Stopping Photobooth application model");
-
+            
+            //Release the hardware
+            hardware.Release();
+            
             //Unsubscribe from all hardware events
             hardware.Camera.StateChanged -= OnCameraStateChanged;
             hardware.TriggerControl.Fired -= OnTriggerControlTriggered;
             hardware.PrintControl.Fired -= OnPrintControlTriggered;
             hardware.PrintTwiceControl.Fired -= OnPrintTwiceControlTriggered;
             hardware.PowerControl.Fired -= OnPowerControlTriggered;
-
-            //Release the hardware
-            hardware.Release();
         }
 
         /// <summary>
