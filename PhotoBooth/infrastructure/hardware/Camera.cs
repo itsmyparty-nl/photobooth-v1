@@ -25,33 +25,29 @@ namespace com.prodg.photobooth.infrastructure.hardware
 {
 	public class Camera : ICamera
 	{
-		private IContext? _context;
-		private LibGPhoto2.ICamera? _camera;
 		private readonly ILogger<Camera> _logger;
-		private bool _initialized;
+		private readonly GPhotoCameraProvider _cameraHardware;
+
 	    private bool _deinitRequested;
 	    private Thread _monitoringThread;
-	    private const string CameraBaseFolder = @"/";
 	    private const int DefaultBatteryLevel = 99;
 	    private const int WarningBatteryLevel = 25;
 
         private readonly object _cameraLock = new();
 
-		public string Id { get; private set; }
-
 		public bool IsReady => CheckInitialized() && !_deinitRequested;
 
-		public Camera(ILogger<Camera> logger)
+		public Camera(ILogger<Camera> logger, GPhotoCameraProvider cameraHardware)
 		{
             logger.LogDebug("Creating camera interface");
             _logger = logger;
-			_initialized = false;
+			_cameraHardware = cameraHardware;
             _deinitRequested = false;
 		}
 
 		public void Initialize ()
 		{
-		    if (_initialized) return;
+		    if (_cameraHardware.Initialized) return;
 
             _logger.LogInformation("Initializing camera");
 		    _deinitRequested = false;
@@ -66,7 +62,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
 	        {
 	            lock (_cameraLock)
 	            {
-	                if (!_initialized)
+	                if (!_cameraHardware.Initialized)
 	                {
 	                    TryInitialize();
 	                }
@@ -120,21 +116,13 @@ namespace com.prodg.photobooth.infrastructure.hardware
 		    {
 			    lock (_cameraLock)
 			    {
-				    //Initialize GPhoto2
-				    _context = new Context();
-				    _camera = new LibGPhoto2.Camera();
-				    _camera.Init(_context);
-
-				    //Get the ID of the camera
-				    CameraAbilities abilities = _camera.GetAbilities();
-				    Id = abilities.model;
+					_cameraHardware.Initialize();
 
 				    //Log the ID
-				    _logger.LogInformation("Found: {Id}", Id);
-				    _logger.LogDebug("Status: {Status}", abilities.status);
-				    _logger.LogDebug("Id: {Id}", abilities.id);
+				    _logger.LogInformation("Found: {Id}", _cameraHardware.Info.Model);
+				    _logger.LogDebug("Status: {Status}", _cameraHardware.Info.status);
+				    _logger.LogDebug("Id: {Id}", _cameraHardware.Info.Id);
 
-				    _initialized = true;
 			    }
 
 			    //Signal that the camera is ready (not within the lock)
@@ -152,38 +140,12 @@ namespace com.prodg.photobooth.infrastructure.hardware
 	    /// software should work without issues</remarks>
         private int GetBatteryLevel()
 	    {
-	        string summary;
             lock (_cameraLock)
             {
                 if (!CheckInitialized()) return DefaultBatteryLevel;
 
-	            summary = _camera.GetSummary(_context).Text;
+	            return _cameraHardware.GetBatteryLevel();
 	        }
-
-	        using (var reader = new StringReader(summary))
-	        {
-	            string? line;
-	            while ((line = reader.ReadLine()) != null)
-	            {
-	                if (!line.Contains("Battery")) continue;
-
-	                Regex regex = new Regex(@"^.+value\: (?<level>\d+)\%.*");
-	                Match match = regex.Match(line);
-
-	                if (!match.Success) return DefaultBatteryLevel;
-
-	                try
-	                {
-	                    return Convert.ToInt32(match.Groups["level"].Value);
-	                }
-	                catch (Exception ex)
-	                {
-	                    _logger.LogDebug(ex, "no match found for battery level");
-	                    return DefaultBatteryLevel;
-	                }
-	            }
-	        }
-	        return DefaultBatteryLevel;
 	    }
 
 	    [Obsolete("Obsolete")]
@@ -217,31 +179,11 @@ namespace com.prodg.photobooth.infrastructure.hardware
 	                return false;
 	            }
 
-	            try
-	            {
-	                //Always get the battery level to make sure the battery warning is signaled timely
-	                _logger.LogDebug("Battery Level: {Level}", GetBatteryLevel());
+	            //Always get the battery level to make sure the battery warning is signaled timely
+	            _logger.LogDebug("Battery Level: {Level}", GetBatteryLevel());
 
-	                //Capture and download
-					ICameraFilePath path = _camera.Capture(CameraCaptureType.Image, _context);
-	                _logger.LogDebug("Capture finished. File {File}", Path.Combine(path.folder, path.name));
-	                ICameraFile cameraFile = _camera.GetFile(path.folder, path.name,
-	                    CameraFileType.Normal,
-	                    _context);
-
-	                _logger.LogInformation("Saving file to {CapturePath}", capturePath);
-	                cameraFile.Save(capturePath);
-
-	                //Remove the file from the camera buffer
-	                _camera.DeleteFile(path.folder, path.name, _context);
-	                return true;
-	            }
-	            catch (Exception exception)
-	            {
-		            _logger.LogError(exception, "Camera capture failed");
-	                return false;
-	            }
-	        }
+	            return _cameraHardware.Capture(capturePath);
+			}
 	    }
 
 	    public void Clean ()
@@ -250,20 +192,14 @@ namespace com.prodg.photobooth.infrastructure.hardware
 	        {
                 if (!CheckInitialized()) return;
 
-	            //Try to delete all images on the camera
-                _camera.DeleteAll(CameraBaseFolder, _context);
-
-                //Deinitialize to fix slow reponse issues after multiple sessions
-                DisposeCameraObjects();
-	            _initialized = false;
-                //note: the monitor thread will re-initialize the camera
+	            _cameraHardware.Clean();
 	        }
 		}
 
 		private bool CheckInitialized ()
 		{
-			if (!_initialized) {
-				_logger.LogError ("Camera not initialized");
+			if (!_cameraHardware.Initialized) {
+				_logger.LogWarning ("Camera not initialized");
 				return false;
 			}
 			return true;
@@ -284,37 +220,10 @@ namespace com.prodg.photobooth.infrastructure.hardware
 			if (_disposed) return;
 			if (disposing) {
 				// Clean up managed objects
-					
+				_cameraHardware.Dispose();
 			}
-			// clean up any unmanaged objects
-			DisposeCameraObjects();
 			_disposed = true;
 		}
-
-	    private void DisposeCameraObjects()
-	    {
-	        try
-	        {
-	            lock (_cameraLock)
-	            {
-		            try
-	                {
-		                _camera.Exit(_context);
-	                }
-	                catch (Exception)
-	                {
-		                _logger.LogWarning("Could not Exit camera from context");
-	                }
-	                _camera?.Dispose();
-
-	                _context?.Dispose();
-	            }
-	        }
-	        catch (Exception ex)
-	        {
-	            _logger.LogError(ex, "Exception while disposing camera objects");
-	        }
-	    }
 
 	    ~Camera ()
 		{
