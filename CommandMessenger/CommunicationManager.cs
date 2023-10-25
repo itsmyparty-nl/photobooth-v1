@@ -19,6 +19,8 @@
 
 using System.Text;
 using CommandMessenger.TransportLayer;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace CommandMessenger
 {
@@ -28,6 +30,7 @@ namespace CommandMessenger
     public class CommunicationManager : DisposableObject
     {
         private readonly ITransport _transport;
+        private readonly ILogger<CommunicationManager> _logger;
         private readonly Encoding _stringEncoder = Encoding.GetEncoding("ISO-8859-1");	// The string encoder
         private string _buffer = "";	                                                // The buffer
 
@@ -44,8 +47,10 @@ namespace CommandMessenger
         /// <param name="escapeCharacter"> The escape character. </param>
         /// <param name="disposeStack"> The DisposeStack</param>
         /// <param name="transport"> The Transport Layer</param>
-        public CommunicationManager(DisposeStack disposeStack,ITransport transport, ReceiveCommandQueue receiveCommandQueue, char commandSeparator = ';',  char fieldSeparator = ',', char escapeCharacter = '/')
+        /// <param name="loggerFactory"></param>
+        public CommunicationManager(DisposeStack disposeStack,ITransport transport, ReceiveCommandQueue receiveCommandQueue, ILoggerFactory loggerFactory, char commandSeparator = ';',  char fieldSeparator = ',', char escapeCharacter = '/')
         {
+            _logger = new Logger<CommunicationManager>(loggerFactory);
             disposeStack.Push(this);
             _transport = transport;
             _receiveCommandQueue = receiveCommandQueue;
@@ -146,6 +151,7 @@ namespace CommandMessenger
             LastLineTimeStamp = TimeUtils.Millis;
             ReadInBuffer();
             var currentLine = ParseLine();
+            _logger.LogDebug(currentLine);
             while (!String.IsNullOrEmpty(currentLine))
             {
                 ProcessLine(currentLine);

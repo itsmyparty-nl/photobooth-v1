@@ -21,6 +21,8 @@
 
 using System.Globalization;
 using CommandMessenger.TransportLayer;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace CommandMessenger
 {
@@ -79,15 +81,24 @@ namespace CommandMessenger
         /// <param name="transport"> The transport layer. </param>
         public CmdMessenger(ITransport transport)
         {
-            Init(transport, ',', ';', '/');
+            Init(transport, ',', ';', '/', new NullLoggerFactory());
         }
+        
+        /// <summary> Constructor. </summary>
+        /// <param name="transport"> The transport layer. </param>
+        /// <param name="loggerFactory"></param>
+        public CmdMessenger(ITransport transport, ILoggerFactory loggerFactory)
+        {
+            Init(transport, ',', ';', '/', loggerFactory);
+        }
+        
 
         /// <summary> Constructor. </summary>
         /// <param name="transport"> The transport layer. </param>
         /// <param name="fieldSeparator"> The field separator. </param>
         public CmdMessenger(ITransport transport, char fieldSeparator)
         {
-            Init(transport, fieldSeparator, ';', '/');
+            Init(transport, fieldSeparator, ';', '/', new NullLoggerFactory());
         }
 
         /// <summary> Constructor. </summary>
@@ -96,7 +107,7 @@ namespace CommandMessenger
         /// <param name="commandSeparator"> The command separator. </param>
         public CmdMessenger(ITransport transport, char fieldSeparator, char commandSeparator)
         {
-            Init(transport, fieldSeparator, commandSeparator, commandSeparator);
+            Init(transport, fieldSeparator, commandSeparator, commandSeparator, new NullLoggerFactory());
         }
 
         /// <summary> Constructor. </summary>
@@ -107,20 +118,33 @@ namespace CommandMessenger
         public CmdMessenger(ITransport transport, char fieldSeparator, char commandSeparator,
                             char escapeCharacter)
         {
-            Init(transport, fieldSeparator, commandSeparator, escapeCharacter);
+            Init(transport, fieldSeparator, commandSeparator, escapeCharacter, new NullLoggerFactory());
         }
 
+        /// <summary> Constructor. </summary>
+        /// <param name="transport">   The transport layer. </param>
+        /// <param name="fieldSeparator">   The field separator. </param>
+        /// <param name="commandSeparator"> The command separator. </param>
+        /// <param name="escapeCharacter">  The escape character. </param>
+        public CmdMessenger(ITransport transport, char fieldSeparator, char commandSeparator,
+            char escapeCharacter, ILoggerFactory loggerFactory)
+        {
+            Init(transport, fieldSeparator, commandSeparator, escapeCharacter, loggerFactory);
+        }
+
+        
         /// <summary> Initialises this object. </summary>
         /// <param name="transport">   The transport layer. </param>
         /// <param name="fieldSeparator">   The field separator. </param>
         /// <param name="commandSeparator"> The command separator. </param>
         /// <param name="escapeCharacter">  The escape character. </param>
+        /// <param name="loggerFactory"></param>
         private void Init(ITransport transport, char fieldSeparator, char commandSeparator,
-                          char escapeCharacter)
+                          char escapeCharacter, ILoggerFactory loggerFactory)
         {
             _sendCommandQueue = new SendCommandQueue(DisposeStack, this);
             _receiveCommandQueue = new ReceiveCommandQueue(DisposeStack, this);
-            _communicationManager = new CommunicationManager(DisposeStack, transport, _receiveCommandQueue, commandSeparator, fieldSeparator, escapeCharacter);
+            _communicationManager = new CommunicationManager(DisposeStack, transport, _receiveCommandQueue, loggerFactory, commandSeparator, fieldSeparator, escapeCharacter);
 
             _fieldSeparator = fieldSeparator;
             _commandSeparator = commandSeparator;

@@ -40,12 +40,12 @@ namespace com.prodg.photobooth.infrastructure.command
         private readonly List<Command> _subscriptions = new();
         private readonly CmdMessenger _messenger;
 
-        public CommandMessengerTransceiver(ILogger<CommandMessengerTransceiver> logger, ITransport transport)
+        public CommandMessengerTransceiver(ILogger<CommandMessengerTransceiver> logger, ITransport transport, ILoggerFactory loggerFactory)
         {
             _logger = logger;
             
             // Initialize the command messenger with the Serial Port transport layer
-            _messenger = new CmdMessenger(transport) {PrintLfCr = true};
+            _messenger = new CmdMessenger(transport, loggerFactory) {PrintLfCr = true};
 
             // Attach to NewLinesReceived for logging purposes
             _messenger.NewLineReceived += NewLineReceived!;
