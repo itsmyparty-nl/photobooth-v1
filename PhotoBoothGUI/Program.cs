@@ -16,19 +16,43 @@
   Copyright 2014 Patrick Bronneberg
 */
 #endregion
+
+using com.prodg.photobooth.domain;
 using Gtk;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Console;
 
 namespace com.prodg.photobooth
 {
-	class MainClass
+	static class Program
 	{
+		static IServiceProvider? value;
+		
+		[STAThread]
 		public static void Main (string[] args)
 		{
 			Application.Init ();
-			MainWindow win = new MainWindow ();
-			//win.ModifyBg (StateType.Normal, new Gdk.Color (0,0, 0));
+			
+			var services = new ServiceCollection();
+			ConfigureServices(services);
+			services.AddSingleton<MainWindow>();
+			value = services.BuildServiceProvider();
+			MainWindow win = value.GetRequiredService<MainWindow>();
 			win.Show ();
 			Application.Run ();
+		}
+
+		private static void ConfigureServices(ServiceCollection services)
+		{
+			var configuration = new ConfigurationBuilder()
+				.AddJsonFile("appsettings.json")
+				.AddEnvironmentVariables()
+				.Build();
+			services.TryAddEnumerable(ServiceDescriptor.Singleton<ILoggerProvider, ConsoleLoggerProvider>());
+			services.AddPhotoBooth(configuration);
 		}
 	}
 }

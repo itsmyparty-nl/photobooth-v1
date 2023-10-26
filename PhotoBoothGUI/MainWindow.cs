@@ -28,14 +28,23 @@ using Pango;
 using System.Collections.Generic;
 using com.prodg.photobooth.domain;
 using com.prodg.photobooth.infrastructure.hardware;
+using Gdk;
+using Microsoft.Extensions.Logging;
+using SixLabors.ImageSharp.Formats.Bmp;
 
 
 public partial class MainWindow: Gtk.Window
 {
-	private readonly PhotoBooth photoBooth;
+	private readonly PhotoBooth _photoBooth;
+	private readonly IHardware _hardware;
+	private readonly IPhotoBoothModel _model;
+	private readonly IPhotoBoothService _service;
+	private readonly ISettings _settings;
+	private readonly ILogger<MainWindow> _logger;
 	private Gdk.Cursor invisibleCursor;
 
-	public MainWindow () : base (Gtk.WindowType.Toplevel)
+	public MainWindow(PhotoBooth photoBooth, IHardware hardware, IPhotoBoothModel model, IPhotoBoothService service,
+		ISettings settings, ILogger<MainWindow> logger) : base(Gtk.WindowType.Toplevel)
 	{
 		Build ();
 
@@ -44,20 +53,25 @@ public partial class MainWindow: Gtk.Window
 		GLib.ExceptionManager.UnhandledException += HandleUnhandledGlibException;
 		TaskScheduler.UnobservedTaskException += HandleUnobservedTaskException;
 
-        photoBooth = new PhotoBooth();
+		_photoBooth = photoBooth;
+		_hardware = hardware;
+		_model = model;
+		_service = service;
+		_settings = settings;
+		_logger = logger;
 
-		PreloadImages(photoBooth.Settings);
+		PreloadImages(_settings);
 		HideCursor ();
 
-		photoBooth.Hardware.Camera.StateChanged += OnCameraStateChanged;
-        photoBooth.Hardware.Camera.BatteryWarning += OnCameraBatteryWarning;
+		hardware.Camera.StateChanged += OnCameraStateChanged;
+        hardware.Camera.BatteryWarning += OnCameraBatteryWarning;
 		
 		//Subscribe to the shutdown requested event 
-		photoBooth.Model.ShutdownRequested += OnPhotoBoothShutdownRequested; 
-		photoBooth.Service.PictureAdded += OnPhotoBoothServicePictureAdded;
-        photoBooth.Hardware.PrintControl.Fired += OnPrintControlFired;
-        photoBooth.Hardware.PrintTwiceControl.Fired += OnPrintTwiceControlFired;
-        photoBooth.Hardware.TriggerControl.Fired += OnTriggerControlFired;
+		model.ShutdownRequested += OnPhotoBoothShutdownRequested; 
+		service.PictureAdded += OnPhotoBoothServicePictureAdded;
+        hardware.PrintControl.Fired += OnPrintControlFired;
+        hardware.PrintTwiceControl.Fired += OnPrintTwiceControlFired;
+        hardware.TriggerControl.Fired += OnTriggerControlFired;
         photoBooth.Model.ErrorOccurred += OnPhotoBoothErrorOccurred;
 
 		statusbar1.Push (1, "Waiting for camera");
@@ -65,10 +79,6 @@ public partial class MainWindow: Gtk.Window
 		imagePhoto.Pixbuf = instructionImages ["instruction"];
 		imageInstruction.Pixbuf = instructionImages ["title"];
 
-		photoBooth.Start ();
-
-		//textview1.Visible = false;
-		//GtkScrolledWindow.Visible = false;
 		this.Fullscreen ();
 	}
 
@@ -84,10 +94,7 @@ public partial class MainWindow: Gtk.Window
 
 	private void HideCursor()
 	{
-		using (Gdk.Pixmap inv = new Gdk.Pixmap (null, 1, 1, 1)) {
-			invisibleCursor = new Gdk.Cursor (inv, inv, Gdk.Color.Zero,
-				Gdk.Color.Zero, 0, 0);
-		}
+		invisibleCursor = new Gdk.Cursor(CursorType.BlankCursor);
 		GdkWindow.Cursor = invisibleCursor;
 	}
 
@@ -160,11 +167,11 @@ public partial class MainWindow: Gtk.Window
     }
 
 	private void Shutdown()
-	{	
-		photoBooth.Stop ();
+	{
+		_photoBooth.StopAsync(new CancellationToken());
 		ShowCursor ();
         
-        photoBooth.Dispose();
+        _photoBooth.Dispose();
 
         Application.Quit ();
 	}
@@ -190,21 +197,21 @@ public partial class MainWindow: Gtk.Window
 
 	private bool HandleUnhandledException(Exception exception, bool tryToRecover)
 	{
-	    if (photoBooth != null)
+	    if (_photoBooth != null)
 	    {
-	        photoBooth.Logger.LogException("Caught unhandled exception", exception);
+	        _logger.LogError(exception, "Caught unhandled exception");
 	        if (tryToRecover)
 	        {
 	            try
 	            {
 	                imagePhoto.Pixbuf = instructionImages["error"];
-                    photoBooth.Stop();
-                    photoBooth.Start();
-	                return true;
+                    // await _photoBooth.StopAsync(new CancellationToken());
+                    // await _photoBooth.StartAsync(new CancellationToken());
+	                //return true;
 	            }
 	            catch (Exception)
 	            {
-                    photoBooth.Logger.LogException("Unable to restore application, quitting", exception);
+                    _logger.LogError(exception, "Unable to restore application, quitting");
 	                return false;
 	            }
 	        }
@@ -229,13 +236,13 @@ public partial class MainWindow: Gtk.Window
 		});
 	}
 
-	private async Task<Gdk.Pixbuf> CreateAndScalePicture(System.Drawing.Image picture, int height)
+	private async Task<Gdk.Pixbuf> CreateAndScalePicture(SixLabors.ImageSharp.Image picture, int height)
     {
 		return await Task.Run(() =>
 	    {
 	        using (var stream = new MemoryStream())
 	        {
-	            picture.Save(stream, ImageFormat.Bmp);
+		        picture.Save(stream, new BmpEncoder());
 	            stream.Position = 0;
                 var pixBuf = new Gdk.Pixbuf(stream);
 
@@ -256,7 +263,7 @@ public partial class MainWindow: Gtk.Window
 	{
 		Gtk.Application.Invoke ((b, c) => {
 			string logString = string.Format (CultureInfo.InvariantCulture, "WARNING BATTERY LOW: {0}%", e.Level);
-            photoBooth.Logger.LogWarning(logString);
+            _logger.LogWarning(logString);
 			statusbar1.Push (1, logString);
 		});
 	}
@@ -266,7 +273,7 @@ public partial class MainWindow: Gtk.Window
 		if (e.NewState)
 		{
 			Gtk.Application.Invoke ((b, c) => {
-				statusbar1.Push (1, photoBooth.Hardware.Camera.Id);
+				statusbar1.Push (1, _hardware.Camera.Id);
 			});
 		}
 		else

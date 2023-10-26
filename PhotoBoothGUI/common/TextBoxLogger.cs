@@ -17,12 +17,13 @@
 */
 #endregion
 
-using System;
 using Gtk;
+using Microsoft.Extensions.Logging;
+using ArgumentOutOfRangeException = System.ArgumentOutOfRangeException;
 
 namespace com.prodg.photobooth.common
 {
-	public class TextBoxLogger: ILogger
+	public class TextBoxLogger : ILogger
 	{
 		private TextBuffer buffer;
 		private TextIter insertIter;
@@ -34,51 +35,58 @@ namespace com.prodg.photobooth.common
 			this.buffer = buffer;
 			insertIter = buffer.StartIter;
 
-			TextTag warningTag  = new TextTag (Warning);
+			TextTag warningTag = new TextTag(Warning);
 			warningTag.Foreground = "orange";
-			buffer.TagTable.Add (warningTag);
+			buffer.TagTable.Add(warningTag);
 
-			TextTag errorTag  = new TextTag (Error);
-			warningTag.Foreground = "red";
-			buffer.TagTable.Add (errorTag);
+			TextTag errorTag = new TextTag(Error);
+			errorTag.Foreground = "red";
+			buffer.TagTable.Add(errorTag);
 		}
 
-        public void LogDebug(string logString)
-        {
-            Gtk.Application.Invoke((b, c) =>
-            {
-                buffer.Insert(ref insertIter, logString + "\n");
-            });
-        }
+		public bool IsEnabled(LogLevel logLevel) => true;
 
-        
-        public void LogInfo(string logString)
-		{
-			Gtk.Application.Invoke ((b, c) => {
-				buffer.Insert (ref insertIter, logString + "\n");
-			});
-		}
+		public IDisposable? BeginScope<TState>(TState state) where TState : notnull => default!;
 
-		public void LogWarning(string logString)
+		public void Log<TState>(
+			LogLevel logLevel,
+			EventId eventId,
+			TState state,
+			Exception? exception,
+			Func<TState, Exception?, string> formatter)
 		{
-			Gtk.Application.Invoke ((b, c) => {
-				buffer.InsertWithTagsByName (ref insertIter, "WARNING: " + logString + "\n", Warning);
-			});
-		}
+			if (!IsEnabled(logLevel))
+			{
+				return;
+			}
 
-		public void LogError(string logString)
-		{
-			Gtk.Application.Invoke ((b, c) => {
-				buffer.InsertWithTagsByName (ref insertIter, "Error: " + logString + "\n", Error);
-			});
-		}
-
-		public void LogException(string logString, Exception exception)
-		{
-			Gtk.Application.Invoke ((b, c) => {
-				buffer.InsertWithTagsByName (ref insertIter, "EXCEPTION: " + logString + "\n", Error);
-				buffer.InsertWithTagsByName (ref insertIter, exception.ToString () + "\n", Error);
-			});
+			var logString = formatter(state, exception);
+			switch (logLevel)
+			{
+				case LogLevel.Trace:
+				case LogLevel.Debug:
+				case LogLevel.Information:
+					Gtk.Application.Invoke((b, c) => { buffer.Insert(ref insertIter, logString + "\n"); });
+					break;
+				case LogLevel.Warning:
+					Gtk.Application.Invoke((b, c) =>
+					{
+						buffer.InsertWithTagsByName(ref insertIter, "WARNING: " + logString + "\n", Warning);
+					});
+					break;
+				case LogLevel.Error:
+					Gtk.Application.Invoke((b, c) =>
+					{
+						buffer.InsertWithTagsByName(ref insertIter, "Error: " + logString + "\n", Error);
+					});
+					break;
+				case LogLevel.Critical:
+					break;
+				case LogLevel.None:
+					break;
+				default:
+					throw new NotSupportedException($"loglevel {logLevel}");
+			}
 		}
 	}
 }

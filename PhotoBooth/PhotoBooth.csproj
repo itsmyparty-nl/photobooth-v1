@@ -18,8 +18,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CommandMessenger\CommandMessenger.csproj" />
-    <ProjectReference Include="..\GPhotoWrapperInterface\GPhotoWrapperInterface.csproj" />
-    <ProjectReference Include="..\GPhotoWrapper\GPhotoWrapper.csproj" />
     <ProjectReference Include="..\PhotoBoothHardwareInterfaces\PhotoBoothHardwareInterfaces.csproj" />
     <ProjectReference Include="..\SharpCameraHardware\SharpCameraHardware.csproj" />
   </ItemGroup>

@@ -74,9 +74,11 @@ namespace com.prodg.photobooth.infrastructure.hardware
                 _pd.DefaultPageSettings.PrinterResolution = new PrinterResolution
                 {
                     X = 300,
-                    Y = 300,
-                    Kind = PrinterResolutionKind.High
+                    Y = 300
                 };
+                _pd.DefaultPageSettings.Color = true;
+                _pd.PrinterSettings.PrintToFile = true;
+                
                 //Pick the first papersize
                 _pd.DefaultPageSettings.PaperSize = _pd.PrinterSettings.PaperSizes[0];
                 //pd.DefaultPageSettings.Landscape = true;
