@@ -32,16 +32,20 @@ namespace com.prodg.photobooth
 		static IServiceProvider? value;
 		
 		[STAThread]
-		public static void Main (string[] args)
-		{
-			Application.Init ();
-			
+		public static async Task Main (string[] args)
+		{			
 			var services = new ServiceCollection();
 			ConfigureServices(services);
 			services.AddSingleton<MainWindow>();
 			value = services.BuildServiceProvider();
+		
+   			Application.Init ();
+			PhotoBoothHost photoBoothHost = value.GetRequiredService<PhotoBoothHost>();
+			await photoBoothHost.StartAsync(new CancellationToken());
+
 			MainWindow win = value.GetRequiredService<MainWindow>();
 			win.Show ();
+			
 			Application.Run ();
 		}
 
@@ -51,8 +55,11 @@ namespace com.prodg.photobooth
 				.AddJsonFile("appsettings.json")
 				.AddEnvironmentVariables()
 				.Build();
+			services.AddSingleton<IConfiguration>(provider => configuration);
+			services.AddLogging(configure => configure.AddConsole());
 			services.TryAddEnumerable(ServiceDescriptor.Singleton<ILoggerProvider, ConsoleLoggerProvider>());
 			services.AddPhotoBooth(configuration);
+			services.AddSingleton<PhotoBoothHost>();
 		}
 	}
 }

@@ -41,9 +41,10 @@ public partial class MainWindow: Gtk.Window
 	private readonly IPhotoBoothService _service;
 	private readonly ISettings _settings;
 	private readonly ILogger<MainWindow> _logger;
+	private readonly PhotoBoothHost _photoBoothHost;
 	private Gdk.Cursor invisibleCursor;
 
-	public MainWindow(PhotoBooth photoBooth, IHardware hardware, IPhotoBoothModel model, IPhotoBoothService service,
+	public MainWindow(PhotoBoothHost photoBoothHost, PhotoBooth photoBooth, IHardware hardware, IPhotoBoothModel model, IPhotoBoothService service,
 		ISettings settings, ILogger<MainWindow> logger) : base(Gtk.WindowType.Toplevel)
 	{
 		Build ();
@@ -59,6 +60,7 @@ public partial class MainWindow: Gtk.Window
 		_service = service;
 		_settings = settings;
 		_logger = logger;
+		_photoBoothHost = photoBoothHost;
 
 		PreloadImages(_settings);
 		HideCursor ();
@@ -168,7 +170,7 @@ public partial class MainWindow: Gtk.Window
 
 	private void Shutdown()
 	{
-		_photoBooth.StopAsync(new CancellationToken());
+		_photoBoothHost.StopAsync(new CancellationToken());
 		ShowCursor ();
         
         _photoBooth.Dispose();

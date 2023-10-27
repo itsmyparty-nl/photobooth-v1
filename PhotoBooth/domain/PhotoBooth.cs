@@ -28,7 +28,7 @@ namespace com.prodg.photobooth.domain
     /// <summary>
     /// A single session in which pictures are taken which are processed into a single result image
     /// </summary>
-    public class PhotoBooth : BackgroundService
+    public class PhotoBooth: IDisposable
     {
         public IPhotoBoothModel Model { get; }
 
@@ -48,36 +48,15 @@ namespace com.prodg.photobooth.domain
             _triggerService = triggerService;
             _logger = logger;
 
-            _logger.LogInformation("Creating PhotoBooth application");
-            this.
-                //Subscribe to the shutdown requested event 
-                Model.ShutdownRequested += (_, _) => StopAsync(new CancellationToken());
         }
 
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-        {
-            Start();
-            while (!stoppingToken.IsCancellationRequested)
-            {
-                try
-                {
-                    _logger.LogInformation("PhotoBooth running at: {time}", DateTimeOffset.Now);
-                    await Task.Delay(TimeSpan.FromMinutes(10), stoppingToken);
-                }
-                catch (TaskCanceledException e)
-                {
-                    _logger.LogInformation("Execution of PhotoBooth cancelled");
-                }
-            }
-            Stop();
-        }
         
         /// <summary>
         /// Start the photobooth
         /// </summary>
-        private void Start()
+        public void Start()
         {
-            _logger.LogInformation("Starting PhotoBooth application");
+            _logger.LogInformation("Starting PhotoBooth");
             //Start
             _triggerService.Register(_hardware.TriggerControl);
             _triggerService.Register(_hardware.PowerControl);
@@ -92,9 +71,9 @@ namespace com.prodg.photobooth.domain
         /// <summary>
         /// Stop the photobooth
         /// </summary>
-        private void Stop()
+        public void Stop()
         {
-            _logger.LogInformation("Stopping PhotoBooth application");
+            _logger.LogInformation("Stopping PhotoBooth");
             //Stop
             Model.Stop();
             _triggerService.DeRegister(_hardware.TriggerControl);
@@ -110,9 +89,8 @@ namespace com.prodg.photobooth.domain
 
         private bool _disposed;
         
-        public override void Dispose()
+        public void Dispose()
         {
-            base.Dispose();
             Dispose(true);
             GC.SuppressFinalize(this);
         }
@@ -121,7 +99,7 @@ namespace com.prodg.photobooth.domain
         {
             if (!_disposed)
             {
-                _logger.LogInformation("Disposing PhotoBooth application");
+                _logger.LogInformation("Disposing PhotoBooth");
                 if (disposing)
                 {
                     // Clean up managed objects
