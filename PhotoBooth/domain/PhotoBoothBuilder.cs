@@ -56,7 +56,7 @@ namespace com.prodg.photobooth.domain
 
             services.AddSingleton<IPhotoBoothModel, PhotoBoothModel>();
 
-            services.AddHostedService<PhotoBooth>();
+            services.AddSingleton<PhotoBooth>();
 
             return services;
         }

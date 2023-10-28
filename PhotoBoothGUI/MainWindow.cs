@@ -41,9 +41,10 @@ public partial class MainWindow: Gtk.Window
 	private readonly IPhotoBoothService _service;
 	private readonly ISettings _settings;
 	private readonly ILogger<MainWindow> _logger;
+	private readonly PhotoBoothHost _photoBoothHost;
 	private Gdk.Cursor invisibleCursor;
 
-	public MainWindow(PhotoBooth photoBooth, IHardware hardware, IPhotoBoothModel model, IPhotoBoothService service,
+	public MainWindow(PhotoBoothHost photoBoothHost, PhotoBooth photoBooth, IHardware hardware, IPhotoBoothModel model, IPhotoBoothService service,
 		ISettings settings, ILogger<MainWindow> logger) : base(Gtk.WindowType.Toplevel)
 	{
 		Build ();
@@ -59,6 +60,7 @@ public partial class MainWindow: Gtk.Window
 		_service = service;
 		_settings = settings;
 		_logger = logger;
+		_photoBoothHost = photoBoothHost;
 
 		PreloadImages(_settings);
 		HideCursor ();
@@ -168,7 +170,7 @@ public partial class MainWindow: Gtk.Window
 
 	private void Shutdown()
 	{
-		_photoBooth.StopAsync(new CancellationToken());
+		_photoBoothHost.StopAsync(new CancellationToken());
 		ShowCursor ();
         
         _photoBooth.Dispose();
@@ -219,8 +221,9 @@ public partial class MainWindow: Gtk.Window
 	    return false;
 	}
 
-	private void OnPhotoBoothServicePictureAdded (object sender, PictureAddedEventArgs a)
+	private async void OnPhotoBoothServicePictureAdded (object sender, PictureAddedEventArgs a)
 	{
+		_logger.LogInformation($"Received picture {a.Index}");
 		Gtk.Application.Invoke ((b, c) => {
 			if (a.IsFinal) {
 				imageInstruction.Pixbuf = instructionImages ["finished"];
@@ -231,15 +234,17 @@ public partial class MainWindow: Gtk.Window
 			var result = CreateAndScalePicture (a.Picture, imagePhoto.Allocation.Height);
 
 			//Set the pixbuf on the UI
-			imagePhoto.Pixbuf = result.Result;
+			imagePhoto.Pixbuf = result;
 			ShowAll ();
 		});
 	}
 
-	private async Task<Gdk.Pixbuf> CreateAndScalePicture(SixLabors.ImageSharp.Image picture, int height)
+	private Gdk.Pixbuf CreateAndScalePicture(SixLabors.ImageSharp.Image picture, int height)
     {
-		return await Task.Run(() =>
-	    {
+		_logger.LogInformation($"Enter CreateAndScale picture height `{height}");
+
+		// return await Task.Run(() =>
+	    // {
 	        using (var stream = new MemoryStream())
 	        {
 		        picture.Save(stream, new BmpEncoder());
@@ -249,7 +254,7 @@ public partial class MainWindow: Gtk.Window
 	            double scale = height/(double) pixBuf.Height;
                 return pixBuf.ScaleSimple((int)(scale * pixBuf.Width), (int)(scale * pixBuf.Height), Gdk.InterpType.Bilinear);
 	        }
-	    });
+	    // });
 	}
 
 	void OnPhotoBoothShutdownRequested (object sender, EventArgs e)
