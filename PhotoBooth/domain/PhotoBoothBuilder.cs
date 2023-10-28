@@ -49,7 +49,7 @@ namespace com.prodg.photobooth.domain
             services.AddSingleton<IMultiImageProcessor, ImageProcessingChain>();
             AddCamera(services, settings);
             CreatePrinterControls(services, settings);
-            services.AddSingleton<IPhotoboothOffloader, OffloadStub>();
+            services.AddSingleton<IPhotoboothOffloader, PhotoboothOffloader>();
             
             services.AddSingleton<IHardware, Hardware>();
             services.AddSingleton<IPhotoBoothService, PhotoBoothService>();

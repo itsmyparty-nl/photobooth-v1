@@ -15,7 +15,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\PhotoboothApiClient\Photobooth-Api-Client.csproj" />
     <ProjectReference Include="..\PhotoBooth\PhotoBooth.csproj" />
   </ItemGroup>
 

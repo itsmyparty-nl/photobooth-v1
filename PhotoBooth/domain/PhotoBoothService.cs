@@ -164,19 +164,16 @@ namespace com.prodg.photobooth.domain
         /// <param name="session"></param>
         public async Task Save(PhotoSession? session)
         {
-            _logger.LogInformation("Start saving session {StoragePath}", session.StoragePath);
+	        _logger.LogInformation("Start saving session {StoragePath}", session.StoragePath);
 
-            await Task.Run(() =>
-            {
-                try
-                {
-                    _offloader.OffloadSession(session.Id);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Error while saving session");
-                }
-            });
+	        try
+	        {
+		        await _offloader.OffloadSession(session.Id);
+	        }
+	        catch (Exception ex)
+	        {
+		        _logger.LogError(ex, "Error while saving session");
+	        }
         }
     }
 }
