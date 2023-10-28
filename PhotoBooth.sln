@@ -13,8 +13,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PhotoBoothGUI", "PhotoBooth
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Photobooth-Api-Client", "PhotoboothApiClient\Photobooth-Api-Client.csproj", "{C9CC764C-DE7A-4966-91B3-ED8305E61A69}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PhotoUploader", "PhotoBoothUploader\PhotoUploader.csproj", "{45D765F2-9A0F-4804-B733-F3C1DF394B06}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PhotoBoothService", "PhotoBoothService\PhotoBoothService.csproj", "{CDAF27AF-F5AF-4F52-937B-9535DB7652B8}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PhotoBoothNetPrinter", "PhotoBoothNetPrinter\PhotoBoothNetPrinter.csproj", "{AE4E80FE-8263-4D76-AEA5-1B239666247F}"
