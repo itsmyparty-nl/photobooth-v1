@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CommandMessenger\CommandMessenger.csproj" />
+    <ProjectReference Include="..\photobooth-api-client\photobooth-api-client.csproj" />
     <ProjectReference Include="..\PhotoBoothHardwareInterfaces\PhotoBoothHardwareInterfaces.csproj" />
     <ProjectReference Include="..\SharpCameraHardware\SharpCameraHardware.csproj" />
   </ItemGroup>

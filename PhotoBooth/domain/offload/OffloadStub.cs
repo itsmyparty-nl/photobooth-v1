@@ -17,16 +17,27 @@
 */
 #endregion
 
+using Microsoft.Extensions.Logging;
+
 namespace com.prodg.photobooth.domain.offload
 {
     public class OffloadStub: IPhotoboothOffloader
     {
-        public void OffloadEvent()
+        private readonly ILogger<OffloadStub> _logger;
+
+        public OffloadStub(ILogger<OffloadStub> logger)
         {
+            _logger = logger;
+        }
+        
+        public Task OffloadEvent()
+        {
+            return new Task(()=>_logger.LogInformation("Dummy offloading event"));
         }
 
-        public void OffloadSession(int sessionIndex)
+        public Task OffloadSession(int sessionIndex)
         {
+            return new Task(()=>_logger.LogInformation("Dummy offloading session"));
         }
     }
 }

@@ -38,7 +38,7 @@ namespace com.prodg.photobooth.domain.image
             _fileName = fileName;
             _encoder = encoder;
 
-            //_logger.LogDebug("Creating ImageFileSink for {FileName} - {Encoder} ",fileName, encoder);
+            _logger.LogDebug("Creating ImageFileSink for {FileName} - {Encoder} ",fileName, encoder);
         }
 
         /// <summary>
@@ -46,7 +46,7 @@ namespace com.prodg.photobooth.domain.image
         /// </summary>
         public Image Process(PhotoSession? session, Image image)
         {
-           //_logger.LogInformation("Storing file to disk {StoragePath} - {FileName}", session?.StoragePath, _fileName); 
+            _logger.LogInformation("Storing file to disk {StoragePath} - {FileName}", session?.StoragePath, _fileName); 
             if (image == null) { throw new ArgumentNullException(nameof(image), "image may not be null"); }
             if (session == null) { throw new ArgumentNullException(nameof(session), "session may not be null"); }
 
