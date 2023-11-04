@@ -55,6 +55,7 @@ namespace com.prodg.photobooth
 				.AddJsonFile("appsettings.json")
 				.AddEnvironmentVariables()
 				.Build();
+			services.AddSingleton<HttpClient>(provider => new HttpClient());
 			services.AddSingleton<IConfiguration>(provider => configuration);
 			services.AddLogging(configure => configure.AddConsole());
 			services.TryAddEnumerable(ServiceDescriptor.Singleton<ILoggerProvider, ConsoleLoggerProvider>());
