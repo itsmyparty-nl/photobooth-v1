@@ -19,9 +19,9 @@
 
 using System.Globalization;
 using System.Net;
+using com.prodg.photobooth.api;
 using com.prodg.photobooth.config;
 using Microsoft.Extensions.Logging;
-using photobooth_api_client;
 using SixLabors.ImageSharp.Formats.Jpeg;
 
 namespace com.prodg.photobooth.domain.offload
@@ -30,19 +30,25 @@ namespace com.prodg.photobooth.domain.offload
     {
         private readonly long _eventId;
         private readonly string _eventFolder;
-        private readonly swaggerClient _client;
+        private readonly PhotoBoothApiClient _client;
         private readonly ILogger<PhotoboothOffloader> _logger;
         private readonly IOffloadContextFileHandler _offloadContextFileHandler;
 
-        public PhotoboothOffloader(swaggerClient client, ISettings settings,
+        public PhotoboothOffloader(PhotoBoothApiClient client, ISettings settings,
             ILogger<PhotoboothOffloader> logger,
             IOffloadContextFileHandler offloadContextFileHandler)
         {
             
+            _logger = logger;
             _eventId = settings.ApiEventId;
             _eventFolder = Path.Combine(settings.StoragePath, settings.EventId);
             _client = client;
-            _logger = logger;
+            
+            var urlBuilder = new System.Text.StringBuilder();
+            urlBuilder.Append(settings.OffloadAddress.TrimEnd('/')).Append(_client.BaseUrl);
+            _client.BaseUrl = urlBuilder.ToString();
+            _logger.LogInformation("Offloading configured to URL '{BaseUrl}'", _client.BaseUrl);
+            
             _offloadContextFileHandler = offloadContextFileHandler;
 
             //Allow all SSL certificates
@@ -93,8 +99,7 @@ namespace com.prodg.photobooth.domain.offload
                 {
                     if (context.IsShotOffloaded(fullFilePath)) continue;
                     
-                    var fullFilename = Path.Combine(sessionFolder, fullFilePath);
-                    await UploadShot(fullFilename, session, context);
+                    await UploadShot(fullFilePath, session, context);
                     GC.Collect();
                 }
             }

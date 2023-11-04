@@ -17,14 +17,17 @@
 */
 #endregion
 
+using com.prodg.photobooth.api;
 using com.prodg.photobooth.config;
 using com.prodg.photobooth.domain.image;
 using com.prodg.photobooth.domain.offload;
 using com.prodg.photobooth.infrastructure.command;
 using com.prodg.photobooth.infrastructure.hardware;
+using com.prodg.photobooth.infrastructure.serialization;
 using CommandMessenger.TransportLayer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Http;
 
 namespace com.prodg.photobooth.domain
 {
@@ -49,13 +52,17 @@ namespace com.prodg.photobooth.domain
             services.AddSingleton<IMultiImageProcessor, ImageProcessingChain>();
             AddCamera(services, settings);
             CreatePrinterControls(services, settings);
+
+            services.AddHttpClient();
+            services.AddSingleton<PhotoBoothApiClient>();
+            services.AddSingleton<IStreamSerializer, JsonStreamSerializer>();
+            services.AddSingleton<IOffloadContextFileHandler, OffloadContextFileHandler>();
             services.AddSingleton<IPhotoboothOffloader, PhotoboothOffloader>();
             
             services.AddSingleton<IHardware, Hardware>();
             services.AddSingleton<IPhotoBoothService, PhotoBoothService>();
-
             services.AddSingleton<IPhotoBoothModel, PhotoBoothModel>();
-
+            
             services.AddSingleton<PhotoBooth>();
 
             return services;
