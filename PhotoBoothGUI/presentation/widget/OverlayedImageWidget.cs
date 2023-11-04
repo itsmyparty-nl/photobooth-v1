@@ -42,23 +42,23 @@ namespace com.prodg.photobooth.presentation.widget
 			FgColor = fontcolor;
 		}
 
-		protected override bool OnExposeEvent (Gdk.EventExpose Event)
-		{
-			//Do we need a check on this.IsRealized
-			bool baseExposeResult = base.OnExposeEvent (Event);
-			if (baseExposeResult && !string.IsNullOrEmpty (Text)) {
-			
-				// Determine the target area.
-				Gdk.Rectangle targetRectangle = new Gdk.Rectangle (0, 0, Allocation.Width, Allocation.Height);
-
-				//Draw the label without shadows etc on top of the image
-				Gtk.Style.PaintLayout (label.Style,  Event.Window, Gtk.StateType.Insensitive, false, targetRectangle, label, null, Style.XThickness, Style.YThickness, label.Layout);
-				// Send back that this expose event has been completely handled.
-				return true;
-			} else {
-				return baseExposeResult;
-			}
-		}
+		// protected override bool OnExposeEvent (Gdk.EventExpose Event)
+		// {
+		// 	//Do we need a check on this.IsRealized
+		// 	bool baseExposeResult = base.OnExposeEvent (Event);
+		// 	if (baseExposeResult && !string.IsNullOrEmpty (Text)) {
+		// 	
+		// 		// Determine the target area.
+		// 		Gdk.Rectangle targetRectangle = new Gdk.Rectangle (0, 0, Allocation.Width, Allocation.Height);
+		//
+		// 		//Draw the label without shadows etc on top of the image
+		// 		Gtk.Style.PaintLayout (label.Style,  Event.Window, Gtk.StateType.Insensitive, false, targetRectangle, label, null, Style.XThickness, Style.YThickness, label.Layout);
+		// 		// Send back that this expose event has been completely handled.
+		// 		return true;
+		// 	} else {
+		// 		return baseExposeResult;
+		// 	}
+		// }
 	}
 
 }

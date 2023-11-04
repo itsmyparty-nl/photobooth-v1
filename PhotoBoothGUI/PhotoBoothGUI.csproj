@@ -1,108 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">Mixed Platforms</Platform>
-    <ProjectGuid>{60C3900D-211C-40D3-8DA5-6BC4D6860F9E}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <Company>ItsMyParty.nl</Company>
     <RootNamespace>com.prodg.photobooth</RootNamespace>
-    <AssemblyName>PhotoBoothGUI</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|Mixed Platforms' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>..\bin\debug\</OutputPath>
-    <DefineConstants>DEBUG;</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <ConsolePause>false</ConsolePause>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|Mixed Platforms' ">
-    <DebugType>full</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>..\bin\release\</OutputPath>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <ConsolePause>false</ConsolePause>
+    <OutputType>Exe</OutputType>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="gtk-sharp, Version=2.4.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f">
-      <SpecificVersion>False</SpecificVersion>
-      <Package>gtk-sharp-2.0</Package>
-    </Reference>
-    <Reference Include="gdk-sharp, Version=2.4.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f">
-      <SpecificVersion>False</SpecificVersion>
-      <Package>gtk-sharp-2.0</Package>
-    </Reference>
-    <Reference Include="glib-sharp, Version=2.4.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f">
-      <SpecificVersion>False</SpecificVersion>
-      <Package>glib-sharp-2.0</Package>
-    </Reference>
-    <Reference Include="glade-sharp, Version=2.4.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f">
-      <SpecificVersion>False</SpecificVersion>
-      <Package>glade-sharp-2.0</Package>
-    </Reference>
-    <Reference Include="pango-sharp, Version=2.4.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f">
-      <SpecificVersion>False</SpecificVersion>
-      <Package>gtk-sharp-2.0</Package>
-    </Reference>
-    <Reference Include="atk-sharp, Version=2.4.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f">
-      <SpecificVersion>False</SpecificVersion>
-      <Package>gtk-sharp-2.0</Package>
-    </Reference>
-    <Reference Include="Mono.Posix" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="Mono.Cairo">
-      <Private>True</Private>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="gtk-gui\gui.stetic">
-      <LogicalName>gui.stetic</LogicalName>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="gtk-gui\generated.cs" />
-    <Compile Include="MainWindow.cs" />
-    <Compile Include="gtk-gui\MainWindow.cs" />
-    <Compile Include="Program.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="common\TextBoxLogger.cs" />
-    <Compile Include="domain\ButtonRemoteControl.cs" />
-    <Compile Include="infrastructure\hardware\GdkPrinter.cs" />
-    <Compile Include="presentation\widget\OverlayedImageWidget.cs" />
-    <Compile Include="gtk-gui\com.prodg.photobooth.OverlayedImageWidget.cs" />
-  </ItemGroup>
-  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <ItemGroup>
-    <ProjectReference Include="..\PhotoBooth\PhotoBooth.csproj">
-      <Project>{532E283C-98AA-417B-8F31-7BD2DA8EA090}</Project>
-      <Name>PhotoBooth</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\PhotoBoothConsole\application\App.config">
-      <Link>App.config</Link>
-    </None>
-    <None Include="NLog.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Resources\BruiloftIlse\Sources\error-en.pdn" />
-    <None Include="Resources\BruiloftIlse\Sources\indicator.pdn" />
-    <None Include="Resources\BruiloftIlse\Sources\largeinstruction-en.pdn" />
-    <None Include="Resources\BruiloftIlse\Sources\largeinstruction.pdn" />
-    <None Include="Resources\BruiloftIlse\Sources\legend.pdn" />
-    <None Include="Resources\BruiloftIlse\Sources\ready-en.pdn" />
-    <None Include="Resources\BruiloftIlse\Sources\tilte.pdn" />
-  </ItemGroup>
-  <ItemGroup />
-  <ItemGroup>
-    <Content Include="NLog.config">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Include="Resources\BruiloftIlse\empty.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -352,6 +258,58 @@
     <Content Include="Resources\ZZZ2017\tilte.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <None Remove="Resources\FuifVeerle12\empty.png" />
+    <Content Include="Resources\FuifVeerle12\empty.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <None Remove="Resources\FuifVeerle12\error.png" />
+    <Content Include="Resources\FuifVeerle12\error.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <None Remove="Resources\FuifVeerle12\indicator1of4.png" />
+    <Content Include="Resources\FuifVeerle12\indicator1of4.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <None Remove="Resources\FuifVeerle12\indicator2of4.png" />
+    <Content Include="Resources\FuifVeerle12\indicator2of4.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <None Remove="Resources\FuifVeerle12\indicator3of4.png" />
+    <Content Include="Resources\FuifVeerle12\indicator3of4.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <None Remove="Resources\FuifVeerle12\indicator4of4.png" />
+    <Content Include="Resources\FuifVeerle12\indicator4of4.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <None Remove="Resources\FuifVeerle12\largeinstruction.png" />
+    <Content Include="Resources\FuifVeerle12\largeinstruction.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <None Remove="Resources\FuifVeerle12\legend.png" />
+    <Content Include="Resources\FuifVeerle12\legend.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <None Remove="Resources\FuifVeerle12\ready.png" />
+    <Content Include="Resources\FuifVeerle12\ready.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <None Remove="Resources\FuifVeerle12\tilte.png" />
+    <Content Include="Resources\FuifVeerle12\tilte.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
-  <ItemGroup />
-</Project>
+  <ItemGroup>
+    <PackageReference Include="GtkSharp" Version="3.24.24.95" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="7.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\PhotoBooth\PhotoBooth.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties" />
+  </ItemGroup>
+ </Project>

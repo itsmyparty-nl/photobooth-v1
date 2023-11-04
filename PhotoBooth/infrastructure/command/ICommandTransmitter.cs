@@ -22,8 +22,8 @@ using com.prodg.photobooth.infrastructure.hardware;
 
 namespace com.prodg.photobooth.infrastructure.command
 {
-    public interface ICommandTransmitter: IHardwareController, IDisposable
+    public interface ICommandTransmitter
     {
-        void SendCommand(Command buttonType, string context);
+        public void SendCommand(Command buttonType, string context);
     }
 }

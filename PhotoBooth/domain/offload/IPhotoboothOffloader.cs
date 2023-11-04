@@ -21,7 +21,7 @@ namespace com.prodg.photobooth.domain.offload
 {
     public interface IPhotoboothOffloader
     {
-        void OffloadEvent();
-        void OffloadSession(int sessionIndex);
+        Task OffloadEvent();
+        Task OffloadSession(int sessionIndex);
     }
 }

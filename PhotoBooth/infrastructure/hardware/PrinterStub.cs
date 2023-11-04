@@ -17,26 +17,27 @@
 */
 #endregion
 
-using com.prodg.photobooth.common;
+using Microsoft.Extensions.Logging;
+using SixLabors.ImageSharp;
 
 namespace com.prodg.photobooth.infrastructure.hardware
 {
 	public class PrinterStub: IPrinter
 	{
-		private readonly ILogger logger;
+		private readonly ILogger<PrinterStub> _logger;
 
-		public PrinterStub (ILogger logger)
+		public PrinterStub (ILogger<PrinterStub> logger)
 		{
-			this.logger = logger;
+			_logger = logger;
 		}
 
 		/// <summary>
 		/// Print an image
 		/// </summary>
 		/// <param name="image"></param>
-		public void Print(System.Drawing.Image image)
+		public void Print(Image image)
 		{
-			logger.LogInfo ("Print ignored by STUB");
+			_logger.LogInformation("Print ignored by STUB");
 		}
 
 		public void Initialize (){

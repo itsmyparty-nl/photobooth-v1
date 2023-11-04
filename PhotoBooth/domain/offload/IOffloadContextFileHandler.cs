@@ -21,7 +21,7 @@ namespace com.prodg.photobooth.domain.offload
 {
     public interface IOffloadContextFileHandler
     {
-        void Save(OffloadContext context, string folder);
-        OffloadContext Load(string folder);
+        void Save(OffloadContext? context, string folder);
+        OffloadContext? Load(string folder);
     }
 }

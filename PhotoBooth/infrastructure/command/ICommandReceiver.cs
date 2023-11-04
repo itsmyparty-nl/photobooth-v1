@@ -32,12 +32,12 @@ namespace com.prodg.photobooth.infrastructure.command
         public Command Command { get; private set; }
     }
    
-    public interface ICommandReceiver : IHardwareController, IDisposable
+    public interface ICommandReceiver
     {
-        event EventHandler<CommandReceivedEventArgs> CommandReceived;
-        
-        void Subscribe(Command command);
+        public event EventHandler<CommandReceivedEventArgs> CommandReceived;
 
-        void UnSubscribe(Command command);
+        public void Subscribe(Command command);
+
+        public void UnSubscribe(Command command);
     }
 }

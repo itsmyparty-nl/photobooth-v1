@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <RootNamespace>com.prodg.photobooth.api</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
+    <PackageReference Include="NSwag.ApiDescription.Client" Version="13.0.5" />
+  </ItemGroup>
+  <ItemGroup>
+    <OpenApiReference Include="PhotoBoothApi.json" SourceUrl="https://photobooth.itsmyparty.nl/api/v1/swagger/v1/swagger.json" />
+  </ItemGroup>
+</Project>

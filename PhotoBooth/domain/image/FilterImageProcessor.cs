@@ -17,100 +17,50 @@
 */
 #endregion
 
-using System;
-using System.Drawing;
-using System.Drawing.Imaging;
-using com.prodg.photobooth.common;
+using Microsoft.Extensions.Logging;
 
 namespace com.prodg.photobooth.domain.image
 {
     /// <summary>
     /// An image processor processes an image by applying a filter
     /// </summary>
-    public class FilterImageProcessor : ISingleImageProcessor, IDisposable
+    public class FilterImageProcessor : ISingleImageProcessor
     {
-        private readonly ILogger logger;
-        private ImageAttributes attributes;
-        private readonly FilterType filterType;
+        private readonly ILogger<FilterImageProcessor> _logger;
+        private readonly FilterType _filterType;
+        private readonly ColorMatrix _colorMatrix;
 
         /// <summary>
         /// C'tor
         /// </summary>
         /// <param name="logger"></param>
         /// <param name="filterType"></param>
-        public FilterImageProcessor(ILogger logger, FilterType filterType)
+        public FilterImageProcessor(ILogger<FilterImageProcessor> logger, FilterType filterType)
         {
-            this.logger = logger;
-            this.filterType = filterType;
+            _logger = logger;
+            _filterType = filterType;
 
-            logger.LogDebug("Creating FilterImageProcessor: " + filterType);
+            _logger.LogDebug("Creating FilterImageProcessor for {FilterType}", filterType);
             
-            //create some image attributes
-            attributes = new ImageAttributes();
-
             //create the grayscale ColorMatrix
-            var colorMatrix = FilterFactory.Create(filterType);
-   
-            //set the color matrix attribute
-            attributes.SetColorMatrix(colorMatrix);
+            _colorMatrix = FilterFactory.Create(filterType);
         }
 
         /// <summary>
         /// Processes the images into a single image
         /// </summary>
-        public Image Process(PhotoSession session, Image image)
+        public Image Process(PhotoSession? session, Image image)
         {            
-            logger.LogInfo("Applying filter on image: " + filterType);
+            _logger.LogInformation("Applying filter {FilterType} on image", _filterType);
 
             if (image == null)
             {
-                throw new ArgumentNullException("image", "image may not be null");
+                throw new ArgumentNullException(nameof(image), "image may not be null");
             }
-
-            //get a graphics object from the image so we can draw on it
-            using (var graphics = Graphics.FromImage(image))
-            {
-                var srcRectangle = new Rectangle(0, 0, image.Width, image.Height);
-                graphics.DrawImage(image, srcRectangle, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, attributes);
-            }
-
+            
+            image.Mutate(context => context.Filter(_colorMatrix));
+            
             return image;
         }
-
-        #region IDisposable Implementation
-
-		bool disposed;
-
-		public void Dispose ()
-		{
-			Dispose (true);
-			GC.SuppressFinalize (this);
-		}
-
-		private void Dispose (bool disposing)
-		{
-		    if (!disposed)
-		    {
-		        if (disposing)
-		        {
-		            // Clean up managed objects
-		            if (attributes != null)
-		            {
-		               attributes.Dispose();
-                       attributes = null;
-		            }
-		        }
-		        // clean up any unmanaged objects
-		        disposed = true;
-		    }
-		}
-
-        ~FilterImageProcessor()
-		{
-			Dispose (false);
-		}
-		
-		#endregion
-
     }
 }

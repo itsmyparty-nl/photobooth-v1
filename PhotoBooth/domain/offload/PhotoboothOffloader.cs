@@ -17,112 +17,112 @@
 */
 #endregion
 
-using ItsMyParty.Photobooth.Client;
-using System;
 using System.Globalization;
-using System.IO;
-using System.Linq;
 using System.Net;
-using com.prodg.photobooth.common;
+using com.prodg.photobooth.api;
 using com.prodg.photobooth.config;
-using ItsMyParty.Photobooth.Api;
+using Microsoft.Extensions.Logging;
+using SixLabors.ImageSharp.Formats.Jpeg;
 
 namespace com.prodg.photobooth.domain.offload
 {
     public class PhotoboothOffloader : IPhotoboothOffloader
     {
-        private readonly ISessionApiApi sessionApi;
-        private readonly IShotApiApi shotApi;
-        private readonly long eventId;
-        private readonly string eventFolder;
-        private readonly ILogger logger;
-        private readonly IOffloadContextFileHandler offloadContextFileHandler;
+        private readonly long _eventId;
+        private readonly string _eventFolder;
+        private readonly PhotoBoothApiClient _client;
+        private readonly ILogger<PhotoboothOffloader> _logger;
+        private readonly IOffloadContextFileHandler _offloadContextFileHandler;
 
-        public PhotoboothOffloader(ISessionApiApi sessionApi, IShotApiApi shotApi, ISettings settings, ILogger logger,
+        public PhotoboothOffloader(PhotoBoothApiClient client, ISettings settings,
+            ILogger<PhotoboothOffloader> logger,
             IOffloadContextFileHandler offloadContextFileHandler)
         {
-            this.sessionApi = sessionApi;
-            this.shotApi = shotApi;
-            this.eventId = settings.ApiEventId;
-            this.eventFolder = Path.Combine(settings.StoragePath, settings.EventId);
-            this.logger = logger;
-            this.offloadContextFileHandler = offloadContextFileHandler;
             
+            _logger = logger;
+            _eventId = settings.ApiEventId;
+            _eventFolder = Path.Combine(settings.StoragePath, settings.EventId);
+            _client = client;
+            
+            var urlBuilder = new System.Text.StringBuilder();
+            urlBuilder.Append(settings.OffloadAddress.TrimEnd('/')).Append(_client.BaseUrl);
+            _client.BaseUrl = urlBuilder.ToString();
+            _logger.LogInformation("Offloading configured to URL '{BaseUrl}'", _client.BaseUrl);
+            
+            _offloadContextFileHandler = offloadContextFileHandler;
+
             //Allow all SSL certificates
-            ServicePointManager.ServerCertificateValidationCallback +=
-                (sender, certificate, chain, sslPolicyErrors) => true;
+            ServicePointManager.ServerCertificateValidationCallback += (_, _, _, _) => true;
         }
 
-        public void OffloadEvent()
+        public async Task OffloadEvent()
         {
-            logger.LogInfo("Sweeping event folder: " + eventFolder);
-            foreach (var sessionFolder in Directory.EnumerateDirectories(eventFolder).OrderBy(f => f))
+            _logger.LogInformation("Sweeping event folder {EventFolder}", _eventFolder);
+            foreach (var sessionFolder in Directory.EnumerateDirectories(_eventFolder).OrderBy(f => f))
             {
-                OffloadSessionFolder(sessionFolder);
+                await OffloadSessionFolder(sessionFolder);
             }
         }
 
-        public void OffloadSession(int sessionIndex)
+        public async Task OffloadSession(int sessionIndex)
         {
             try{
-                OffloadSessionFolder(Path.Combine(eventFolder, sessionIndex.ToString(CultureInfo.InvariantCulture)));
+                await OffloadSessionFolder(Path.Combine(_eventFolder, sessionIndex.ToString(CultureInfo.InvariantCulture)));
             }
             catch (Exception e)
             {
-                logger.LogException("Error while offloading session: ", e);
+                _logger.LogError(e, "Error while offloading session");
             }
         }
 
-        private void OffloadSessionFolder(string sessionFolder)
+        private async Task OffloadSessionFolder(string sessionFolder)
         {
-            var context = offloadContextFileHandler.Load(sessionFolder);
+            var context = _offloadContextFileHandler.Load(sessionFolder);
             try
             {
-                var index = Convert.ToInt32(sessionFolder.Replace(eventFolder+Path.DirectorySeparatorChar, ""));
+                var index = Convert.ToInt32(sessionFolder.Replace(_eventFolder+Path.DirectorySeparatorChar, ""));
 
                 SessionDTO session;
                 if (context.EventCreated)
                 {
-                    session = sessionApi.GetSessionByIndex(eventId, index);
+                    session = await _client.Sessions4Async(_eventId, index);
                 }
                 else
                 {
                     var timestamp = Directory.GetCreationTime(sessionFolder);
-                    session = CreateSession(index, timestamp);
+                    session = await CreateSession(index, timestamp);
                     context.EventCreated = true;
                 }
 
 
                 foreach (var fullFilePath in Directory.GetFiles(sessionFolder, "*.jpg"))
                 {
-                    if (!context.IsShotOffloaded(fullFilePath))
-                    {
-                        var fullFilename = Path.Combine(sessionFolder, fullFilePath);
-                        UploadShot(fullFilename, session, context);
-                        GC.Collect();
-                    }
+                    if (context.IsShotOffloaded(fullFilePath)) continue;
+                    
+                    await UploadShot(fullFilePath, session, context);
+                    GC.Collect();
                 }
             }
             catch (Exception e)
             {
-                logger.LogException("Error while offloading session: " + sessionFolder, e);
+                _logger.LogError(e, "Error while offloading session {SessionFolder}", sessionFolder);
             }
             finally
             {
-                offloadContextFileHandler.Save(context, sessionFolder);
+                _offloadContextFileHandler.Save(context, sessionFolder);
             }
         }
 
-        private SessionDTO CreateSession(int index, DateTime timestamp)
+        private async Task<SessionDTO> CreateSession(int index, DateTime timestamp)
         {
-            var session = new SessionDTO() {Index = index, Timestamp = timestamp, EventId = eventId};
-            var createdSession = sessionApi.CreateEventSession(eventId, session);
-            return createdSession;
+            var session = new SessionDTO {Index = index, Timestamp = timestamp, EventId = _eventId};
+            await _client.SessionsAsync(_eventId, session);
+            return await _client.Sessions4Async(_eventId, index);
         }
 
-        private void UploadShot(string fullFilename, SessionDTO session, OffloadContext context)
+        private async Task UploadShot(string fullFilename, SessionDTO session, OffloadContext? context)
         {
-            logger.LogInfo("Offloading shot: " + fullFilename);
+            _logger.LogInformation("Offloading shot {FullFilename}", fullFilename);
             var shotFileName = Path.GetFileName(fullFilename);
             try
             {
@@ -135,12 +135,12 @@ namespace com.prodg.photobooth.domain.offload
                     Image = LoadImageAsBase64(fullFilename)
                 };
 
-                shotApi.CreateEventSessionShot(eventId, session.Index, shot);
+                await _client.ShotsAsync(_eventId, session.Index, shot);
                 context.ShotOffloadFinished(fullFilename, true);
             }
             catch (Exception e)
             {
-                logger.LogException("Error while offloading shot:" + fullFilename, e);
+                _logger.LogError(e, "Error while offloading shot {FullFilename}", fullFilename);
                 context.ShotOffloadFinished(fullFilename, false);
                 context.Errors.Add(e.Message);
             }
@@ -148,14 +148,8 @@ namespace com.prodg.photobooth.domain.offload
 
         private static string LoadImageAsBase64(string fullFilename)
         {
-            using (FileStream stream = new FileStream(fullFilename, FileMode.Open))
-            {
-                using (MemoryStream ms = new MemoryStream())
-                {
-                    stream.CopyTo(ms);
-                    return Base64ImageConverter.ToBase64Jpg(ms.ToArray());
-                }
-            }
+            using var image = Image.Load(fullFilename);
+            return image.ToBase64String(JpegFormat.Instance);
         }
     }
 }

@@ -17,61 +17,53 @@
 */
 #endregion
 
-using System.IO;
-using System.Linq;
-using com.prodg.photobooth.common;
 using com.prodg.photobooth.infrastructure.serialization;
+using Microsoft.Extensions.Logging;
 
 namespace com.prodg.photobooth.domain.offload
 {
     public class OffloadContextFileHandler : IOffloadContextFileHandler
     {
-        private static readonly string FileName = "offloadstatus.json";
-        private readonly IStreamSerializer serializer;
-        private readonly ILogger logger;
+        private static readonly string _fileName = "offloadstatus.json";
+        private readonly IStreamSerializer _serializer;
+        private readonly ILogger<OffloadContextFileHandler> _logger;
 
-        public OffloadContextFileHandler(IStreamSerializer serializer, ILogger logger)
+        public OffloadContextFileHandler(IStreamSerializer serializer, ILogger<OffloadContextFileHandler> logger)
         {
-            this.serializer = serializer;
-            this.logger = logger;
+            _serializer = serializer;
+            _logger = logger;
         }
 
-        public void Save(OffloadContext context, string folder)
+        public void Save(OffloadContext? context, string folder)
         {
             try
             {
-                using (var fileStream = File.OpenWrite(Path.Combine(folder, FileName)))
-                {
-                    //Load offload status from file
-                    serializer.Serialize(fileStream, context);
-
-                }
+                using var fileStream = File.OpenWrite(Path.Combine(folder, _fileName));
+                //Load offload status from file
+                _serializer.Serialize(fileStream, context);
             }
             catch (IOException e)
             {
-                logger.LogException("Error while saving offload context for folder "+folder, e);
+                _logger.LogError(e, "Error while saving offload context for {Folder}",folder);
             }
         }
 
-        public OffloadContext Load(string folder)
+        public OffloadContext? Load(string folder)
         {
             var context = new OffloadContext();
             try
             {
-                var contextFile = Path.Combine(folder, FileName);
+                var contextFile = Path.Combine(folder, _fileName);
                 if (File.Exists(contextFile))
                 {
-                    using (var fileStream = File.OpenRead(contextFile))
-                    {
-                        //Load offload status from file
-                        context = serializer.Deserialize<OffloadContext>(fileStream);
-                    }
+                    using var fileStream = File.OpenRead(contextFile);
+                    //Load offload status from file
+                    context = _serializer.Deserialize<OffloadContext>(fileStream);
                 }
-
             }
             catch (IOException e)
             {
-                logger.LogException("Error while loading offload context for folder " + folder, e);
+                _logger.LogError(e, "Error while loading offload context for {Folder} ", folder);
             }
             return context;
         }

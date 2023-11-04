@@ -17,8 +17,7 @@
 */
 #endregion
 
-using System;
-using System.Drawing;
+using SixLabors.ImageSharp;
 
 namespace com.prodg.photobooth.domain.image
 {
@@ -38,6 +37,6 @@ namespace com.prodg.photobooth.domain.image
 		/// <returns>
 		/// The resulting image
 		/// </returns>
-		Image Process(PhotoSession session);
+		Image Process(PhotoSession? session);
 	}
 }

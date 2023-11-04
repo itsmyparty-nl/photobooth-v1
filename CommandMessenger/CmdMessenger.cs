@@ -14,15 +14,15 @@
   included in all copies or substantial portions of the Software.
 
   Copyright 2013 - Thijs Elenbaas
+  
+  Adapted for migration to .Net6 - pbronneberg
 */
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
-using System.Windows.Forms;
 using CommandMessenger.TransportLayer;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace CommandMessenger
 {
@@ -53,7 +53,6 @@ namespace CommandMessenger
         private SendCommandQueue _sendCommandQueue;                         // The queue of commands to be sent
         private ReceiveCommandQueue _receiveCommandQueue;                   // The queue of commands to be processed
 
-        //private Logger _sendCommandLogger = new Logger(@"d:\sendCommands.txt");
         /// <summary> Definition of the messenger callback function. </summary>
         /// <param name="receivedCommand"> The received command. </param>
         public delegate void MessengerCallbackFunction(ReceivedCommand receivedCommand);
@@ -73,35 +72,33 @@ namespace CommandMessenger
         /// <summary> Gets or sets the currently sent line. </summary>
         /// <value> The currently sent line. </value>
         public String CurrentSentLine { get; private set; }
-
-        /// <summary> Gets or sets the log file of send commands. </summary>
-        /// <value> The logfile name for send commands. </value>
-        //public String LogFileSendCommands
-        //{
-        //    get { return _sendCommandLogger.LogFileName; }
-        //    set { _sendCommandLogger.LogFileName = value; }
-        //}
-
+        
         /// <summary> Gets or sets the log file of receive commands. </summary>
         /// <value> The logfile name for receive commands. </value>
         public String LogFileReceiveCommands { get; set; }
-
-        // The control to invoke the callback on
-        private Control _controlToInvokeOn; 
-
+        
         /// <summary> Constructor. </summary>
         /// <param name="transport"> The transport layer. </param>
         public CmdMessenger(ITransport transport)
         {
-            Init(transport, ',', ';', '/');
+            Init(transport, ',', ';', '/', new NullLoggerFactory());
         }
+        
+        /// <summary> Constructor. </summary>
+        /// <param name="transport"> The transport layer. </param>
+        /// <param name="loggerFactory"></param>
+        public CmdMessenger(ITransport transport, ILoggerFactory loggerFactory)
+        {
+            Init(transport, ',', ';', '/', loggerFactory);
+        }
+        
 
         /// <summary> Constructor. </summary>
         /// <param name="transport"> The transport layer. </param>
         /// <param name="fieldSeparator"> The field separator. </param>
         public CmdMessenger(ITransport transport, char fieldSeparator)
         {
-            Init(transport, fieldSeparator, ';', '/');
+            Init(transport, fieldSeparator, ';', '/', new NullLoggerFactory());
         }
 
         /// <summary> Constructor. </summary>
@@ -110,7 +107,7 @@ namespace CommandMessenger
         /// <param name="commandSeparator"> The command separator. </param>
         public CmdMessenger(ITransport transport, char fieldSeparator, char commandSeparator)
         {
-            Init(transport, fieldSeparator, commandSeparator, commandSeparator);
+            Init(transport, fieldSeparator, commandSeparator, commandSeparator, new NullLoggerFactory());
         }
 
         /// <summary> Constructor. </summary>
@@ -121,22 +118,33 @@ namespace CommandMessenger
         public CmdMessenger(ITransport transport, char fieldSeparator, char commandSeparator,
                             char escapeCharacter)
         {
-            Init(transport, fieldSeparator, commandSeparator, escapeCharacter);
+            Init(transport, fieldSeparator, commandSeparator, escapeCharacter, new NullLoggerFactory());
         }
 
+        /// <summary> Constructor. </summary>
+        /// <param name="transport">   The transport layer. </param>
+        /// <param name="fieldSeparator">   The field separator. </param>
+        /// <param name="commandSeparator"> The command separator. </param>
+        /// <param name="escapeCharacter">  The escape character. </param>
+        public CmdMessenger(ITransport transport, char fieldSeparator, char commandSeparator,
+            char escapeCharacter, ILoggerFactory loggerFactory)
+        {
+            Init(transport, fieldSeparator, commandSeparator, escapeCharacter, loggerFactory);
+        }
+
+        
         /// <summary> Initialises this object. </summary>
         /// <param name="transport">   The transport layer. </param>
         /// <param name="fieldSeparator">   The field separator. </param>
         /// <param name="commandSeparator"> The command separator. </param>
         /// <param name="escapeCharacter">  The escape character. </param>
+        /// <param name="loggerFactory"></param>
         private void Init(ITransport transport, char fieldSeparator, char commandSeparator,
-                          char escapeCharacter)
-        {           
-            _controlToInvokeOn = null;
-
+                          char escapeCharacter, ILoggerFactory loggerFactory)
+        {
             _sendCommandQueue = new SendCommandQueue(DisposeStack, this);
             _receiveCommandQueue = new ReceiveCommandQueue(DisposeStack, this);
-            _communicationManager = new CommunicationManager(DisposeStack, transport, _receiveCommandQueue, commandSeparator, fieldSeparator, escapeCharacter);
+            _communicationManager = new CommunicationManager(DisposeStack, transport, _receiveCommandQueue, loggerFactory, commandSeparator, fieldSeparator, escapeCharacter);
 
             _fieldSeparator = fieldSeparator;
             _commandSeparator = commandSeparator;
@@ -145,34 +153,7 @@ namespace CommandMessenger
             _callbackList = new Dictionary<int, MessengerCallbackFunction>();
             PrintLfCr = false;
         }
-
-        public void SetSingleCore()
-        {
-            Process proc = Process.GetCurrentProcess();
-            //var t = proc.Threads[0];
-            foreach (ProcessThread pt in proc.Threads)
-            {
-                if (pt.ThreadState != ThreadState.Terminated)
-                {
-                    try
-                    {
-                        pt.IdealProcessor = 0;
-                        pt.ProcessorAffinity = (IntPtr) 1;
-                    }
-                    catch (Exception)
-                    {
-                    }
-
-                }
-            }
-        }
-        /// <summary> Sets a control to invoke on. </summary>
-        /// <param name="controlToInvokeOn"> The control to invoke on. </param>
-        public void SetControlToInvokeOn(Control controlToInvokeOn)
-        {
-            _controlToInvokeOn = controlToInvokeOn;
-        }
-
+        
         /// <summary>  Stop listening and end serial port connection. </summary>
         /// <returns> true if it succeeds, false if it fails. </returns>
         public bool StopListening()
@@ -375,20 +356,13 @@ namespace CommandMessenger
             {
                 if (eventHandler != null)
                 {
-                    if (_controlToInvokeOn != null && _controlToInvokeOn.InvokeRequired)
-                    {
-                        //Asynchronously call on UI thread
-                        _controlToInvokeOn.Invoke(eventHandler, null);
-                    }
-                    else
-                    {
                         //Directly call
                         eventHandler(this, null);
-                    }
                 }
             }
             catch (Exception)
             {
+                //Silently ignore all errors
             }
         }
 
@@ -397,18 +371,17 @@ namespace CommandMessenger
         /// <param name="command">                   The command. </param>
         private void InvokeCallBack(MessengerCallbackFunction messengerCallbackFunction, ReceivedCommand command)
         {
-            if (messengerCallbackFunction != null)
+            try
             {
-                if (_controlToInvokeOn != null && _controlToInvokeOn.InvokeRequired)
-                {
-                    //Asynchronously call on UI thread
-                    _controlToInvokeOn.Invoke(new MessengerCallbackFunction(messengerCallbackFunction), (object) command);
-                }
-                else
+                if (messengerCallbackFunction != null)
                 {
                     //Directly call
                     messengerCallbackFunction(command);
                 }
+            }
+            catch (Exception)
+            {
+                //Silently ignore all errors
             }
         }
 
@@ -473,7 +446,6 @@ namespace CommandMessenger
         {
             if (disposing)
             {
-                _controlToInvokeOn = null;
                 _receiveCommandQueue.ThreadRunState = CommandQueue.ThreadRunStates.Stop;
             }
             base.Dispose(disposing);

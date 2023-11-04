@@ -23,6 +23,7 @@ namespace com.prodg.photobooth.domain.image
     {
         Original,
         DarkGrayscale,
+        Grayscale,
         Polaroid,
         DesaturateLuminance,
         Brownie,
@@ -31,7 +32,5 @@ namespace com.prodg.photobooth.domain.image
         Technicolor,
         Sepia,
         AlternativePolaroid,
-        FrozenBlue,
-        FrozenIce
     }
 }

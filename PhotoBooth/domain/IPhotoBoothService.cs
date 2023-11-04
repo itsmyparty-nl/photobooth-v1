@@ -30,19 +30,19 @@ namespace com.prodg.photobooth.domain
         /// Capture a photo sessio
         /// </summary>
         /// <returns>The session containing the captured and processed images</returns>
-        Task<PhotoSession> Capture();
+        Task<PhotoSession?> Capture();
 
         /// <summary>
         /// Print a photo session
         /// </summary>
         /// <param name="session"></param>
-        Task Print(PhotoSession session);
+        Task Print(PhotoSession? session);
 
         /// <summary>
         /// Saves a photo session to disk for later use 
         /// </summary>
         /// <param name="session"></param>
         /// <returns></returns>
-        Task Save(PhotoSession session);
+        Task Save(PhotoSession? session);
     }
 }

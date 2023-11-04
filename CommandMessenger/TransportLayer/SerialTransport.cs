@@ -17,12 +17,10 @@
 */
 #endregion
 
-using System;
 using System.ComponentModel;
 using System.IO.Ports;
 using System.Reflection;
-using System.Linq;
-using System.Threading;
+using System.Text;
 
 namespace CommandMessenger.TransportLayer
 {
@@ -39,19 +37,20 @@ namespace CommandMessenger.TransportLayer
     {
         private readonly QueueSpeed _queueSpeed = new QueueSpeed(4);
         private Thread _queueThread;
+        private bool _stopRequested;
 
         public ThreadRunStates ThreadRunState = ThreadRunStates.Start;
 
         /// <summary> Default constructor. </summary>
         public SerialTransport()
-        {          
+        {
+            _stopRequested = false;
             Initialize();
         }
 
         /// <summary> Initializes this object. </summary>
         public void Initialize()
         {            
-           // _queueSpeed.Name = "Serial";
             // Find installed serial ports on hardware
             _currentSerialSettings.PortNameCollection = SerialPort.GetPortNames();
             _currentSerialSettings.PropertyChanged += CurrentSerialSettingsPropertyChanged;
@@ -94,8 +93,7 @@ namespace CommandMessenger.TransportLayer
         {
             get { return _serialPort; }
         }
-
-
+        
         #endregion
 
         #region Event handlers
@@ -106,14 +104,16 @@ namespace CommandMessenger.TransportLayer
         private void CurrentSerialSettingsPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             // if serial port is changed, a new baud query is issued
-            if (e.PropertyName.Equals("PortName"))
+            if (e.PropertyName is "PortName")
+            {
                 UpdateBaudRateCollection();
+            }
         }
 
-        protected  void ProcessQueue()
+        protected void ProcessQueue()
         {
             // Endless loop
-            while (ThreadRunState == ThreadRunStates.Start)
+            while (ThreadRunState == ThreadRunStates.Start && !_stopRequested)
             {
                 var bytes = BytesInBuffer();
                     _queueSpeed.SetCount(bytes);
@@ -313,7 +313,7 @@ namespace CommandMessenger.TransportLayer
         {
             if (disposing)
             {
-                _queueThread.Abort();
+                _stopRequested = true;
                 _queueThread.Join();
                 _currentSerialSettings.PropertyChanged -= CurrentSerialSettingsPropertyChanged;
                 // Releasing serial port 

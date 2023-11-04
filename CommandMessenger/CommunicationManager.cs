@@ -17,9 +17,10 @@
 */
 #endregion
 
-using System;
 using System.Text;
 using CommandMessenger.TransportLayer;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace CommandMessenger
 {
@@ -28,25 +29,16 @@ namespace CommandMessenger
     /// </summary>
     public class CommunicationManager : DisposableObject
     {
-        private ITransport _transport;
-        public readonly Encoding StringEncoder = Encoding.GetEncoding("ISO-8859-1");	// The string encoder
+        private readonly ITransport _transport;
+        private readonly ILogger<CommunicationManager> _logger;
+        private readonly Encoding _stringEncoder = Encoding.GetEncoding("ISO-8859-1");	// The string encoder
         private string _buffer = "";	                                                // The buffer
 
-        private ReceiveCommandQueue _receiveCommandQueue;
-        private IsEscaped _isEscaped;                                           // The is escaped
-        private char _fieldSeparator;                                       // The field separator
-        private char _commandSeparator;                                     // The command separator
-        private char _escapeCharacter;                                      // The escape character
-
-
-        /// <summary> Default constructor. </summary>
-        /// /// <param name="disposeStack"> The DisposeStack</param>
-        /// <param name="transport"> The Transport Layer</param>
-        /// <param name="receiveCommandQueue"></param>
-        public CommunicationManager(DisposeStack disposeStack, ITransport transport, ReceiveCommandQueue receiveCommandQueue)
-        {
-            Initialize(disposeStack,transport, receiveCommandQueue, ';', ',', '/');
-        }
+        private readonly ReceiveCommandQueue _receiveCommandQueue;
+        private readonly IsEscaped _isEscaped;                                           // The is escaped
+        private readonly char _fieldSeparator;                                       // The field separator
+        private readonly char _commandSeparator;                                     // The command separator
+        private readonly char _escapeCharacter;                                      // The escape character
 
         /// <summary> Constructor. </summary>
         /// <param name="receiveCommandQueue"></param>
@@ -55,26 +47,10 @@ namespace CommandMessenger
         /// <param name="escapeCharacter"> The escape character. </param>
         /// <param name="disposeStack"> The DisposeStack</param>
         /// <param name="transport"> The Transport Layer</param>
-        public CommunicationManager(DisposeStack disposeStack,ITransport transport, ReceiveCommandQueue receiveCommandQueue, char commandSeparator,  char fieldSeparator, char escapeCharacter)
+        /// <param name="loggerFactory"></param>
+        public CommunicationManager(DisposeStack disposeStack,ITransport transport, ReceiveCommandQueue receiveCommandQueue, ILoggerFactory loggerFactory, char commandSeparator = ';',  char fieldSeparator = ',', char escapeCharacter = '/')
         {
-            Initialize(disposeStack, transport, receiveCommandQueue, commandSeparator, fieldSeparator, escapeCharacter);
-        }
-
-        /// <summary> Finaliser. </summary>
-        ~CommunicationManager()
-        {
-            Dispose(false);
-        }
-
-        /// <summary> Initializes this object. </summary>
-        /// <param name="receiveCommandQueue"></param>
-        /// <param name="commandSeparator">    The End-Of-Line separator. </param>
-        /// <param name="fieldSeparator"></param>
-        /// <param name="escapeCharacter"> The escape character. </param>
-        /// <param name="disposeStack"> The DisposeStack</param>
-        /// /// <param name="transport"> The Transport Layer</param>
-        public void Initialize(DisposeStack disposeStack, ITransport transport, ReceiveCommandQueue receiveCommandQueue, char commandSeparator, char fieldSeparator, char escapeCharacter)
-        {
+            _logger = new Logger<CommunicationManager>(loggerFactory);
             disposeStack.Push(this);
             _transport = transport;
             _receiveCommandQueue = receiveCommandQueue;
@@ -83,7 +59,13 @@ namespace CommandMessenger
             _fieldSeparator = fieldSeparator;
             _escapeCharacter = escapeCharacter;
 
-            _isEscaped = new IsEscaped();           
+            _isEscaped = new IsEscaped();
+        }
+
+        /// <summary> Finaliser. </summary>
+        ~CommunicationManager()
+        {
+            Dispose(false);
         }
 
         #region Fields
@@ -102,7 +84,7 @@ namespace CommandMessenger
         #region Event handlers
 
         /// <summary> Serial port data received. </summary>
-        private void NewDataReceived(object o, EventArgs e)
+        private void NewDataReceived(object? o, EventArgs e)
         {
             ParseLines();
         }
@@ -129,7 +111,7 @@ namespace CommandMessenger
         /// <param name="value"> The string to write. </param>
         public void WriteLine(string value)
         {
-            byte[] writeBytes = StringEncoder.GetBytes(value + '\n');
+            byte[] writeBytes = _stringEncoder.GetBytes(value + '\n');
             _transport.Write(writeBytes);
         }
 
@@ -138,8 +120,8 @@ namespace CommandMessenger
         /// <param name="value"> The value. </param>
         public void WriteLine<T>(T value)
         {        
-            var writeString = value.ToString();
-            byte[] writeBytes = StringEncoder.GetBytes(writeString + '\n');
+            var writeString = value?.ToString();
+            byte[] writeBytes = _stringEncoder.GetBytes(writeString + '\n');
             _transport.Write(writeBytes);
         }
 
@@ -148,9 +130,12 @@ namespace CommandMessenger
         /// <param name="value"> The value. </param>
         public void Write<T>(T value)
         {
-            var writeString = value.ToString();
-            byte[] writeBytes = StringEncoder.GetBytes(writeString);
-            _transport.Write(writeBytes);
+            var writeString = value?.ToString();
+            if (writeString != null)
+            {
+                byte[] writeBytes = _stringEncoder.GetBytes(writeString);
+                _transport.Write(writeBytes);
+            }
         }
 
 
@@ -158,7 +143,7 @@ namespace CommandMessenger
         private void ReadInBuffer()
         {
             var data = _transport.Read();
-            _buffer += StringEncoder.GetString(data);
+            _buffer += _stringEncoder.GetString(data);
         }
 
         private void ParseLines()
@@ -166,14 +151,12 @@ namespace CommandMessenger
             LastLineTimeStamp = TimeUtils.Millis;
             ReadInBuffer();
             var currentLine = ParseLine();
+            _logger.LogDebug(currentLine);
             while (!String.IsNullOrEmpty(currentLine))
             {
                 ProcessLine(currentLine);
                 currentLine = ParseLine();
             }
-            //Send data to whom ever interested
-            //if (newDataAvailable && NewLinesReceived != null)
-            //    NewLinesReceived(this, null);
         }
 
         /// <summary> Converts lines on . </summary>
@@ -211,7 +194,6 @@ namespace CommandMessenger
                 if (_buffer != "")
                 {
                     // Check if an End-Of-Line is present in the string, and split on first
-                    //var i = _buffer.IndexOf(CommandSeparator);
                     var i = FindNextEol();
                     if (i >= 0 && i < _buffer.Length)
                     {

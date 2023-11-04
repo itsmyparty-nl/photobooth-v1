@@ -17,12 +17,7 @@
 */
 #endregion
 
-using System;
-using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
-using System.IO;
-using com.prodg.photobooth.common;
+using Microsoft.Extensions.Logging;
 
 namespace com.prodg.photobooth.domain.image
 {
@@ -31,68 +26,56 @@ namespace com.prodg.photobooth.domain.image
     /// </summary>
     public class OverlayImageProcessor : ISingleImageProcessor, IDisposable
     {
-        private readonly ILogger logger;
-        private ImageAttributes attributes;
-        private readonly string overlayImageFileName;
-        private Image overlayImage;
+        private readonly ILogger<OverlayImageProcessor> _logger;
+        private readonly string _overlayImageFileName;
+        private Image<Argb32> _overlayImage;
 
         /// <summary>
         /// C'tor
         /// </summary>
         /// <param name="logger"></param>
         /// <param name="overlayImageFileName"></param>
-        public OverlayImageProcessor(ILogger logger, string overlayImageFileName)
+        public OverlayImageProcessor(ILogger<OverlayImageProcessor> logger, string overlayImageFileName)
         {
-            this.logger = logger;
-            this.overlayImageFileName = overlayImageFileName;
+            _logger = logger;
+            _overlayImageFileName = overlayImageFileName;
 
-            logger.LogDebug("Creating OverlayImageProcessor: " + overlayImageFileName);
-            if (!File.Exists(overlayImageFileName))
+            logger.LogDebug("Creating OverlayImageProcessor with {OverlayImageFileName}", overlayImageFileName);
+            if (string.IsNullOrWhiteSpace(overlayImageFileName) || !File.Exists(overlayImageFileName))
             {
                 throw new FileNotFoundException("overlay image does not exist: " + overlayImageFileName);
             }
 
-            overlayImage = Image.FromFile(overlayImageFileName);
-
-            //create some image attributes
-            attributes = new ImageAttributes();
+            _overlayImage = Image.Load<Argb32>(overlayImageFileName);
         }
 
         /// <summary>
         /// Processes the images into a single image
         /// </summary>
-        public Image Process(PhotoSession session, Image image)
+        public Image Process(PhotoSession? session, Image image)
         {            
-            logger.LogInfo("Applying overlay on image: " + Path.GetFileNameWithoutExtension(overlayImageFileName));
+            _logger.LogInformation("Applying overlay on image: {OverlayImage}" , Path.GetFileNameWithoutExtension(_overlayImageFileName));
 
             if (image == null)
             {
-                throw new ArgumentNullException("image", "image may not be null");
+                throw new ArgumentNullException(nameof(image), "image may not be null");
             }
 
             //get a graphics object from the image so we can draw on it
-            using (var graphics = Graphics.FromImage(image))
+            
+            image.Mutate(x =>
             {
-                var srcRectangle = new Rectangle(0, 0, image.Width, image.Height);
-                int xStart = (int) Math.Round((image.Width/2f) - (overlayImage.Width/2f));
-                int yStart = (int) Math.Round((image.Height/2f) - (overlayImage.Height/2f));
-                //int xStart = (int) Math.Round(image.Width/2f);
-                //int yStart = (int) Math.Round(image.Height/2f);
-                
-                //graphics.DrawImage(overlayImage, srcRectangle, xStart, yStart, overlayImage.Width, overlayImage.Height,
-                //    GraphicsUnit.Pixel, attributes);
-                            graphics.SmoothingMode = SmoothingMode.HighQuality;
-            graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                graphics.DrawImage(overlayImage, xStart, yStart,
-                    new Rectangle(0, 0, overlayImage.Width, overlayImage.Height), GraphicsUnit.Pixel);
-            }
+	            int xStart = (int) Math.Round((image.Width/2f) - (_overlayImage.Width/2f));
+	            int yStart = (int) Math.Round((image.Height/2f) - (_overlayImage.Height/2f));
+	            x.DrawImage(_overlayImage, new Point(xStart, yStart), 1);
+            });
 
             return image;
         }
 
         #region IDisposable Implementation
 
-		bool disposed;
+		bool _disposed;
 
 		public void Dispose ()
 		{
@@ -102,25 +85,14 @@ namespace com.prodg.photobooth.domain.image
 
 		private void Dispose (bool disposing)
 		{
-		    if (!disposed)
+		    if (!_disposed)
 		    {
 		        if (disposing)
 		        {
-		            // Clean up managed objects
-		            if (attributes != null)
-		            {
-		               attributes.Dispose();
-                       attributes = null;
-		            }
-
-                    if (overlayImage != null)
-                    {
-                        overlayImage.Dispose();
-                        overlayImage = null;
-                    }
+			        _overlayImage.Dispose();
 		        }
 		        // clean up any unmanaged objects
-		        disposed = true;
+		        _disposed = true;
 		    }
 		}
 

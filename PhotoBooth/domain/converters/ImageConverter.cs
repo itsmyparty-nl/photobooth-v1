@@ -17,33 +17,24 @@
 */
 #endregion
 
-using System;
-using System.Drawing;
-using System.IO;
-using Newtonsoft.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats.Jpeg;
 
 namespace com.prodg.photobooth.domain.converters
 {
-    public class ImageConverter : Newtonsoft.Json.JsonConverter
+    public class ImageConverter : JsonConverter<Image>
     {
-        public override bool CanConvert(Type objectType)
+        public override Image? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            return objectType == typeof(Image);
+            var bytes = reader.GetBytesFromBase64();
+            return Image.Load(bytes);
         }
 
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        public override void Write(Utf8JsonWriter writer, Image value, JsonSerializerOptions options)
         {
-            var m = new MemoryStream(Convert.FromBase64String((string)reader.Value));
-            return Image.FromStream(m);
-        }
-
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
-        {
-            var bmp = (Image)value;
-            var m = new MemoryStream();
-            bmp.Save(m, System.Drawing.Imaging.ImageFormat.Png);
-
-            writer.WriteValue(Convert.ToBase64String(m.ToArray()));
+            writer.WriteStringValue(value.ToBase64String(JpegFormat.Instance));
         }
     }
 }

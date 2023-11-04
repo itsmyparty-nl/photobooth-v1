@@ -56,7 +56,7 @@ namespace CommandMessenger
         protected override void ProcessQueue()
         {
             // Endless loop
-            while (ThreadRunState == ThreadRunStates.Start)
+            while (ThreadRunState == ThreadRunStates.Start && !stopRequested)
             {
                 // Calculate sleep time based on incoming command speed
                 _queueSpeed.SetCount(Queue.Count);

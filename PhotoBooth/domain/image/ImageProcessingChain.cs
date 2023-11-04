@@ -17,66 +17,69 @@
 */
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using com.prodg.photobooth.common;
 using com.prodg.photobooth.config;
+using Microsoft.Extensions.Logging;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats.Jpeg;
 
 namespace com.prodg.photobooth.domain.image
 {
     public class ImageProcessingChain: IMultiImageProcessor
     {
-        private readonly IList<ISingleImageProcessor> imagePreProcessors;
-        private IMultiImageProcessor imageCombiner;
-        private readonly IList<ISingleImageProcessor> imagePostProcessors;
+	    private readonly ILogger<ImageProcessingChain> _logger;
+	    private readonly IList<ISingleImageProcessor> _imagePreProcessors;
+        private IMultiImageProcessor _imageCombiner;
+        private readonly IList<ISingleImageProcessor> _imagePostProcessors;
 
-        public int RequiredImages
-        {
-            get { return imageCombiner.RequiredImages; }
-        }
+        public int RequiredImages => _imageCombiner.RequiredImages;
 
-        public ImageProcessingChain(ILogger logger, ISettings settings)
+        public ImageProcessingChain(ILoggerFactory loggerFactory, ILogger<ImageProcessingChain> logger, ISettings settings)
         {
-            imagePreProcessors = new List<ISingleImageProcessor>
+	        _logger = logger;
+	        _imagePreProcessors = new List<ISingleImageProcessor>
             {
-                new FilterImageProcessor(logger, settings.Filter)
+                new FilterImageProcessor(new Logger<FilterImageProcessor>(loggerFactory), settings.Filter)
             };
 
-            if (!string.IsNullOrWhiteSpace(settings.FixedImageFilename))
-            {
-                imageCombiner = new FixedImageCollageImageProcessor(logger, settings, settings.FixedImageFilename);
-            }
-            else
-            {
-                imageCombiner = new CollageImageProcessor(logger, settings);
-            }
+            // if (!string.IsNullOrWhiteSpace(settings.FixedImageFilename))
+            // {
+	           //  _imageCombiner = new FixedImageCollageImageProcessor(
+		          //   new Logger<FixedImageCollageImageProcessor>(loggerFactory), settings, settings.FixedImageFilename);
+            // }
+            // else
+            // {
+	            _imageCombiner = new CollageImageProcessor(new Logger<CollageImageProcessor>(loggerFactory), settings);
+            //}
 
-            imagePostProcessors = new List<ISingleImageProcessor>();
+            _imagePostProcessors = new List<ISingleImageProcessor>();
             if (!string.IsNullOrWhiteSpace(settings.OverlayImageFilename))
             {
-                imagePostProcessors.Add(new OverlayImageProcessor(logger, settings.OverlayImageFilename));
+	            _imagePostProcessors.Add(new OverlayImageProcessor(new Logger<OverlayImageProcessor>(loggerFactory),
+		            settings.OverlayImageFilename));
             }
-            imagePostProcessors.Add(new ImageFileSink(logger, "collage.jpg", 90));
+
+            _imagePostProcessors.Add(new ImageFileSink(new Logger<ImageFileSink>(loggerFactory), "collage.jpg",
+	            new JpegEncoder()));
         }
 
-        public Image Process(PhotoSession session)
+        public Image Process(PhotoSession? session)
         {
-            PreProcessImages(session);
+            _logger.LogInformation("Process session");
+	        PreProcessImages(session);
 
-            var combinedImage = imageCombiner.Process(session);
+            var combinedImage = _imageCombiner.Process(session);
 
             return PostProcessCombinedImage(session, combinedImage);
         }
 
-        private void PreProcessImages(PhotoSession session)
+        private void PreProcessImages(PhotoSession? session)
         {
-            if (imagePreProcessors.Any())
+	        _logger.LogInformation("Preprocessing images");
+	        if (_imagePreProcessors.Any())
             {
                 for (var imageIndex = 0; imageIndex < session.ImageCount; imageIndex++)
                 {
-                    foreach (var imagePreProcessor in imagePreProcessors)
+                    foreach (var imagePreProcessor in _imagePreProcessors)
                     {
                         session.Images[imageIndex] = imagePreProcessor.Process(session, session.Images[imageIndex]);
                     }
@@ -84,11 +87,11 @@ namespace com.prodg.photobooth.domain.image
             }
         }
 
-        private Image PostProcessCombinedImage(PhotoSession session, Image combinedImage)
+        private Image PostProcessCombinedImage(PhotoSession? session, Image combinedImage)
         {
-            if (imagePostProcessors.Any())
+            if (_imagePostProcessors.Any())
             {
-                foreach (var combinedImagePostProcessor in imagePostProcessors)
+                foreach (var combinedImagePostProcessor in _imagePostProcessors)
                 {
                     combinedImage = combinedImagePostProcessor.Process(session, combinedImage);
                 }
@@ -98,7 +101,7 @@ namespace com.prodg.photobooth.domain.image
 
            #region IDisposable Implementation
 
-		bool disposed;
+		bool _disposed;
 
 		public void Dispose ()
 		{
@@ -108,37 +111,34 @@ namespace com.prodg.photobooth.domain.image
 
 		private void Dispose (bool disposing)
 		{
-		    if (!disposed)
+		    if (!_disposed)
 		    {
 		        if (disposing)
 		        {
 		            // Clean up managed objects
-		            if (imageCombiner != null)
+		            _imageCombiner.Dispose();
+		            
+		            if (_imagePreProcessors.Any())
 		            {
-		               imageCombiner.Dispose();
-                       imageCombiner = null;
+		                foreach (var singleImageProcessor in _imagePreProcessors)
+		                {
+		                    
+			                (singleImageProcessor as IDisposable)?.Dispose();
+		                }
+                        _imagePreProcessors.Clear();
 		            }
 
-		            if (imagePreProcessors != null && imagePreProcessors.Any())
+		            if (_imagePostProcessors.Any())
 		            {
-		                foreach (var singleImageProcessor in imagePreProcessors)
+		                foreach (var singleImageProcessor in _imagePostProcessors)
 		                {
-		                    singleImageProcessor.Dispose();
+		                    (singleImageProcessor as IDisposable)?.Dispose();
 		                }
-                        imagePreProcessors.Clear();
-		            }
-
-		            if (imagePostProcessors != null && imagePostProcessors.Any())
-		            {
-		                foreach (var singleImageProcessor in imagePostProcessors)
-		                {
-		                    singleImageProcessor.Dispose();
-		                }
-                        imagePostProcessors.Clear();
+                        _imagePostProcessors.Clear();
 		            }
 		        }
 		        // clean up any unmanaged objects
-		        disposed = true;
+		        _disposed = true;
 		    }
 		}
 

@@ -21,7 +21,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
 {
     public interface IHardwareController
     {
-        void Initialize();
-        void DeInitialize();
+        public void Initialize();
+        public void DeInitialize();
     }
 }

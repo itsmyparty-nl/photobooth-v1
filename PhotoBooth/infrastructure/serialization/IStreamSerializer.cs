@@ -17,16 +17,14 @@
 */
 #endregion
 
-using System.IO;
-
 namespace com.prodg.photobooth.infrastructure.serialization
 {
     public interface IStreamSerializer
     {
         string Type { get; }
         
-        void Serialize(Stream stream, object obj);
+        void Serialize(Stream stream, object? obj);
 
-        T Deserialize<T>(Stream stream) where T : class;
+        T? Deserialize<T>(Stream stream) where T : class;
     }
 }

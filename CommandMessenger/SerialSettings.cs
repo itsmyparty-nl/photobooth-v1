@@ -28,7 +28,7 @@ namespace CommandMessenger
     /// </summary>
     public class SerialSettings : INotifyPropertyChanged
     {
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
         string _portName = "";
         int _baudRate = 115200;
         readonly BindingList<int> _baudRateCollection = new BindingList<int>();

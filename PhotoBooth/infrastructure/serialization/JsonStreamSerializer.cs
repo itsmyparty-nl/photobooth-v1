@@ -17,50 +17,39 @@
 */
 #endregion
 
-using System.IO;
-using com.prodg.photobooth.common;
-using Newtonsoft.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using Microsoft.Extensions.Logging;
 
 namespace com.prodg.photobooth.infrastructure.serialization
 {
     public class JsonStreamSerializer : IStreamSerializer
     {
-        private readonly JsonSerializer serializer;
-        private ILogger logger;
+        private readonly ILogger<JsonStreamSerializer> _logger;
+        private JsonSerializerOptions? _options;
 
-        public string Type
+        public string Type => "json";
+
+        public JsonStreamSerializer(ILogger<JsonStreamSerializer> logger)
         {
-            get { return "json"; }
-        }
+            _logger = logger;
+            
+            _logger.LogDebug("Creating JSon serializer");
 
-        public JsonStreamSerializer(ILogger logger)
-        {
-            this.logger = logger;
-            logger.LogDebug("Creating JSon serializer");
-
-            serializer = new JsonSerializer
+            _options = new JsonSerializerOptions(JsonSerializerDefaults.General)
             {
-                DateFormatHandling = DateFormatHandling.IsoDateFormat,
-                MissingMemberHandling = MissingMemberHandling.Error,
-                Formatting = Formatting.Indented,
-                NullValueHandling = NullValueHandling.Include,
-                DefaultValueHandling = DefaultValueHandling.Include,
-                ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
-                PreserveReferencesHandling = PreserveReferencesHandling.Objects,
+                DefaultIgnoreCondition = JsonIgnoreCondition.Never,
+                IncludeFields = true
             };
         }
         
-        public void Serialize(Stream stream, object obj)
+        public void Serialize(Stream stream, object? obj)
         {
-            logger.LogDebug("Serializing stream to JSON");
+            _logger.LogDebug("Serializing stream to JSON");
 
             try
             {
-                using (var streamWriter = new StreamWriter(stream))
-                using (var jsonTextWriter = new JsonTextWriter(streamWriter))
-                {
-                    serializer.Serialize(jsonTextWriter, obj);
-                }
+                JsonSerializer.Serialize(stream, obj, _options);
             }
             catch (JsonException e)
             {
@@ -68,17 +57,13 @@ namespace com.prodg.photobooth.infrastructure.serialization
             }
         }
 
-        public T Deserialize<T>(Stream stream) where T : class
+        public T? Deserialize<T>(Stream stream) where T : class
         {
-            logger.LogDebug("Deserializing stream to JSON");
+            _logger.LogDebug("Deserializing stream to JSON");
 
             try
             {
-                using (var streamReader = new StreamReader(stream))
-                using (var jsonTextReader = new JsonTextReader(streamReader))
-                {
-                    return serializer.Deserialize<T>(jsonTextReader);
-                }
+                return JsonSerializer.Deserialize<T>(stream);
             }
             catch (JsonException e)
             {

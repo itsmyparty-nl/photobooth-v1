@@ -17,58 +17,51 @@
 */
 #endregion
 
-using System;
-using System.IO;
-using System.Text.RegularExpressions;
-using System.Threading;
-using com.prodg.photobooth.common;
-using LibGPhoto2;
+using Microsoft.Extensions.Logging;
 
 namespace com.prodg.photobooth.infrastructure.hardware
 {
-	public class Camera : ICamera
+	public class Camera : ICamera, IDisposable
 	{
-		private LibGPhoto2.IContext context;
-		private LibGPhoto2.ICamera camera;
-		private readonly ILogger logger;
-		private bool initialized;
-	    private bool deinitRequested;
-	    private Thread monitoringThread;
-	    private const string CameraBaseFolder = @"/";
-	    private const int DefaultBatteryLevel = 99;
-	    private const int WarningBatteryLevel = 25;
+		private readonly ILogger<Camera> _logger;
+		private readonly ICameraProvider _cameraHardware;
+		private const int WarningBatteryLevel = 25;
 
-        private readonly object cameraLock = new object();
+		private bool _deinitRequested;
+	    private Thread _monitoringThread;
 
+        private readonly object _cameraLock = new();
 
-		public string Id { get; private set; }
+        public string Id => CheckInitialized() ? _cameraHardware!.Id : "Uninitialized";
 
-		public Camera (ILogger logger)
+		public bool IsReady => CheckInitialized() && !_deinitRequested;
+
+		public Camera(ILogger<Camera> logger, ICameraProvider cameraHardware)
 		{
             logger.LogDebug("Creating camera interface");
-            this.logger = logger;
-			initialized = false;
-            deinitRequested = false;
+            _logger = logger;
+			_cameraHardware = cameraHardware;
+            _deinitRequested = false;
 		}
 
 		public void Initialize ()
 		{
-		    if (initialized) return;
+		    if (_cameraHardware.Initialized) return;
 
-            logger.LogInfo ("Initializing camera");
-		    deinitRequested = false;
-            monitoringThread = new Thread(MonitorCameraAsync);
-		    monitoringThread.Start();
+            _logger.LogInformation("Initializing camera");
+		    _deinitRequested = false;
+            _monitoringThread = new Thread(MonitorCameraAsync);
+		    _monitoringThread.Start();
 		}
 
 	    private void MonitorCameraAsync()
 	    {
 	        int pollingIndex = 0;
-	        while (!deinitRequested)
+	        while (!_deinitRequested)
 	        {
-	            lock (cameraLock)
+	            lock (_cameraLock)
 	            {
-	                if (!initialized)
+	                if (!_cameraHardware.Initialized)
 	                {
 	                    TryInitialize();
 	                }
@@ -83,7 +76,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
 	                }
 	            }
 	            //Sleep until the next poll
-                if (!deinitRequested)
+                if (!_deinitRequested)
                 {
                     Thread.Sleep(3000);
                 }
@@ -92,191 +85,118 @@ namespace com.prodg.photobooth.infrastructure.hardware
 
 	    private void MonitorCameraPresence()
 	    {
-	        try
+		    try
 	        {
-	            int level = 0;
-	            lock (cameraLock)
+		        int level;
+		        lock (_cameraLock)
 	            {
 	                level = GetBatteryLevel();
 	            }
 	            //Notify users if the battery level is at a warning level
 	            if (level <= WarningBatteryLevel)
 	            {
-	                if (BatteryWarning != null)
-	                {
-	                    BatteryWarning.Invoke(this, new CameraBatteryWarningEventArgs(level));
-	                }
+		            BatteryWarning.Invoke(this, new CameraBatteryWarningEventArgs(level));
 	            }
 	        }
 	        catch (Exception)
 	        {
-	            logger.LogWarning("Connection with camera lost");
-	            DisposeCameraObjects();
-	            initialized = false;
+	            _logger.LogWarning("Connection with camera lost");
+	            _cameraHardware.Clean();
 
                 //Signal that the camera is lost (not within the lock)
-                if (StateChanged != null)
-                {
-                    StateChanged.Invoke(this, new CameraStateChangedEventArgs(false));
-                }
+                StateChanged.Invoke(this, new CameraStateChangedEventArgs(false));
 	        }
 	    }
 
 	    private void TryInitialize()
 	    {
-	        try
-	        {
-	            lock (cameraLock)
-	            {
-	                //Initialize GPhoto2
-	                context = new LibGPhoto2.Context();
-	                camera = new LibGPhoto2.Camera();
-	                camera.Init(context);
+		    try
+		    {
+			    lock (_cameraLock)
+			    {
+				    _cameraHardware.Initialize();
 
-	                //Get the ID of the camera
-	                LibGPhoto2.CameraAbilities abilities = camera.GetAbilities();
-	                Id = abilities.model;
+				    //Log the ID
+				    _logger.LogInformation("Found: {Id}", _cameraHardware.Info.Model);
+				    _logger.LogDebug("Status: {Status}", _cameraHardware.Info.Status);
+				    _logger.LogDebug("Id: {Id}", _cameraHardware.Info.Id);
 
-	                //Log the ID
-	                logger.LogInfo("Found: " + Id);
-	                logger.LogDebug("Status: " + abilities.status);
-	                logger.LogDebug("Id: " + abilities.id);
+			    }
 
-	                initialized = true;
-	            }
-
-	            //Signal that the camera is ready (not within the lock)
-	            if (StateChanged != null)
-	            {
-	                StateChanged.Invoke(this, new CameraStateChangedEventArgs(true) );
-	            }
-	        }
-	        catch (Exception exception)
-	        {
-	            logger.LogDebug("Could not initialize camera: " + exception.Message);
-	        }
+			    //Signal that the camera is ready (not within the lock)
+			    StateChanged.Invoke(this, new CameraStateChangedEventArgs(true));
+		    }
+		    catch (Exception exception)
+		    {
+			    _logger.LogDebug(exception, "Could not initialize camera: {Message}", exception.Message);
+		    }
 	    }
-
-
+	    
 	    /// <remarks>In all cases that no value can be retrieved a default battery level is returned which
 	    /// indicates a full battery. rationale is that in this case manual checking is needed, and the
 	    /// software should work without issues</remarks>
         private int GetBatteryLevel()
 	    {
-	        string summary = null;
-            lock (cameraLock)
+            lock (_cameraLock)
             {
-                if (!CheckInitialized()) return DefaultBatteryLevel;
+                if (!CheckInitialized()) return WarningBatteryLevel;
 
-	            summary = camera.GetSummary(context).Text;
+	            return _cameraHardware.GetBatteryLevel();
 	        }
-
-	        using (var reader = new StringReader(summary))
-	        {
-	            string line;
-	            while ((line = reader.ReadLine()) != null)
-	            {
-	                if (!line.Contains("Battery")) continue;
-
-	                Regex regex = new Regex(@"^.+value\: (?<level>\d+)\%.*");
-	                Match match = regex.Match(line);
-
-	                if (!match.Success) return DefaultBatteryLevel;
-
-	                try
-	                {
-	                    return Convert.ToInt32(match.Groups["level"].Value);
-	                }
-	                catch (Exception ex)
-	                {
-	                    logger.LogDebug("no match found for battery level: " + ex.Message);
-	                    return DefaultBatteryLevel;
-	                }
-	            }
-	        }
-	        return DefaultBatteryLevel;
 	    }
 
+	    [Obsolete("Obsolete")]
 	    public void DeInitialize()
 	    {
-            logger.LogInfo("DeInitializing camera");
-	        deinitRequested = true;
+            _logger.LogInformation("DeInitializing camera");
+	        _deinitRequested = true;
 
-	        if (monitoringThread != null && !Thread.CurrentThread.Equals(monitoringThread))
+	        if (!Thread.CurrentThread.Equals(_monitoringThread))
 	        {
-	            if (!monitoringThread.Join(5000))
+	            if (!_monitoringThread.Join(5000))
 	            {
-	                logger.LogError("Cancel initialize failed, aborting thread");
-                    monitoringThread.Abort();
+	                _logger.LogError("Cancel initialize failed, aborting thread");
+                    _monitoringThread.Abort();
 	            }
 	        }
 
-	        lock (cameraLock)
+	        lock (_cameraLock)
 	        {
-	            if (context == null) return;
-	            if (camera == null) return;
-
-	            DisposeCameraObjects();
+		        _cameraHardware.Clean();
 	        }
 	    }
 
 	    public bool Capture(string capturePath)
 	    {
-	        logger.LogDebug("Starting capture");
-	        lock (cameraLock)
+	        _logger.LogDebug("Starting capture");
+	        lock (_cameraLock)
 	        {
 	            if (!CheckInitialized())
 	            {
 	                return false;
 	            }
 
-	            try
-	            {
-	                //Always get the battery level to make sure the battery warning is signaled timely
-	                logger.LogDebug("Battery Level: " + GetBatteryLevel());
+	            //Always get the battery level to make sure the battery warning is signaled timely
+	            _logger.LogDebug("Battery Level: {Level}", GetBatteryLevel());
 
-	                //Capture and download
-					LibGPhoto2.ICameraFilePath path = camera.Capture(LibGPhoto2.CameraCaptureType.Image, context);
-	                logger.LogDebug("Capture finished. File: " + Path.Combine(path.folder, path.name));
-	                LibGPhoto2.ICameraFile cameraFile = camera.GetFile(path.folder, path.name,
-	                    LibGPhoto2.CameraFileType.Normal,
-	                    context);
-
-	                logger.LogInfo("Saving file to: " + capturePath);
-	                cameraFile.Save(capturePath);
-
-	                //Remove the file from the camera buffer
-	                camera.DeleteFile(path.folder, path.name, context);
-	                return true;
-	            }
-	            catch (Exception exception)
-	            {
-	                logger.LogError("Camera capture failed: "+ exception.Message);
-	                return false;
-	            }
-	        }
+	            return _cameraHardware.Capture(capturePath);
+			}
 	    }
 
 	    public void Clean ()
 		{
-	        lock (cameraLock)
+	        lock (_cameraLock)
 	        {
                 if (!CheckInitialized()) return;
 
-	            //Try to delete all images on the camera
-                camera.DeleteAll(CameraBaseFolder, context);
-
-                //Deinitialize to fix slow reponse issues after multiple sessions
-                DisposeCameraObjects();
-	            initialized = false;
-                //note: the monitor thread will re-initialize the camera
+	            _cameraHardware.Clean();
 	        }
 		}
 
 		private bool CheckInitialized ()
 		{
-			if (!initialized) {
-				logger.LogError ("Camera not initialized");
+			if (!_cameraHardware.Initialized) {
+				_logger.LogWarning ("Camera not initialized");
 				return false;
 			}
 			return true;
@@ -284,7 +204,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
 
 		#region IDisposable Implementation
 
-		bool disposed;
+		bool _disposed;
 
 		public void Dispose ()
 		{
@@ -294,54 +214,10 @@ namespace com.prodg.photobooth.infrastructure.hardware
 
 		private void Dispose (bool disposing)
 		{
-			if (!disposed) {
-				if (disposing) {
-					// Clean up managed objects
-					
-				}
-				// clean up any unmanaged objects
-				DisposeCameraObjects();
-				disposed = true;
-			}
+			if (_disposed) return;
+			if (disposing) { };
+			_disposed = true;
 		}
-
-	    private void DisposeCameraObjects()
-	    {
-	        try
-	        {
-	            lock (cameraLock)
-	            {
-	                if (camera != null)
-	                {
-						if (context != null)
-						{
-							try
-							{
-								camera.Exit(context);
-							}
-							catch (Exception)
-							{
-								logger.LogWarning("Could not Exit camera from context");
-							}
-						}
-						camera.Dispose();
-	                }
-	                if (context != null)
-	                {
-	                    context.Dispose();
-	                }
-	            }
-	        }
-	        catch (Exception ex)
-	        {
-	            logger.LogException("Exception while disposing camera objects", ex);
-	        }
-	        finally
-	        {
-	            context = null;
-	            camera = null;
-	        }
-	    }
 
 	    ~Camera ()
 		{

@@ -17,14 +17,14 @@
 */
 #endregion
 
-using System;
-using System.IO;
-using com.prodg.photobooth.common;
+
 using com.prodg.photobooth.config;
 using com.prodg.photobooth.domain;
 using com.prodg.photobooth.domain.image;
+using Microsoft.Extensions.Logging;
+using Moq;
 using NUnit.Framework;
-using Rhino.Mocks;
+using SixLabors.ImageSharp;
 
 namespace Test_Photobooth.domain
 {
@@ -39,88 +39,95 @@ namespace Test_Photobooth.domain
         [TestCase(FilterType.Original)]
         [TestCase(FilterType.Kodachrome)]
         [TestCase(FilterType.DesaturateLuminance)]
+        [TestCase(FilterType.Polaroid)]
         [TestCase(FilterType.AlternativePolaroid)]
         [TestCase(FilterType.DarkGrayscale)]
-        [TestCase(FilterType.FrozenBlue)]
-        [TestCase(FilterType.FrozenIce)]
-        public void TestProcessImages2x2(FilterType filterType)
+        [TestCase(FilterType.Grayscale)]
+        public void TestProcessImagesChain(FilterType filterType)
         {
-            ConsoleLogger logger = new ConsoleLogger();
-            ISettings settings = MockRepository.GenerateStub<ISettings>();
+            Mock<ILoggerFactory> loggerFactoryStub = new MockRepository(MockBehavior.Loose).Create<ILoggerFactory>();
+            Mock<ILogger<ImageProcessingChain>> loggerStub = new MockRepository(MockBehavior.Loose).Create<ILogger<ImageProcessingChain>>();
+            Mock<ISettings> settingsStub = new MockRepository(MockBehavior.Loose).Create<ISettings>();
 
-            settings.Stub(s => s.CollageGridWidth).Return(2);
-            settings.Stub(s => s.CollageGridHeight).Return(2);
-            settings.Stub(s => s.CollageScalePercentage).Return(1);
-            settings.Stub(s => s.CollagePaddingPixels).Return(20);
-            settings.Stub(s => s.CollageAspectRatio).Return(1.5);
-            settings.Stub(s => s.Filter).Return(filterType);
+            settingsStub.SetupGet(s => s.CollageGridWidth).Returns(2);
+            settingsStub.SetupGet(s => s.CollageGridHeight).Returns(2);
+            settingsStub.SetupGet(s => s.CollageScalePercentage).Returns(1.0f);
+            settingsStub.SetupGet(s => s.CollagePaddingPixels).Returns(20);
+            settingsStub.SetupGet(s => s.CollageAspectRatio).Returns(1.5);
+            settingsStub.SetupGet(s => s.Filter).Returns(filterType);
+        
+            var imageProcessingChain = new ImageProcessingChain(loggerFactoryStub.Object,loggerStub.Object, settingsStub.Object);
+        
+            var session = LoadPhotoSession(@"resources/testImages", imageProcessingChain.RequiredImages);
+            
+            //Act
+            var image = imageProcessingChain.Process(session);
+            Assert.That(image, Is.Not.Null);
+            Assert.That(image.Height, Is.GreaterThan(100));
+            Assert.That(image.Width, Is.GreaterThan(100));
+            image.SaveAsJpeg($"out-{filterType}.jpg");
+        }
+        
+        [TestCase("halloween")]
+        [TestCase("halloween-small")]
+        public void TestProcessImagesOverlay(string overlayPath)
+        {
+            Mock<ILoggerFactory> loggerFactoryStub = new MockRepository(MockBehavior.Loose).Create<ILoggerFactory>();
+            Mock<ILogger<ImageProcessingChain>> loggerStub = new MockRepository(MockBehavior.Loose).Create<ILogger<ImageProcessingChain>>();
+            Mock<ISettings> settingsStub = new MockRepository(MockBehavior.Loose).Create<ISettings>();
 
-            var imageProcessingChain = new ImageProcessingChain(logger, settings);
-
-            string baseFolder = @"C:\Users\nly96192\Downloads\HHDxSoftwareInloopdag\";
-            //string baseFolder = @"C:\Users\nly96192\Desktop\Test";
-            ProcessImages(imageProcessingChain, baseFolder);
+            var overlayFullPath = Path.Combine($"resources", "overlay", $"{overlayPath}.png");
+            settingsStub.SetupGet(s => s.CollageGridWidth).Returns(2);
+            settingsStub.SetupGet(s => s.CollageGridHeight).Returns(2);
+            settingsStub.SetupGet(s => s.CollageScalePercentage).Returns(1.0f);
+            settingsStub.SetupGet(s => s.CollagePaddingPixels).Returns(20);
+            settingsStub.SetupGet(s => s.CollageAspectRatio).Returns(1.32);
+            settingsStub.SetupGet(s => s.OverlayImageFilename).Returns(overlayFullPath);
+        
+            var imageProcessingChain = new ImageProcessingChain(loggerFactoryStub.Object,loggerStub.Object, settingsStub.Object);
+        
+            var session = LoadPhotoSession(@"resources/testImages", imageProcessingChain.RequiredImages);
+            
+            //Act
+            var image = imageProcessingChain.Process(session);
+            Assert.That(image, Is.Not.Null);
+            Assert.That(image.Height, Is.GreaterThan(100));
+            Assert.That(image.Width, Is.GreaterThan(100));
+            image.SaveAsJpeg($"out-overlay-{overlayPath}.jpg");
         }
 
         [Test]
-        public void TestProcessImages3x3()
+        public void TestProcessImagesCollage()
         {
-            ConsoleLogger logger = new ConsoleLogger();
-            ISettings settings = MockRepository.GenerateStub<ISettings>();
+            //Arrange
+            Mock<ILogger<CollageImageProcessor>> loggerStub = new MockRepository(MockBehavior.Loose).Create<ILogger<CollageImageProcessor>>();
+            Mock<ISettings> settingsStub = new MockRepository(MockBehavior.Loose).Create<ISettings>();
 
-            settings.Stub(s => s.CollageGridWidth).Return(3);
-            settings.Stub(s => s.CollageGridHeight).Return(3);
-            settings.Stub(s => s.CollageScalePercentage).Return(1);
-            settings.Stub(s => s.CollagePaddingPixels).Return(20);
-            settings.Stub(s => s.CollageAspectRatio).Return(1.5);
-
-            var imageProcessor = new CollageImageProcessor(logger, settings);
-
-            string baseFolder = @"C:\temp\3x3";
-            ProcessImages(imageProcessor, baseFolder);
+            settingsStub.SetupGet(s => s.CollageGridWidth).Returns(2);
+            settingsStub.SetupGet(s => s.CollageGridHeight).Returns(2);
+            settingsStub.SetupGet(s => s.CollageScalePercentage).Returns(1.0f);
+            settingsStub.SetupGet(s => s.CollagePaddingPixels).Returns(15);
+            settingsStub.SetupGet(s => s.CollageAspectRatio).Returns(1.32f);
+            
+            var imageProcessor = new CollageImageProcessor(loggerStub.Object, settingsStub.Object);
+            var session = LoadPhotoSession(@"resources/testImages", imageProcessor.RequiredImages);
+            
+            //Act
+            var image = imageProcessor.Process(session);
+            Assert.That(image, Is.Not.Null);
+            Assert.That(image.Height, Is.GreaterThan(100));
+            Assert.That(image.Width, Is.GreaterThan(100));
+            image.SaveAsJpeg("test-collage-out.jpg");
         }
 
-        [Test]
-        public void TestProcessImages4x4()
+        private static PhotoSession LoadPhotoSession(string imageFolder, int requiredImages)
         {
-            ConsoleLogger logger = new ConsoleLogger();
-            ISettings settings = MockRepository.GenerateStub<ISettings>();
-
-            settings.Stub(s => s.CollageGridWidth).Return(4);
-            settings.Stub(s => s.CollageGridHeight).Return(4);
-            settings.Stub(s => s.CollageScalePercentage).Return(0.5f);
-            settings.Stub(s => s.CollagePaddingPixels).Return(5);
-            settings.Stub(s => s.CollageAspectRatio).Return(1.5);
-
-            var imageProcessor = new CollageImageProcessor(logger, settings);
-
-            string baseFolder = @"C:\temp\4x4";
-            ProcessImages(imageProcessor, baseFolder);
-        }
-
-        private static void ProcessImages(IMultiImageProcessor imageProcessor, string baseFolder)
-        {
-            foreach (String imageFolder in Directory.GetDirectories(baseFolder))
+            var session = new PhotoSession("Test", 0, imageFolder);
+            for (var i = 1; i <= requiredImages; i++)
             {
-                string id = imageFolder.Replace(Path.GetDirectoryName(imageFolder) + "\\", "");
-                try
-                {
-                    using (
-                        PhotoSession session = new PhotoSession("Test",
-                            0, imageFolder))
-                    {
-                        for (int i = 1; i <= imageProcessor.RequiredImages; i++)
-                        {
-                            session.AddPicture(Path.Combine(imageFolder, i + ".jpg"));
-                        }
-                        imageProcessor.Process(session);
-                    }
-                }
-                catch (Exception)
-                {
-                    // do nothing
-                }
+                session.AddPicture(Path.Combine(imageFolder, i + ".jpg"));
             }
+            return session;
         }
     }
 }

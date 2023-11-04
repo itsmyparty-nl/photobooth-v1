@@ -17,107 +17,42 @@
 */
 #endregion
 
-using com.prodg.photobooth.common;
-using System.Drawing;
-using System;
-using System.Drawing.Imaging;
-using System.IO;
-using com.prodg.photobooth.domain.image;
+using Microsoft.Extensions.Logging;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats;
 
-namespace com.prodg.photobooth.domain
+namespace com.prodg.photobooth.domain.image
 {
     /// <summary>
     /// Sink to store an image to disk in an image file
     /// </summary>
-    public class ImageFileSink : ISingleImageProcessor, IDisposable
+    public class ImageFileSink : ISingleImageProcessor
     {
-        private readonly ILogger logger;
-        private EncoderParameters imageEncoderParameters;
-        private readonly ImageCodecInfo imageCodecInfo;
+        private readonly ILogger<ImageFileSink> _logger;
+        private readonly string _fileName;
+        private readonly IImageEncoder _encoder;
 
-        private readonly string fileName;
-
-        /// <summary>
-        /// C'tor
-        /// </summary>
-        /// <param name="logger"></param>
-        /// <param name="fileName"></param>
-        /// <param name="quality"></param>
-        public ImageFileSink(ILogger logger, string fileName, int quality)
+        public ImageFileSink(ILogger<ImageFileSink> logger, string fileName, IImageEncoder encoder)
         {
-            this.logger = logger;
-            this.fileName = fileName;
-            logger.LogDebug("Creating ImageFileSink for: "+fileName);
-          
-            // EncoderParameter object in the array.
-            imageEncoderParameters = new EncoderParameters(1);
-            imageEncoderParameters.Param[0] = new EncoderParameter(Encoder.Quality, quality);
-            imageCodecInfo = GetEncoderInfo("image/jpeg");
+            _logger = logger;
+            _fileName = fileName;
+            _encoder = encoder;
+
+            _logger.LogDebug("Creating ImageFileSink for {FileName} - {Encoder} ",fileName, encoder);
         }
 
         /// <summary>
         /// Processes the images into a single image
         /// </summary>
-        public Image Process(PhotoSession session, Image image)
+        public Image Process(PhotoSession? session, Image image)
         {
-            logger.LogInfo(string.Format("Storing file to disk {0}: {1}", session.StoragePath, fileName));
-                       if (image == null)
-            {
-                throw new ArgumentNullException("image", "image may not be null");
-            }
+            _logger.LogInformation("Storing file to disk {StoragePath} - {FileName}", session?.StoragePath, _fileName); 
+            if (image == null) { throw new ArgumentNullException(nameof(image), "image may not be null"); }
+            if (session == null) { throw new ArgumentNullException(nameof(session), "session may not be null"); }
 
-            image.Save(Path.Combine(session.StoragePath, fileName), imageCodecInfo, imageEncoderParameters);
+            image.Save(Path.Combine(session.StoragePath, _fileName), _encoder);
+            
             return image;
         }
-
-        private static ImageCodecInfo GetEncoderInfo(String mimeType)
-        {
-            int j;
-            ImageCodecInfo[] encoders;
-            encoders = ImageCodecInfo.GetImageEncoders();
-            for (j = 0; j < encoders.Length; ++j)
-            {
-                if (encoders[j].MimeType == mimeType)
-                    return encoders[j];
-            }
-            return null;
-        }
-
-        #region IDisposable Implementation
-
-		bool disposed;
-
-		public void Dispose ()
-		{
-			Dispose (true);
-			GC.SuppressFinalize (this);
-		}
-
-		private void Dispose (bool disposing)
-		{
-		    if (!disposed)
-		    {
-		        if (disposing)
-		        {
-		            // Clean up managed objects
-		           
-                    if (imageEncoderParameters != null)
-                    {
-                        imageEncoderParameters.Dispose();
-                        imageEncoderParameters = null;
-                    }
-		        }
-		        // clean up any unmanaged objects
-		        disposed = true;
-		    }
-		}
-
-        ~ImageFileSink()
-		{
-			Dispose (false);
-		}
-		
-		#endregion
-
     }
 }

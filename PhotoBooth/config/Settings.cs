@@ -17,12 +17,10 @@
 */
 #endregion
 
-using System;
-using System.IO;
-using System.Collections.Specialized;
 using System.Configuration;
-using com.prodg.photobooth.common;
+using System.Globalization;
 using com.prodg.photobooth.domain.image;
+using Microsoft.Extensions.Configuration;
 
 namespace com.prodg.photobooth.config
 {
@@ -38,6 +36,7 @@ namespace com.prodg.photobooth.config
     {
         #region Setting key definitions
 
+        private const string PhotoBoothSection = "PhotoBoothSettings";
         private const string SerialPortNameKey = "SerialPortName";
         private const string SerialPortBaudRateKey = "SerialPortBaudRate";
         private const string SerialPortDtrEnableKey = "SerialPortDtrEnable";
@@ -61,6 +60,7 @@ namespace com.prodg.photobooth.config
         private const string FilterKey = "Filter";
         private const string FixedImageFilenameKey = "FixedImageFilename";
         private const string OverlayImageFilenameKey = "OverlayImageFilename";
+        private const string StubCameraKey = "StubCamera";
         private const string ApiEventIdKey = "ApiEventId";
         #endregion
 
@@ -91,6 +91,8 @@ namespace com.prodg.photobooth.config
         public string OverlayImageFilename { get; private set; }
         public long ApiEventId { get; private set; }
         
+        public bool StubCamera { get; private set; }
+        
         #endregion
 
         /// <summary>
@@ -99,63 +101,55 @@ namespace com.prodg.photobooth.config
         /// Reads in all settings from the app config file of the current application
         /// </para>
         /// </summary>
-        public Settings(ILogger logger)
+        public Settings(IConfiguration configuration)
         {
-            logger.LogDebug("Initializing application settings");
             try
             {
-                // Get the AppSettings section.
-                NameValueCollection appSettings =
-                    ConfigurationManager.AppSettings;
+                var settings = configuration.GetSection(PhotoBoothSection);
 
-                if (appSettings.Count == 0)
+                if (!settings.Exists())
                 {
-                    throw new Exception("Application settings are empty or could noy be found");
+                    throw new Exception(
+                        $"Application settings section '{PhotoBoothSection}' is empty or could noy be found");
                 }
 
                 //Read in all settings
-                SerialPortName = appSettings.Get(SerialPortNameKey);
-                SerialPortBaudRate = Convert.ToInt32(appSettings.Get(SerialPortBaudRateKey));
-                SerialPortDtrEnable = Convert.ToBoolean(appSettings.Get(SerialPortDtrEnableKey));
-                StoragePath = appSettings.Get(StoragePathKey);
-                CollageGridWidth = Convert.ToInt32(appSettings.Get(CollageGridWidthKey));
-                CollageGridHeight = Convert.ToInt32(appSettings.Get(CollageGridHeightKey));
-                CollageScalePercentage = Convert.ToSingle(appSettings.Get(CollageScalePercentageKey));
-                CollagePaddingPixels = Convert.ToInt32(appSettings.Get(CollagePaddingPixelsKey));
-                CollageAspectRatio = Convert.ToDouble(appSettings.Get(CollageAspectRatioKey));
-                Filter = (FilterType)Enum.Parse(typeof (FilterType), appSettings.Get(FilterKey));
-                PrinterName = appSettings.Get(PrinterNameKey);
-                PrintMarginTop = Convert.ToInt32(appSettings.Get(PrintMarginTopKey));
-                PrintMarginLeft = Convert.ToInt32(appSettings.Get(PrintMarginLeftKey));
-                PrintMarginBottom = Convert.ToInt32(appSettings.Get(PrintMarginBottomKey));
-                PrintMarginRight = Convert.ToInt32(appSettings.Get(PrintMarginRightKey));
-                SaveSessions = Convert.ToBoolean(appSettings.Get(SaveSessionsKey));
-                OffloadSessions = Convert.ToBoolean(appSettings.Get(OffloadSessionsKey));
-                OffloadAddress = appSettings.Get(OffloadAddressKey);
-                TriggerDelayMs = Convert.ToInt32(appSettings.Get(TriggerDelayMsKey));
-                PrintDurationMs = Convert.ToInt32(appSettings.Get(PrintDurationMsKey));
-                EventId = appSettings.Get(EventIdKey);
-                FixedImageFilename = appSettings.Get(FixedImageFilenameKey);
-                OverlayImageFilename = appSettings.Get(OverlayImageFilenameKey);
-                ApiEventId = Convert.ToInt64(appSettings.Get(ApiEventIdKey));
+                SerialPortName = settings[SerialPortNameKey]!;
+                SerialPortBaudRate = Convert.ToInt32(settings[SerialPortBaudRateKey]!);
+                SerialPortDtrEnable = Convert.ToBoolean(settings[SerialPortDtrEnableKey]!);
+                StoragePath = settings[StoragePathKey]!;
+                CollageGridWidth = Convert.ToInt32(settings[CollageGridWidthKey]!);
+                CollageGridHeight = Convert.ToInt32(settings[CollageGridHeightKey]!);
+                CollageScalePercentage = Convert.ToSingle(settings[CollageScalePercentageKey]!, CultureInfo.InvariantCulture);
+                CollagePaddingPixels = Convert.ToInt32(settings[CollagePaddingPixelsKey]!);
+                CollageAspectRatio = Convert.ToDouble(settings[CollageAspectRatioKey]!, CultureInfo.InvariantCulture);
+                Filter = (FilterType)Enum.Parse(typeof(FilterType), settings[FilterKey]!);
+                PrinterName = settings[PrinterNameKey]!;
+                PrintMarginTop = Convert.ToInt32(settings[PrintMarginTopKey]!);
+                PrintMarginLeft = Convert.ToInt32(settings[PrintMarginLeftKey]!);
+                PrintMarginBottom = Convert.ToInt32(settings[PrintMarginBottomKey]!);
+                PrintMarginRight = Convert.ToInt32(settings[PrintMarginRightKey]!);
+                SaveSessions = Convert.ToBoolean(settings[SaveSessionsKey]!);
+                OffloadSessions = Convert.ToBoolean(settings[OffloadSessionsKey]!);
+                OffloadAddress = settings[OffloadAddressKey]!;
+                TriggerDelayMs = Convert.ToInt32(settings[TriggerDelayMsKey]!);
+                PrintDurationMs = Convert.ToInt32(settings[PrintDurationMsKey]!);
+                EventId = settings[EventIdKey]!;
+                FixedImageFilename = settings[FixedImageFilenameKey]!;
+                OverlayImageFilename = settings[OverlayImageFilenameKey]!;
+                ApiEventId = Convert.ToInt64(settings[ApiEventIdKey]!);
+                StubCamera = settings[StubCameraKey] != null;
 
                 // Check consistency
                 if (!SaveSessions && OffloadSessions)
                 {
                     throw new ConfigurationErrorsException("Save sessions must be enabled when offloading is enabled");
                 }
-                try
-                {
-                    if (!Directory.Exists(StoragePath))
-                    {
-                        Directory.CreateDirectory(StoragePath);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    logger.LogException(string.Format(@"Error while creating directory {0}", StoragePath), ex);
-                }
 
+                if (!Directory.Exists(StoragePath))
+                {
+                    Directory.CreateDirectory(StoragePath!);
+                }
             }
             catch (ConfigurationErrorsException e)
             {
