@@ -39,8 +39,8 @@ namespace com.prodg.photobooth.infrastructure.command
             _commandKeyMapping = new Dictionary<Command, ConsoleKey>
                 {
                     {Command.Trigger, ConsoleKey.T},
-                    {Command.Print, ConsoleKey.NumPad1},
-                    {Command.PrintTwice, ConsoleKey.NumPad2},
+                    {Command.Print, ConsoleKey.D1},
+                    {Command.PrintTwice, ConsoleKey.D2},
                     {Command.Power, ConsoleKey.Q}
                 };
         }

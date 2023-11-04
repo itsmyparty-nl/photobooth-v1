@@ -173,7 +173,7 @@ namespace com.prodg.photobooth.domain
                 }
 
                 //Wait until releasing the control to show that printing is busy
-                await Task.Delay(TimeSpan.FromSeconds(settings.PrintDurationMs));
+                await Task.Delay(TimeSpan.FromMilliseconds(settings.PrintDurationMs));
             }
             catch (Exception ex)
             {
