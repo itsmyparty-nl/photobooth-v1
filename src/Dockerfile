@@ -1,17 +1,15 @@
 ﻿FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS base
 WORKDIR /app
 EXPOSE 80
-EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
-COPY  PhotoBoothService.csproj .
-RUN dotnet restore PhotoBoothService.csproj
 COPY . .
-RUN dotnet build PhotoBoothService.csproj -c Release -o /app/build
+WORKDIR /src/PhotoBoothService
+RUN dotnet build PhotoBoothService.csproj -c HeadlessRelease -o /app/build
 
 FROM build AS publish
-RUN dotnet publish PhotoBoothService.csproj -c Release -o /app/publish /p:UseAppHost=false
+RUN dotnet publish PhotoBoothService.csproj -c HeadlessRelease -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app

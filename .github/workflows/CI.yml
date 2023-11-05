@@ -57,7 +57,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
-          context: ./src/PhotoBoothService/
+          context: ./src
           sbom: true
           cache-from: bronneberg/photobooth-service:cache
           cache-to: bronneberg/photobooth-service:cache

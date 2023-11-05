@@ -7,6 +7,8 @@
     <Company>ItsMyParty.nl</Company>
     <RootNamespace>com.prodg.photobooth</RootNamespace>
     <OutputType>Exe</OutputType>
+    <Configurations>Debug;Release;HeadlessRelease</Configurations>
+    <Platforms>AnyCPU</Platforms>
   </PropertyGroup>
   <ItemGroup>
     <Content Include="Resources\BruiloftIlse\empty.png">

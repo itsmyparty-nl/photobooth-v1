@@ -6,6 +6,8 @@
     <Nullable>enable</Nullable>
     <Company>ItsMyParty.nl</Company>
     <RootNamespace>com.prodg.photobooth</RootNamespace>
+    <Configurations>Debug;Release;HeadlessRelease</Configurations>
+    <Platforms>AnyCPU</Platforms>
   </PropertyGroup>
 
   <ItemGroup>
