@@ -15,9 +15,9 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  prepare:
     runs-on: [ ubuntu-latest ]
-    name: Build and Test
+    name: Determine Version
     outputs:
       version: ${{ github.ref == 'refs/heads/main' && steps.version_release.outputs.version || steps.version_prerelease.outputs.version }}
       version_tag : ${{ steps.version_release.outputs.version_tag }}
@@ -42,7 +42,25 @@ jobs:
           version_format: "${major}.${minor}.${patch}"
           change_path: "src"
 
+
+  build:
+    runs-on: [ ubuntu-latest ]
+    needs: [ prepare ]
+    strategy:
+      matrix:
+        platform:
+          - linux/amd64
+          - linux/arm64
+    name: Build and Test
+    permissions:
+      contents: read
+      statuses: write
+      checks: write
+    steps:
+      - uses: actions/checkout@v4
+
       - name: Set up QEMU
+        if: ${{ matrix.platform != 'linux/amd64' }}
         uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
@@ -61,13 +79,13 @@ jobs:
           sbom: true
           cache-from: bronneberg/photobooth-service:cache
           cache-to: bronneberg/photobooth-service:cache
-          platforms: linux/amd64,linux/arm64
+          platforms: ${{ matrix.platform }}
           push: true
-          tags: bronneberg/photobooth-service:latest, bronneberg/photobooth-service:${{ github.ref == 'refs/heads/main' && steps.version_release.outputs.version || steps.version_prerelease.outputs.version }}
+          tags: bronneberg/photobooth-service:latest, bronneberg/photobooth-service:${{ needs.prepare.outputs.version }}
 
   vulnerability-test:
     name: Vulnerability Test
-    needs: build
+    needs: [ prepare, build ]
     runs-on: [ ubuntu-latest ]
     permissions:
       contents: read
@@ -77,7 +95,7 @@ jobs:
     steps:
       - name: Pull Docker image from cache
         env:
-          IMAGE_TAG: ${{ needs.build.outputs.version }}
+          IMAGE_TAG: ${{ needs.prepare.outputs.version }}
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_APIKEY: ${{ secrets.DOCKER_APIKEY }}
         run: |
@@ -87,7 +105,7 @@ jobs:
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: bronneberg/photobooth-service:${{ needs.build.outputs.version }}
+          image-ref: bronneberg/photobooth-service:${{ needs.prepare.outputs.version }}
           format: "table"
           exit-code: "1"
           ignore-unfixed: true
@@ -96,7 +114,7 @@ jobs:
   
   create-release:
     name: Create Release
-    needs: [ build, vulnerability-test]
+    needs: [ prepare, build, vulnerability-test]
     runs-on: [ ubuntu-latest ]
     if: ${{ github.actor != 'dependabot[bot]' }} AND ${{github.ref == 'refs/heads/main'}}
     permissions:
@@ -108,7 +126,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           generate_release_notes: true
-          tag_name: ${{ needs.build.outputs.version_tag  }}
-          name: "Version ${{ needs.build.outputs.version }}"
+          tag_name: ${{ needs.prepare.outputs.version_tag  }}
+          name: "Version ${{ needs.prepare.outputs.version }}"
           prerelease: false
           target_commitish: ${{ github.ref }}
