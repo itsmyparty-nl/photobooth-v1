@@ -3,23 +3,23 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26730.3
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PhotoBooth", "PhotoBooth\PhotoBooth.csproj", "{532E283C-98AA-417B-8F31-7BD2DA8EA090}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PhotoBooth", "src\PhotoBooth\PhotoBooth.csproj", "{532E283C-98AA-417B-8F31-7BD2DA8EA090}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommandMessenger", "CommandMessenger\CommandMessenger.csproj", "{3CF8F8FC-6F5C-46F8-94DC-C2E4C505ECA4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommandMessenger", "src\CommandMessenger\CommandMessenger.csproj", "{3CF8F8FC-6F5C-46F8-94DC-C2E4C505ECA4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test-Photobooth", "Test-Photobooth\Test-Photobooth.csproj", "{5D5A94BA-CFF0-4ECF-9971-89AD39E6CE2B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test-Photobooth", "src\Test-Photobooth\Test-Photobooth.csproj", "{5D5A94BA-CFF0-4ECF-9971-89AD39E6CE2B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PhotoBoothGUI", "PhotoBoothGUI\PhotoBoothGUI.csproj", "{60C3900D-211C-40D3-8DA5-6BC4D6860F9E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PhotoBoothGUI", "src\PhotoBoothGUI\PhotoBoothGUI.csproj", "{60C3900D-211C-40D3-8DA5-6BC4D6860F9E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PhotoBoothService", "PhotoBoothService\PhotoBoothService.csproj", "{CDAF27AF-F5AF-4F52-937B-9535DB7652B8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PhotoBoothService", "src\PhotoBoothService\PhotoBoothService.csproj", "{CDAF27AF-F5AF-4F52-937B-9535DB7652B8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PhotoBoothNetPrinter", "PhotoBoothNetPrinter\PhotoBoothNetPrinter.csproj", "{AE4E80FE-8263-4D76-AEA5-1B239666247F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PhotoBoothNetPrinter", "src\PhotoBoothNetPrinter\PhotoBoothNetPrinter.csproj", "{AE4E80FE-8263-4D76-AEA5-1B239666247F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpCameraHardware", "SharpCameraHardware\SharpCameraHardware.csproj", "{D6CD1C75-EAE6-4F69-8661-85E13CC7A6B2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpCameraHardware", "src\SharpCameraHardware\SharpCameraHardware.csproj", "{D6CD1C75-EAE6-4F69-8661-85E13CC7A6B2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PhotoBoothHardwareInterfaces", "PhotoBoothHardwareInterfaces\PhotoBoothHardwareInterfaces.csproj", "{68DD2862-AFB6-46A3-95F2-D31EC609E50E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PhotoBoothHardwareInterfaces", "src\PhotoBoothHardwareInterfaces\PhotoBoothHardwareInterfaces.csproj", "{68DD2862-AFB6-46A3-95F2-D31EC609E50E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "photobooth-api-client", "photobooth-api-client\photobooth-api-client.csproj", "{3EE87E88-692A-4070-A243-7B53F95979F8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "photobooth-api-client", "src\photobooth-api-client\photobooth-api-client.csproj", "{3EE87E88-692A-4070-A243-7B53F95979F8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
