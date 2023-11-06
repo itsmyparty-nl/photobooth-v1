@@ -17,9 +17,6 @@
 */
 #endregion
 
-using com.prodg.photobooth.infrastructure.command;
-using com.prodg.photobooth.infrastructure.hardware;
-using CommandMessenger.TransportLayer;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -53,7 +50,7 @@ namespace com.prodg.photobooth.domain
                     _logger.LogInformation("PhotoBooth Host running at: {time}", DateTimeOffset.Now);
                     await Task.Delay(TimeSpan.FromMinutes(10), stoppingToken);
                 }
-                catch (TaskCanceledException e)
+                catch (TaskCanceledException)
                 {
                     _logger.LogInformation("Execution of PhotoBooth Host cancelled");
                 }
@@ -62,34 +59,13 @@ namespace com.prodg.photobooth.domain
         }
         
         #region IDisposable Implementation
-
-        private bool _disposed;
         
         public override void Dispose()
         {
             base.Dispose();
-            Dispose(true);
             GC.SuppressFinalize(this);
         }
-
-        private void Dispose(bool disposing)
-        {
-            if (!_disposed)
-            {
-                _logger.LogInformation("Disposing PhotoBooth Host");
-                if (disposing)
-                {
-                }
-                // clean up any unmanaged objects
-                _disposed = true;
-            }
-        }
-
-        ~PhotoBoothHost()
-        {
-            Dispose(false);
-        }
-
+        
         #endregion
     }
 }

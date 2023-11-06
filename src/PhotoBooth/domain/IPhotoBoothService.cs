@@ -36,13 +36,13 @@ namespace com.prodg.photobooth.domain
         /// Print a photo session
         /// </summary>
         /// <param name="session"></param>
-        Task Print(PhotoSession? session);
+        Task Print(PhotoSession session);
 
         /// <summary>
         /// Saves a photo session to disk for later use 
         /// </summary>
         /// <param name="session"></param>
         /// <returns></returns>
-        Task Save(PhotoSession? session);
+        Task Save(PhotoSession session);
     }
 }

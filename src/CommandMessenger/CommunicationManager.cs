@@ -84,7 +84,7 @@ namespace CommandMessenger
         #region Event handlers
 
         /// <summary> Serial port data received. </summary>
-        private void NewDataReceived(object? o, EventArgs e)
+        private void NewDataReceived(object o, EventArgs e)
         {
             ParseLines();
         }

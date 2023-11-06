@@ -46,12 +46,12 @@ namespace com.prodg.photobooth.infrastructure.hardware
 	    /// <summary>
         /// Emits an event when the camera state changed (from ready to connection lost and vice versa)
         /// </summary>
-        event EventHandler<CameraStateChangedEventArgs> StateChanged;
+        event EventHandler<CameraStateChangedEventArgs>? StateChanged;
    
         /// <summary>
         /// Emits a warning if the battery level is at or below the warning level
         /// </summary>
-        event EventHandler<CameraBatteryWarningEventArgs> BatteryWarning;
+        event EventHandler<CameraBatteryWarningEventArgs>? BatteryWarning;
         
         /// <summary>
 		/// The identifier (model) of the camera

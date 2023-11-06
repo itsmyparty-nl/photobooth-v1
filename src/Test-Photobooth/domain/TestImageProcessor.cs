@@ -63,8 +63,8 @@ namespace Test_Photobooth.domain
             //Act
             var image = imageProcessingChain.Process(session);
             Assert.That(image, Is.Not.Null);
-            Assert.That(image.Height, Is.GreaterThan(100));
-            Assert.That(image.Width, Is.GreaterThan(100));
+            Assert.That(image!.Height, Is.GreaterThan(100));
+            Assert.That(image!.Width, Is.GreaterThan(100));
             image.SaveAsJpeg($"out-{filterType}.jpg");
         }
         
@@ -91,8 +91,8 @@ namespace Test_Photobooth.domain
             //Act
             var image = imageProcessingChain.Process(session);
             Assert.That(image, Is.Not.Null);
-            Assert.That(image.Height, Is.GreaterThan(100));
-            Assert.That(image.Width, Is.GreaterThan(100));
+            Assert.That(image!.Height, Is.GreaterThan(100));
+            Assert.That(image!.Width, Is.GreaterThan(100));
             image.SaveAsJpeg($"out-overlay-{overlayPath}.jpg");
         }
 

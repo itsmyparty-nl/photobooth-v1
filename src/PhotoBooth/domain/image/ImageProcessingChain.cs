@@ -28,7 +28,7 @@ namespace com.prodg.photobooth.domain.image
     {
 	    private readonly ILogger<ImageProcessingChain> _logger;
 	    private readonly IList<ISingleImageProcessor> _imagePreProcessors;
-        private IMultiImageProcessor _imageCombiner;
+        private readonly IMultiImageProcessor _imageCombiner;
         private readonly IList<ISingleImageProcessor> _imagePostProcessors;
 
         public int RequiredImages => _imageCombiner.RequiredImages;
@@ -76,7 +76,7 @@ namespace com.prodg.photobooth.domain.image
 
             var combinedImage = _imageCombiner.Process(session);
 
-            return PostProcessCombinedImage(session, combinedImage);
+            return PostProcessCombinedImage(session, combinedImage!);
         }
 
         private void PreProcessImages(PhotoSession session)

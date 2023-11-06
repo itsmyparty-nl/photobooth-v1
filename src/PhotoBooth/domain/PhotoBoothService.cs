@@ -122,8 +122,9 @@ namespace com.prodg.photobooth.domain
 					}
 					session.ResultImage = _imageProcessor.Process (session);
 					//Signal that a new picture was added
-					if (PictureAdded != null) {
-						PictureAdded(this, new PictureAddedEventArgs (session.ResultImage, session.ImageCount, 
+					if (PictureAdded != null && session.ResultImage != null)
+					{
+						PictureAdded(this, new PictureAddedEventArgs(session.ResultImage, session.ImageCount,
 							_imageProcessor.RequiredImages));
 					}
 
@@ -143,29 +144,29 @@ namespace com.prodg.photobooth.domain
         /// Print a photo session
         /// </summary>
         /// <param name="session"></param>
-        public async Task Print(PhotoSession? session)
-		{
-			_logger.LogInformation("Start Printing result image for session {StoragePath}", session.StoragePath);
+        public Task Print(PhotoSession session)
+        {
+	        _logger.LogInformation("Start Printing result image for session {StoragePath}", session.StoragePath);
 
-            await Task.Run(() =>
-            {
-                try
-                {
-	                _hardware.Printer.Print(session.ResultImage ??
-	                                        throw new InvalidOperationException("Cannot print: ResultImage is null"));
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Error while printing image");
-                }
-            });
-		}
+	        return Task.Run(() =>
+	        {
+		        try
+		        {
+			        _hardware.Printer.Print(session.ResultImage ??
+			                                throw new InvalidOperationException("Cannot print: ResultImage is null"));
+		        }
+		        catch (Exception ex)
+		        {
+			        _logger.LogError(ex, "Error while printing image");
+		        }
+	        });
+        }
 
         /// <summary>
         /// Save a photo session
         /// </summary>
         /// <param name="session"></param>
-        public async Task Save(PhotoSession? session)
+        public async Task Save(PhotoSession session)
         {
 	        _logger.LogInformation("Start saving session {StoragePath}", session.StoragePath);
 

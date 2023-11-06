@@ -133,7 +133,7 @@ namespace com.prodg.photobooth.domain
             {
                 //Trigger a shutdown request.
                 //Do not call stop directly since this is the responsibility of the application
-                ShutdownRequested.Invoke(this, EventArgs.Empty);
+                ShutdownRequested?.Invoke(this, EventArgs.Empty);
             }
             catch (Exception ex)
             {
@@ -196,7 +196,6 @@ namespace com.prodg.photobooth.domain
 			logger.LogInformation("Print twice control fired");
 
 			//Release the print button to prevent printing twice
-			//hardware.PrintControl.Release ();
 			var lockId = hardware.PrintTwiceControl.Lock (true);
             var singleLockId = hardware.PrintControl.Lock(false);
 
@@ -322,7 +321,7 @@ namespace com.prodg.photobooth.domain
 			GC.SuppressFinalize (this);
 		}
 
-		private void Dispose (bool disposing)
+		protected virtual void Dispose (bool disposing)
 		{
 		    if (!disposed)
 		    {
