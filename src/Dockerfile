@@ -23,7 +23,7 @@ WORKDIR /src/PhotoBoothService
 RUN dotnet build PhotoBoothService.csproj -c HeadlessRelease -o /app/build -a $TARGETARCH
 
 FROM build AS publish
-RUN dotnet publish PhotoBoothService.csproj -c HeadlessRelease -o /app/publish -a $TARGETARCH
+RUN dotnet publish PhotoBoothService.csproj -c HeadlessRelease -o /app/publish -a $TARGETARCH --self-contained false
 
 FROM base AS final
 WORKDIR /app
