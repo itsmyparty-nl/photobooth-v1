@@ -7,6 +7,8 @@
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
         <Configurations>Debug;Release;HeadlessRelease</Configurations>
         <Platforms>AnyCPU</Platforms>
+        <UseAppHost>false</UseAppHost>
+        <SelfContained>false</SelfContained>
     </PropertyGroup>
 
     <ItemGroup>
