@@ -17,9 +17,9 @@
 */
 #endregion
 
+using System.Diagnostics;
 using com.prodg.photobooth.config;
 using Microsoft.Extensions.Logging;
-using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Jpeg;
 
 namespace com.prodg.photobooth.domain.image
@@ -62,9 +62,16 @@ namespace com.prodg.photobooth.domain.image
 	            new JpegEncoder()));
         }
 
-        public Image Process(PhotoSession? session)
+        public Image? Process(PhotoSession? session)
         {
-            _logger.LogInformation("Process session");
+	        _logger.LogInformation("Process session");
+	        if (session == null)
+	        {
+		        _logger.LogWarning("Session processings is requested for a NULL session");
+		        Debug.Assert(session == null, "Session processings is requested for a NULL session");
+		        return null;
+	        }
+            
 	        PreProcessImages(session);
 
             var combinedImage = _imageCombiner.Process(session);
@@ -72,7 +79,7 @@ namespace com.prodg.photobooth.domain.image
             return PostProcessCombinedImage(session, combinedImage);
         }
 
-        private void PreProcessImages(PhotoSession? session)
+        private void PreProcessImages(PhotoSession session)
         {
 	        _logger.LogInformation("Preprocessing images");
 	        if (_imagePreProcessors.Any())
@@ -87,7 +94,7 @@ namespace com.prodg.photobooth.domain.image
             }
         }
 
-        private Image PostProcessCombinedImage(PhotoSession? session, Image combinedImage)
+        private Image PostProcessCombinedImage(PhotoSession session, Image combinedImage)
         {
             if (_imagePostProcessors.Any())
             {
@@ -99,7 +106,7 @@ namespace com.prodg.photobooth.domain.image
             return combinedImage;
         }
 
-           #region IDisposable Implementation
+	    #region IDisposable Implementation
 
 		bool _disposed;
 
@@ -111,38 +118,30 @@ namespace com.prodg.photobooth.domain.image
 
 		private void Dispose (bool disposing)
 		{
-		    if (!_disposed)
-		    {
-		        if (disposing)
-		        {
-		            // Clean up managed objects
-		            _imageCombiner.Dispose();
-		            
-		            if (_imagePreProcessors.Any())
-		            {
-		                foreach (var singleImageProcessor in _imagePreProcessors)
-		                {
-		                    
-			                (singleImageProcessor as IDisposable)?.Dispose();
-		                }
-                        _imagePreProcessors.Clear();
-		            }
+			if (_disposed) return;
+			if (disposing)
+			{
+				// Clean up managed objects
+				_imageCombiner.Dispose();
 
-		            if (_imagePostProcessors.Any())
-		            {
-		                foreach (var singleImageProcessor in _imagePostProcessors)
-		                {
-		                    (singleImageProcessor as IDisposable)?.Dispose();
-		                }
-                        _imagePostProcessors.Clear();
-		            }
-		        }
-		        // clean up any unmanaged objects
-		        _disposed = true;
-		    }
+				DisposeImageProcessors(_imagePreProcessors);
+				DisposeImageProcessors(_imagePostProcessors);
+			}
+			// clean up any unmanaged objects
+			_disposed = true;
 		}
 
-        ~ImageProcessingChain()
+		private static void DisposeImageProcessors(IList<ISingleImageProcessor> processors)
+		{
+			if (!processors.Any()) return;
+			foreach (var singleImageProcessor in processors)
+			{
+				(singleImageProcessor as IDisposable)?.Dispose();
+			}
+			processors.Clear();
+		}
+
+		~ImageProcessingChain()
 		{
 			Dispose (false);
 		}

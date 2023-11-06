@@ -28,7 +28,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
 		private const int WarningBatteryLevel = 25;
 
 		private bool _deinitRequested;
-	    private Thread _monitoringThread;
+	    private Thread? _monitoringThread;
 
         private readonly object _cameraLock = new();
 
@@ -116,11 +116,17 @@ namespace com.prodg.photobooth.infrastructure.hardware
 			    {
 				    _cameraHardware.Initialize();
 
-				    //Log the ID
-				    _logger.LogInformation("Found: {Id}", _cameraHardware.Info.Model);
-				    _logger.LogDebug("Status: {Status}", _cameraHardware.Info.Status);
-				    _logger.LogDebug("Id: {Id}", _cameraHardware.Info.Id);
-
+				    if (_cameraHardware.Info != null)
+				    {
+					    //Log the ID
+					    _logger.LogInformation("Found: {Id}", _cameraHardware.Info.Model);
+					    _logger.LogDebug("Status: {Status}", _cameraHardware.Info.Status);
+					    _logger.LogDebug("Id: {Id}", _cameraHardware.Info.Id);
+				    }
+				    else
+				    {
+					    _logger.LogWarning("Camera Hardware info not set after initialization");
+				    }
 			    }
 
 			    //Signal that the camera is ready (not within the lock)

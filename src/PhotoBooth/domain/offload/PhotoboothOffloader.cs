@@ -18,7 +18,6 @@
 #endregion
 
 using System.Globalization;
-using System.Net;
 using com.prodg.photobooth.api;
 using com.prodg.photobooth.config;
 using Microsoft.Extensions.Logging;
@@ -50,9 +49,6 @@ namespace com.prodg.photobooth.domain.offload
             _logger.LogInformation("Offloading configured to URL '{BaseUrl}'", _client.BaseUrl);
             
             _offloadContextFileHandler = offloadContextFileHandler;
-
-            //Allow all SSL certificates
-            ServicePointManager.ServerCertificateValidationCallback += (_, _, _, _) => true;
         }
 
         public async Task OffloadEvent()
@@ -78,6 +74,11 @@ namespace com.prodg.photobooth.domain.offload
         private async Task OffloadSessionFolder(string sessionFolder)
         {
             var context = _offloadContextFileHandler.Load(sessionFolder);
+            if (context == null)
+            {
+                _logger.LogError("Cannot offload, Offload context is not set");
+                return;
+            }
             try
             {
                 var index = Convert.ToInt32(sessionFolder.Replace(_eventFolder+Path.DirectorySeparatorChar, ""));
@@ -85,7 +86,7 @@ namespace com.prodg.photobooth.domain.offload
                 SessionDTO session;
                 if (context.EventCreated)
                 {
-                    session = await _client.Sessions4Async(_eventId, index);
+                    session = await _client.SessionsGET2Async(_eventId, index);
                 }
                 else
                 {
@@ -94,13 +95,11 @@ namespace com.prodg.photobooth.domain.offload
                     context.EventCreated = true;
                 }
 
-
                 foreach (var fullFilePath in Directory.GetFiles(sessionFolder, "*.jpg"))
                 {
                     if (context.IsShotOffloaded(fullFilePath)) continue;
                     
                     await UploadShot(fullFilePath, session, context);
-                    GC.Collect();
                 }
             }
             catch (Exception e)
@@ -116,11 +115,11 @@ namespace com.prodg.photobooth.domain.offload
         private async Task<SessionDTO> CreateSession(int index, DateTime timestamp)
         {
             var session = new SessionDTO {Index = index, Timestamp = timestamp, EventId = _eventId};
-            await _client.SessionsAsync(_eventId, session);
-            return await _client.Sessions4Async(_eventId, index);
+           
+            return await _client.SessionsPOSTAsync(_eventId, session);
         }
 
-        private async Task UploadShot(string fullFilename, SessionDTO session, OffloadContext? context)
+        private async Task UploadShot(string fullFilename, SessionDTO session, OffloadContext context)
         {
             _logger.LogInformation("Offloading shot {FullFilename}", fullFilename);
             var shotFileName = Path.GetFileName(fullFilename);
@@ -135,7 +134,7 @@ namespace com.prodg.photobooth.domain.offload
                     Image = LoadImageAsBase64(fullFilename)
                 };
 
-                await _client.ShotsAsync(_eventId, session.Index, shot);
+                await _client.ShotsPOSTAsync(_eventId, session.Index, shot);
                 context.ShotOffloadFinished(fullFilename, true);
             }
             catch (Exception e)

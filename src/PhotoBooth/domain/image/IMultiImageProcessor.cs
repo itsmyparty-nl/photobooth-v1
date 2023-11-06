@@ -37,6 +37,6 @@ namespace com.prodg.photobooth.domain.image
 		/// <returns>
 		/// The resulting image
 		/// </returns>
-		Image Process(PhotoSession? session);
+		Image? Process(PhotoSession session);
 	}
 }

@@ -41,12 +41,12 @@ namespace com.prodg.photobooth.domain
         /// </summary>
         /// <remarks>This event is added to provide a single location for handling all hardware controls, while keeping
         /// the responsibility of stopping the model at the application class</remarks>
-        public event EventHandler ShutdownRequested;
+        public event EventHandler? ShutdownRequested;
 
 		/// <summary>
 		/// Occurs when error occurred.
 		/// </summary>
-		public event EventHandler<ErrorEventArgs> ErrorOccurred;
+		public event EventHandler<ErrorEventArgs>? ErrorOccurred;
 
         /// <summary>
         /// C'tor
@@ -76,11 +76,11 @@ namespace com.prodg.photobooth.domain
             logger.LogInformation("Starting Photobooth application model for event {EventId}", settings.EventId);
 
             //Register events
-            hardware.Camera.StateChanged += OnCameraStateChanged;
-            hardware.TriggerControl.Fired += OnTriggerControlTriggered;
-            hardware.PrintControl.Fired += OnPrintControlTriggered;
-            hardware.PrintTwiceControl.Fired += OnPrintTwiceControlTriggered;
-            hardware.PowerControl.Fired += OnPowerControlTriggered;
+            hardware.Camera.StateChanged += OnCameraStateChanged!;
+            hardware.TriggerControl.Fired += OnTriggerControlTriggered!;
+            hardware.PrintControl.Fired += OnPrintControlTriggered!;
+            hardware.PrintTwiceControl.Fired += OnPrintTwiceControlTriggered!;
+            hardware.PowerControl.Fired += OnPowerControlTriggered!;
             
             //Acquire the hardware
             hardware.Acquire();
@@ -100,11 +100,11 @@ namespace com.prodg.photobooth.domain
             hardware.Release();
             
             //Unsubscribe from all hardware events
-            hardware.Camera.StateChanged -= OnCameraStateChanged;
-            hardware.TriggerControl.Fired -= OnTriggerControlTriggered;
-            hardware.PrintControl.Fired -= OnPrintControlTriggered;
-            hardware.PrintTwiceControl.Fired -= OnPrintTwiceControlTriggered;
-            hardware.PowerControl.Fired -= OnPowerControlTriggered;
+            hardware.Camera.StateChanged -= OnCameraStateChanged!;
+            hardware.TriggerControl.Fired -= OnTriggerControlTriggered!;
+            hardware.PrintControl.Fired -= OnPrintControlTriggered!;
+            hardware.PrintTwiceControl.Fired -= OnPrintTwiceControlTriggered!;
+            hardware.PowerControl.Fired -= OnPowerControlTriggered!;
         }
 
         /// <summary>

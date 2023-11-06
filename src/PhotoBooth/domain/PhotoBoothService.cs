@@ -21,9 +21,7 @@ using com.prodg.photobooth.config;
 using com.prodg.photobooth.domain.image;
 using com.prodg.photobooth.domain.offload;
 using com.prodg.photobooth.infrastructure.hardware;
-using com.prodg.photobooth.infrastructure.serialization;
 using Microsoft.Extensions.Logging;
-using SixLabors.ImageSharp;
 
 namespace com.prodg.photobooth.domain
 {
@@ -92,6 +90,11 @@ namespace com.prodg.photobooth.domain
         public async Task<PhotoSession?> Capture()
 		{
             var session = _sessionFactory.CreateSession();
+            if (session == null)
+            {
+	            _logger.LogError("Aborting capture since session is null");
+	            return null;
+            }
             _logger.LogInformation("Start Capturing images for event {EventId}, session {Id}",
                 session.EventId, session.Id);
 
