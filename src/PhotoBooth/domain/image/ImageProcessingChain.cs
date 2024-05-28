@@ -20,6 +20,7 @@
 using System.Diagnostics;
 using com.prodg.photobooth.config;
 using Microsoft.Extensions.Logging;
+using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Jpeg;
 
 namespace com.prodg.photobooth.domain.image

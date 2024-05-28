@@ -137,7 +137,7 @@ namespace com.prodg.photobooth.domain.offload
                 };
 
                 await _client.ShotsPOSTAsync(_eventId, session.Index, shot);
-                context.ShotOffloadFinished(fullFilename, true);
+                context?.ShotOffloadFinished(fullFilename, true);
             }
             catch (Exception e)
             {

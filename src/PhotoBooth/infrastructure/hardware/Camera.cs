@@ -28,7 +28,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
 		private const int WarningBatteryLevel = 25;
 
 		private bool _deinitRequested;
-	    private Thread _monitoringThread;
+	    private Thread _monitoringThread = null!;
 
         private readonly object _cameraLock = new();
 
@@ -95,7 +95,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
 	            //Notify users if the battery level is at a warning level
 	            if (level <= WarningBatteryLevel)
 	            {
-		            BatteryWarning.Invoke(this, new CameraBatteryWarningEventArgs(level));
+		            BatteryWarning?.Invoke(this, new CameraBatteryWarningEventArgs(level));
 	            }
 	        }
 	        catch (Exception)
@@ -104,7 +104,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
 	            _cameraHardware.Clean();
 
                 //Signal that the camera is lost (not within the lock)
-                StateChanged.Invoke(this, new CameraStateChangedEventArgs(false));
+                StateChanged?.Invoke(this, new CameraStateChangedEventArgs(false));
 	        }
 	    }
 
@@ -157,7 +157,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
             _logger.LogInformation("DeInitializing camera");
 	        _deinitRequested = true;
 
-	        if (_monitoringThread != null && !Thread.CurrentThread.Equals(_monitoringThread) &&
+	        if (!Thread.CurrentThread.Equals(_monitoringThread) &&
 	            !_monitoringThread.Join(5000))
 	        {
 		        _logger.LogError("Cancel initialize failed, aborting thread");
@@ -233,9 +233,9 @@ namespace com.prodg.photobooth.infrastructure.hardware
 
         #region ICamera Members
 
-        public event EventHandler<CameraStateChangedEventArgs> StateChanged;
+        public event EventHandler<CameraStateChangedEventArgs>? StateChanged;
 
-        public event EventHandler<CameraBatteryWarningEventArgs> BatteryWarning;
+        public event EventHandler<CameraBatteryWarningEventArgs>? BatteryWarning;
 
         #endregion
     }
