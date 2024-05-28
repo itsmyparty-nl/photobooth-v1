@@ -20,7 +20,6 @@
 using System.Text;
 using CommandMessenger.TransportLayer;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 
 namespace CommandMessenger
 {

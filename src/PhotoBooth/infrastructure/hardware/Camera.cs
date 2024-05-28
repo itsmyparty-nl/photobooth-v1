@@ -28,7 +28,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
 		private const int WarningBatteryLevel = 25;
 
 		private bool _deinitRequested;
-	    private Thread? _monitoringThread;
+	    private Thread _monitoringThread = null!;
 
         private readonly object _cameraLock = new();
 
@@ -46,7 +46,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
 
 		public void Initialize ()
 		{
-		    if (_cameraHardware.Initialized) {return;}
+		    if (_cameraHardware.Initialized) return;
 
             _logger.LogInformation("Initializing camera");
 		    _deinitRequested = false;
@@ -151,12 +151,13 @@ namespace com.prodg.photobooth.infrastructure.hardware
 	        }
 	    }
 
+	    [Obsolete("Obsolete")]
 	    public void DeInitialize()
 	    {
             _logger.LogInformation("DeInitializing camera");
 	        _deinitRequested = true;
 
-	        if (_monitoringThread != null && !Thread.CurrentThread.Equals(_monitoringThread) &&
+	        if (!Thread.CurrentThread.Equals(_monitoringThread) &&
 	            !_monitoringThread.Join(5000))
 	        {
 		        _logger.LogError("Cancel initialize failed, aborting thread");
@@ -218,10 +219,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
 		private void Dispose (bool disposing)
 		{
 			if (_disposed) return;
-			if (disposing)
-			{
-				//add remove of managed objects here
-			};
+			if (disposing) { };
 			_disposed = true;
 		}
 

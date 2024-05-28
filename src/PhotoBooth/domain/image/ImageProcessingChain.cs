@@ -20,6 +20,7 @@
 using System.Diagnostics;
 using com.prodg.photobooth.config;
 using Microsoft.Extensions.Logging;
+using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Jpeg;
 
 namespace com.prodg.photobooth.domain.image
@@ -84,7 +85,7 @@ namespace com.prodg.photobooth.domain.image
 	        _logger.LogInformation("Preprocessing images");
 	        if (_imagePreProcessors.Any())
             {
-                for (var imageIndex = 0; imageIndex < session.ImageCount; imageIndex++)
+                for (var imageIndex = 0; imageIndex < session!.ImageCount; imageIndex++)
                 {
                     foreach (var imagePreProcessor in _imagePreProcessors)
                     {

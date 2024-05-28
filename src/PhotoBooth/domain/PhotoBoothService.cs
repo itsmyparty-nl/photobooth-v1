@@ -21,7 +21,9 @@ using com.prodg.photobooth.config;
 using com.prodg.photobooth.domain.image;
 using com.prodg.photobooth.domain.offload;
 using com.prodg.photobooth.infrastructure.hardware;
+using com.prodg.photobooth.infrastructure.serialization;
 using Microsoft.Extensions.Logging;
+using SixLabors.ImageSharp;
 
 namespace com.prodg.photobooth.domain
 {
@@ -96,7 +98,7 @@ namespace com.prodg.photobooth.domain
 	            return null;
             }
             _logger.LogInformation("Start Capturing images for event {EventId}, session {Id}",
-                session.EventId, session.Id);
+                session!.EventId, session.Id);
 
             if (!_hardware.Camera.IsReady)
             {
@@ -166,13 +168,13 @@ namespace com.prodg.photobooth.domain
         /// Save a photo session
         /// </summary>
         /// <param name="session"></param>
-        public async Task Save(PhotoSession session)
+        public async Task Save(PhotoSession? session)
         {
-	        _logger.LogInformation("Start saving session {StoragePath}", session.StoragePath);
+	        _logger.LogInformation("Start saving session {StoragePath}", session?.StoragePath);
 
 	        try
 	        {
-		        await _offloader.OffloadSession(session.Id);
+		        await _offloader.OffloadSession(session!.Id);
 	        }
 	        catch (Exception ex)
 	        {

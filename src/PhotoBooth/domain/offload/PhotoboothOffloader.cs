@@ -1,4 +1,4 @@
-﻿#region PhotoBooth - MIT - (c) 2017 Patrick Bronneberg
+#region PhotoBooth - MIT - (c) 2017 Patrick Bronneberg
 /*
   PhotoBooth - an application to control a DIY photobooth
 
@@ -18,9 +18,11 @@
 #endregion
 
 using System.Globalization;
+using System.Net;
 using com.prodg.photobooth.api;
 using com.prodg.photobooth.config;
 using Microsoft.Extensions.Logging;
+using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Jpeg;
 
 namespace com.prodg.photobooth.domain.offload
@@ -84,7 +86,7 @@ namespace com.prodg.photobooth.domain.offload
                 var index = Convert.ToInt32(sessionFolder.Replace(_eventFolder+Path.DirectorySeparatorChar, ""));
 
                 SessionDTO session;
-                if (context.EventCreated)
+                if (context!.EventCreated)
                 {
                     session = await _client.SessionsGET2Async(_eventId, index);
                 }
@@ -119,7 +121,7 @@ namespace com.prodg.photobooth.domain.offload
             return await _client.SessionsPOSTAsync(_eventId, session);
         }
 
-        private async Task UploadShot(string fullFilename, SessionDTO session, OffloadContext context)
+        private async Task UploadShot(string fullFilename, SessionDTO session, OffloadContext? context)
         {
             _logger.LogInformation("Offloading shot {FullFilename}", fullFilename);
             var shotFileName = Path.GetFileName(fullFilename);
@@ -135,13 +137,13 @@ namespace com.prodg.photobooth.domain.offload
                 };
 
                 await _client.ShotsPOSTAsync(_eventId, session.Index, shot);
-                context.ShotOffloadFinished(fullFilename, true);
+                context?.ShotOffloadFinished(fullFilename, true);
             }
             catch (Exception e)
             {
                 _logger.LogError(e, "Error while offloading shot {FullFilename}", fullFilename);
-                context.ShotOffloadFinished(fullFilename, false);
-                context.Errors.Add(e.Message);
+                context?.ShotOffloadFinished(fullFilename, false);
+                context?.Errors.Add(e.Message);
             }
         }
 
