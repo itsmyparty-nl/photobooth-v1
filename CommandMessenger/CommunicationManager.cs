@@ -20,7 +20,6 @@
 using System.Text;
 using CommandMessenger.TransportLayer;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 
 namespace CommandMessenger
 {
@@ -84,7 +83,7 @@ namespace CommandMessenger
         #region Event handlers
 
         /// <summary> Serial port data received. </summary>
-        private void NewDataReceived(object? o, EventArgs e)
+        private void NewDataReceived(object o, EventArgs e)
         {
             ParseLines();
         }

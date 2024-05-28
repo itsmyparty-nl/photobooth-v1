@@ -32,16 +32,17 @@ namespace com.prodg.photobooth.infrastructure.hardware
 
         private readonly object _cameraLock = new();
 
-        public string Id => CheckInitialized() ? _cameraHardware!.Id : "Uninitialized";
+        public string Id => (CheckInitialized() ? _cameraHardware?.Id : "Uninitialized")!;
 
 		public bool IsReady => CheckInitialized() && !_deinitRequested;
 
-		public Camera(ILogger<Camera> logger, ICameraProvider cameraHardware)
+		public Camera(ILogger<Camera> logger, ICameraProvider cameraHardware, Thread monitoringThread)
 		{
             logger.LogDebug("Creating camera interface");
             _logger = logger;
 			_cameraHardware = cameraHardware;
-            _deinitRequested = false;
+			_monitoringThread = monitoringThread;
+			_deinitRequested = false;
 		}
 
 		public void Initialize ()
@@ -95,7 +96,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
 	            //Notify users if the battery level is at a warning level
 	            if (level <= WarningBatteryLevel)
 	            {
-		            BatteryWarning.Invoke(this, new CameraBatteryWarningEventArgs(level));
+		            BatteryWarning?.Invoke(this, new CameraBatteryWarningEventArgs(level));
 	            }
 	        }
 	        catch (Exception)
@@ -104,7 +105,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
 	            _cameraHardware.Clean();
 
                 //Signal that the camera is lost (not within the lock)
-                StateChanged.Invoke(this, new CameraStateChangedEventArgs(false));
+                StateChanged?.Invoke(this, new CameraStateChangedEventArgs(false));
 	        }
 	    }
 
@@ -117,14 +118,14 @@ namespace com.prodg.photobooth.infrastructure.hardware
 				    _cameraHardware.Initialize();
 
 				    //Log the ID
-				    _logger.LogInformation("Found: {Id}", _cameraHardware.Info.Model);
+				    _logger.LogInformation("Found: {Id}", _cameraHardware.Info!.Model);
 				    _logger.LogDebug("Status: {Status}", _cameraHardware.Info.Status);
 				    _logger.LogDebug("Id: {Id}", _cameraHardware.Info.Id);
 
 			    }
 
 			    //Signal that the camera is ready (not within the lock)
-			    StateChanged.Invoke(this, new CameraStateChangedEventArgs(true));
+			    StateChanged?.Invoke(this, new CameraStateChangedEventArgs(true));
 		    }
 		    catch (Exception exception)
 		    {
@@ -229,9 +230,9 @@ namespace com.prodg.photobooth.infrastructure.hardware
 
         #region ICamera Members
 
-        public event EventHandler<CameraStateChangedEventArgs> StateChanged;
+        public event EventHandler<CameraStateChangedEventArgs>? StateChanged;
 
-        public event EventHandler<CameraBatteryWarningEventArgs> BatteryWarning;
+        public event EventHandler<CameraBatteryWarningEventArgs>? BatteryWarning;
 
         #endregion
     }

@@ -77,7 +77,7 @@ namespace com.prodg.photobooth.domain.image
 	        _logger.LogInformation("Preprocessing images");
 	        if (_imagePreProcessors.Any())
             {
-                for (var imageIndex = 0; imageIndex < session.ImageCount; imageIndex++)
+                for (var imageIndex = 0; imageIndex < session!.ImageCount; imageIndex++)
                 {
                     foreach (var imagePreProcessor in _imagePreProcessors)
                     {

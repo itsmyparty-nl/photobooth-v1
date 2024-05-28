@@ -22,6 +22,7 @@ using System.Net;
 using com.prodg.photobooth.api;
 using com.prodg.photobooth.config;
 using Microsoft.Extensions.Logging;
+using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Jpeg;
 
 namespace com.prodg.photobooth.domain.offload
@@ -83,7 +84,7 @@ namespace com.prodg.photobooth.domain.offload
                 var index = Convert.ToInt32(sessionFolder.Replace(_eventFolder+Path.DirectorySeparatorChar, ""));
 
                 SessionDTO session;
-                if (context.EventCreated)
+                if (context!.EventCreated)
                 {
                     session = await _client.Sessions4Async(_eventId, index);
                 }
@@ -136,13 +137,13 @@ namespace com.prodg.photobooth.domain.offload
                 };
 
                 await _client.ShotsAsync(_eventId, session.Index, shot);
-                context.ShotOffloadFinished(fullFilename, true);
+                context?.ShotOffloadFinished(fullFilename, true);
             }
             catch (Exception e)
             {
                 _logger.LogError(e, "Error while offloading shot {FullFilename}", fullFilename);
-                context.ShotOffloadFinished(fullFilename, false);
-                context.Errors.Add(e.Message);
+                context?.ShotOffloadFinished(fullFilename, false);
+                context?.Errors.Add(e.Message);
             }
         }
 

@@ -116,7 +116,7 @@ namespace com.prodg.photobooth.domain
 			            image.Dispose();
 		            }
 		            Images.Clear();
-		            Images = null;
+		            Images = null!;
 
 		            if (ResultImage != null)
 		            {

@@ -29,24 +29,24 @@ namespace com.prodg.photobooth.domain
     /// </summary>
     public class PhotoBoothModel : IPhotoBoothModel
     {
-        private readonly ILogger logger;
-        private readonly IHardware hardware;
-        private readonly IPhotoBoothService service;
-        private readonly SemaphoreSlim sessionLock;
-	    private readonly ISettings settings;
-		private PhotoSession? currentSession;
+        private readonly ILogger _logger;
+        private readonly IHardware _hardware;
+        private readonly IPhotoBoothService _service;
+        private readonly SemaphoreSlim _sessionLock;
+	    private readonly ISettings _settings;
+		private PhotoSession? _currentSession;
 
         /// <summary>
         /// Event to signal that shutdown is requested
         /// </summary>
         /// <remarks>This event is added to provide a single location for handling all hardware controls, while keeping
         /// the responsibility of stopping the model at the application class</remarks>
-        public event EventHandler ShutdownRequested;
+        public event EventHandler? ShutdownRequested;
 
 		/// <summary>
 		/// Occurs when error occurred.
 		/// </summary>
-		public event EventHandler<ErrorEventArgs> ErrorOccurred;
+		public event EventHandler<ErrorEventArgs>? ErrorOccurred;
 
         /// <summary>
         /// C'tor
@@ -57,15 +57,15 @@ namespace com.prodg.photobooth.domain
         /// <param name="settings"></param>
         public PhotoBoothModel(IPhotoBoothService service, IHardware hardware, ILogger<PhotoBoothModel> logger, ISettings settings)
         {
-            this.hardware = hardware;
-            this.logger = logger;
-            this.service = service;
-            this.settings = settings;
-            sessionLock = new SemaphoreSlim (1);
+            this._hardware = hardware;
+            this._logger = logger;
+            this._service = service;
+            this._settings = settings;
+            _sessionLock = new SemaphoreSlim (1);
             
             logger.LogDebug("Creating PhotoBooth Model");
 
-            currentSession = null;
+            _currentSession = null;
         }
 
         /// <summary>
@@ -73,20 +73,20 @@ namespace com.prodg.photobooth.domain
         /// </summary>
         public void Start()
         {
-            logger.LogInformation("Starting Photobooth application model for event {EventId}", settings.EventId);
+            _logger.LogInformation("Starting Photobooth application model for event {EventId}", _settings.EventId);
 
             //Register events
-            hardware.Camera.StateChanged += OnCameraStateChanged;
-            hardware.TriggerControl.Fired += OnTriggerControlTriggered;
-            hardware.PrintControl.Fired += OnPrintControlTriggered;
-            hardware.PrintTwiceControl.Fired += OnPrintTwiceControlTriggered;
-            hardware.PowerControl.Fired += OnPowerControlTriggered;
+            _hardware.Camera.StateChanged += OnCameraStateChanged!;
+            _hardware.TriggerControl.Fired += OnTriggerControlTriggered!;
+            _hardware.PrintControl.Fired += OnPrintControlTriggered!;
+            _hardware.PrintTwiceControl.Fired += OnPrintTwiceControlTriggered!;
+            _hardware.PowerControl.Fired += OnPowerControlTriggered!;
             
             //Acquire the hardware
-            hardware.Acquire();
+            _hardware.Acquire();
 
             //Start with only the power control armed
-            hardware.PowerControl.Arm();
+            _hardware.PowerControl.Arm();
         }
 
         /// <summary>
@@ -94,17 +94,17 @@ namespace com.prodg.photobooth.domain
         /// </summary>
         public void Stop()
         {
-            logger.LogInformation("Stopping Photobooth application model");
+            _logger.LogInformation("Stopping Photobooth application model");
             
             //Release the hardware
-            hardware.Release();
+            _hardware.Release();
             
             //Unsubscribe from all hardware events
-            hardware.Camera.StateChanged -= OnCameraStateChanged;
-            hardware.TriggerControl.Fired -= OnTriggerControlTriggered;
-            hardware.PrintControl.Fired -= OnPrintControlTriggered;
-            hardware.PrintTwiceControl.Fired -= OnPrintTwiceControlTriggered;
-            hardware.PowerControl.Fired -= OnPowerControlTriggered;
+            _hardware.Camera.StateChanged -= OnCameraStateChanged!;
+            _hardware.TriggerControl.Fired -= OnTriggerControlTriggered!;
+            _hardware.PrintControl.Fired -= OnPrintControlTriggered!;
+            _hardware.PrintTwiceControl.Fired -= OnPrintTwiceControlTriggered!;
+            _hardware.PowerControl.Fired -= OnPowerControlTriggered!;
         }
 
         /// <summary>
@@ -117,28 +117,28 @@ namespace com.prodg.photobooth.domain
         {
             if (e.NewState)
             {
-                Task.Run(() => hardware.TriggerControl.Arm());
+                Task.Run(() => _hardware.TriggerControl.Arm());
             }
             else
             {
-                Task.Run(() => hardware.TriggerControl.Release());
+                Task.Run(() => _hardware.TriggerControl.Release());
             }
         }
 
         private void OnPowerControlTriggered(object sender, TriggerControlEventArgs e)
         {
-            logger.LogInformation("Power control fired");
+            _logger.LogInformation("Power control fired");
 
             try
             {
                 //Trigger a shutdown request.
                 //Do not call stop directly since this is the responsibility of the application
-                ShutdownRequested.Invoke(this, EventArgs.Empty);
+                ShutdownRequested?.Invoke(this, EventArgs.Empty);
             }
             catch (Exception ex)
             {
                 //Log the exception
-                logger.LogError(ex, "Error while handling shutdown");
+                _logger.LogError(ex, "Error while handling shutdown");
                 //Rethrow since no mitigation is possible
                 throw;
             }
@@ -146,38 +146,38 @@ namespace com.prodg.photobooth.domain
 
         private async void OnPrintControlTriggered(object sender, TriggerControlEventArgs e)
 		{
-			logger.LogInformation("Print control fired");
+			_logger.LogInformation("Print control fired");
            
 			//lock both buttons but only indicate that the first is printing
-			var lockId = hardware.PrintControl.Lock (true);
-            var twiceLockId = hardware.PrintTwiceControl.Lock(false);
+			var lockId = _hardware.PrintControl.Lock (true);
+            var twiceLockId = _hardware.PrintTwiceControl.Lock(false);
             try
             {
                 try
                 {
-                    sessionLock.Wait();
+                    _sessionLock.Wait();
                     //Print
-                    if (currentSession != null)
+                    if (_currentSession != null)
                     {
                         //Get the last sesion from the queue and print it
-                        await service.Print(currentSession);
+                        await _service.Print(_currentSession);
                     }
                     else
                     {
-                        logger.LogWarning("Nothing to print");
+                        _logger.LogWarning("Nothing to print");
                     }
                 }
                 finally
                 {
-                    sessionLock.Release();
+                    _sessionLock.Release();
                 }
 
                 //Wait until releasing the control to show that printing is busy
-                await Task.Delay(TimeSpan.FromMilliseconds(settings.PrintDurationMs));
+                await Task.Delay(TimeSpan.FromMilliseconds(_settings.PrintDurationMs));
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Error while printing");
+                _logger.LogError(ex, "Error while printing");
                 if (ErrorOccurred != null)
                 {
                     ErrorOccurred.Invoke(this, new ErrorEventArgs("Error while printing"));
@@ -186,49 +186,49 @@ namespace com.prodg.photobooth.domain
             finally
             {
                 //always reset the control to its initial state
-                hardware.PrintControl.Unlock(lockId);
-                hardware.PrintTwiceControl.Unlock(twiceLockId);
+                _hardware.PrintControl.Unlock(lockId);
+                _hardware.PrintTwiceControl.Unlock(twiceLockId);
             }
 		}
 
         private async void OnPrintTwiceControlTriggered(object sender, TriggerControlEventArgs e)
 		{
-			logger.LogInformation("Print twice control fired");
+			_logger.LogInformation("Print twice control fired");
 
 			//Release the print button to prevent printing twice
 			//hardware.PrintControl.Release ();
-			var lockId = hardware.PrintTwiceControl.Lock (true);
-            var singleLockId = hardware.PrintControl.Lock(false);
+			var lockId = _hardware.PrintTwiceControl.Lock (true);
+            var singleLockId = _hardware.PrintControl.Lock(false);
 
             try
             {
                 try
                 {
 
-                    sessionLock.Wait();
-                    if (currentSession != null)
+                    _sessionLock.Wait();
+                    if (_currentSession != null)
                     {
                         //Get the last sesion from the queue and print it
-                        await service.Print(currentSession);
-                        await service.Print(currentSession);
+                        await _service.Print(_currentSession);
+                        await _service.Print(_currentSession);
                     }
                     else
                     {
-                        logger.LogInformation("Nothing to print");
+                        _logger.LogInformation("Nothing to print");
                         return;
                     }
 
                 }
                 finally
                 {
-                    sessionLock.Release();
+                    _sessionLock.Release();
                 }
                 //Wait until releasing the control to show that printing is busy
-                await Task.Delay(TimeSpan.FromMilliseconds(settings.PrintDurationMs*2));
+                await Task.Delay(TimeSpan.FromMilliseconds(_settings.PrintDurationMs*2));
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Error while printing twice");
+                _logger.LogError(ex, "Error while printing twice");
                 if (ErrorOccurred != null)
                 {
                     ErrorOccurred.Invoke(this, new ErrorEventArgs("Error while printing twice"));
@@ -237,55 +237,55 @@ namespace com.prodg.photobooth.domain
             finally
             {
                 //always reset the control to its initial state
-                hardware.PrintTwiceControl.Unlock(lockId);
-                hardware.PrintControl.Unlock(singleLockId);
+                _hardware.PrintTwiceControl.Unlock(lockId);
+                _hardware.PrintControl.Unlock(singleLockId);
             }
 		}
 
         private async void OnTriggerControlTriggered(object sender, TriggerControlEventArgs e)
 		{
-			logger.LogInformation("Trigger control fired");
+			_logger.LogInformation("Trigger control fired");
 
 			//Release the trigger to prevent double sessions
-			var lockId = hardware.TriggerControl.Lock (true);
-			hardware.PrintControl.Release ();
-			hardware.PrintTwiceControl.Release ();
+			var lockId = _hardware.TriggerControl.Lock (true);
+			_hardware.PrintControl.Release ();
+			_hardware.PrintTwiceControl.Release ();
 
             try
             {
                 try
                 {
-                    sessionLock.Wait();
-                    if (currentSession != null)
+                    _sessionLock.Wait();
+                    if (_currentSession != null)
                     {
-                        logger.LogDebug("Disposing previous session");
-                        currentSession.Dispose();
-                        currentSession = null;
+                        _logger.LogDebug("Disposing previous session");
+                        _currentSession.Dispose();
+                        _currentSession = null;
                     }
                     //Wait before taking the first picture if configured
-                    if (settings.TriggerDelayMs > 0)
+                    if (_settings.TriggerDelayMs > 0)
                     {
-                        await Task.Delay(TimeSpan.FromMilliseconds(settings.TriggerDelayMs));
+                        await Task.Delay(TimeSpan.FromMilliseconds(_settings.TriggerDelayMs));
                     }
                     //Take pictures and add to the queue
-                    currentSession = await service.Capture();
+                    _currentSession = await _service.Capture();
 
-                    if (currentSession != null && currentSession.ResultImage != null)
+                    if (_currentSession != null && _currentSession.ResultImage != null)
                     {
                         //Save the session for later use (e.g. offloading) if configured
-                        if (settings.SaveSessions)
+                        if (_settings.SaveSessions)
                         {
-                            await service.Save(currentSession);
+                            await _service.Save(_currentSession);
                         }
                         //Afer capturing we're ready for printing or for another shoot
-                        hardware.PrintControl.Arm();
-                        hardware.PrintTwiceControl.Arm();
+                        _hardware.PrintControl.Arm();
+                        _hardware.PrintTwiceControl.Arm();
                     }
                     else
                     {
                         if (ErrorOccurred != null)
                         {
-                            logger.LogError("Capturing did not lead to a successful session");
+                            _logger.LogError("Capturing did not lead to a successful session");
                             ErrorOccurred.Invoke(this,
                                 new ErrorEventArgs("Capturing did not lead to a successful session"));
                         }
@@ -294,12 +294,12 @@ namespace com.prodg.photobooth.domain
                 }
                 finally
                 {
-                    sessionLock.Release();
+                    _sessionLock.Release();
                 }
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Error while capturing images");
+                _logger.LogError(ex, "Error while capturing images");
                 if (ErrorOccurred != null)
                 {
                     ErrorOccurred.Invoke(this, new ErrorEventArgs("Error while capturing images"));
@@ -308,7 +308,7 @@ namespace com.prodg.photobooth.domain
             finally
             {
                 //Always re-arm the trigger after shooting
-                hardware.TriggerControl.Unlock(lockId);
+                _hardware.TriggerControl.Unlock(lockId);
             }
 		}
 
@@ -330,7 +330,7 @@ namespace com.prodg.photobooth.domain
 		        {
 		            // Clean up managed objects
 		        }
-                currentSession = null;
+                _currentSession = null;
 		        // clean up any unmanaged objects
 		        disposed = true;
 		    }

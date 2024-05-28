@@ -53,7 +53,7 @@ namespace com.prodg.photobooth.domain
                     _logger.LogInformation("PhotoBooth Host running at: {time}", DateTimeOffset.Now);
                     await Task.Delay(TimeSpan.FromMinutes(10), stoppingToken);
                 }
-                catch (TaskCanceledException e)
+                catch (TaskCanceledException)
                 {
                     _logger.LogInformation("Execution of PhotoBooth Host cancelled");
                 }

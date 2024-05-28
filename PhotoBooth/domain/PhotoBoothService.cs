@@ -93,7 +93,7 @@ namespace com.prodg.photobooth.domain
 		{
             var session = _sessionFactory.CreateSession();
             _logger.LogInformation("Start Capturing images for event {EventId}, session {Id}",
-                session.EventId, session.Id);
+                session!.EventId, session.Id);
 
             if (!_hardware.Camera.IsReady)
             {
@@ -142,13 +142,13 @@ namespace com.prodg.photobooth.domain
         /// <param name="session"></param>
         public async Task Print(PhotoSession? session)
 		{
-			_logger.LogInformation("Start Printing result image for session {StoragePath}", session.StoragePath);
+			_logger.LogInformation("Start Printing result image for session {StoragePath}", session?.StoragePath);
 
             await Task.Run(() =>
             {
                 try
                 {
-	                _hardware.Printer.Print(session.ResultImage ??
+	                _hardware.Printer.Print(session?.ResultImage ??
 	                                        throw new InvalidOperationException("Cannot print: ResultImage is null"));
                 }
                 catch (Exception ex)
@@ -164,11 +164,11 @@ namespace com.prodg.photobooth.domain
         /// <param name="session"></param>
         public async Task Save(PhotoSession? session)
         {
-	        _logger.LogInformation("Start saving session {StoragePath}", session.StoragePath);
+	        _logger.LogInformation("Start saving session {StoragePath}", session?.StoragePath);
 
 	        try
 	        {
-		        await _offloader.OffloadSession(session.Id);
+		        await _offloader.OffloadSession(session!.Id);
 	        }
 	        catch (Exception ex)
 	        {

@@ -17,7 +17,6 @@
 */
 #endregion
 
-using System;
 using System.IO.Ports;
 using System.ComponentModel;
 
@@ -28,7 +27,7 @@ namespace CommandMessenger
     /// </summary>
     public class SerialSettings : INotifyPropertyChanged
     {
-        public event PropertyChangedEventHandler? PropertyChanged;
+        public event PropertyChangedEventHandler PropertyChanged;
         string _portName = "";
         int _baudRate = 115200;
         readonly BindingList<int> _baudRateCollection = new BindingList<int>();
@@ -36,7 +35,7 @@ namespace CommandMessenger
         int _dataBits = 8;
         int[] _dataBitsCollection = new[] { 5, 6, 7, 8 };
         StopBits _stopBits = StopBits.One;
-        private bool _dtrEnable = false;
+        private bool _dtrEnable;
 
         #region Properties
         /// <summary>
