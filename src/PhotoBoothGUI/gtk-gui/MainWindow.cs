@@ -25,28 +25,28 @@ public partial class MainWindow
 		this.vbox1.Spacing = 0;
 		this.vbox1.Margin = 0;
 		// Container child vbox1.Gtk.Box+BoxChild
-		this.imagePhoto = new global::Gtk.Image ();
-		this.imagePhoto.HeightRequest = 800;
-		this.imagePhoto.Name = "imagePhoto";
-		this.vbox1.Add (this.imagePhoto);
-		global::Gtk.Box.BoxChild w1 = ((global::Gtk.Box.BoxChild)(this.vbox1 [this.imagePhoto]));
-		w1.PackType = PackType.End;
-		w1.Position = 0;
-		w1.Expand = false;
-		w1.Fill = false;
-		w1.Padding = 0;
-		// Container child vbox1.Gtk.Box+BoxChild
 		this.imageInstruction = new global::Gtk.Image ();
 		this.imageInstruction.WidthRequest = 1280;
 		this.imageInstruction.HeightRequest = 200;
 		this.imageInstruction.Name = "imageInstruction";
 		this.vbox1.Add (this.imageInstruction);
-		global::Gtk.Box.BoxChild w2 = ((global::Gtk.Box.BoxChild)(this.vbox1 [this.imageInstruction]));
-		w2.PackType = ((global::Gtk.PackType)(1));
-		w2.Position = 1;
-		w2.Expand = false;
-		w2.Fill = false;
-		w2.Padding = 0;
+		global::Gtk.Box.BoxChild w0 = ((global::Gtk.Box.BoxChild)(this.vbox1 [this.imageInstruction]));
+		w0.PackType = PackType.Start;
+		w0.Position = 0;
+		w0.Expand = false;
+		w0.Fill = false;
+		w0.Padding = 0;
+		// Container child vbox1.Gtk.Box+BoxChild
+		this.imagePhoto = new global::Gtk.Image ();
+		this.imagePhoto.HeightRequest = 800;
+		this.imagePhoto.Name = "imagePhoto";
+		this.vbox1.Add (this.imagePhoto);
+		global::Gtk.Box.BoxChild w1 = ((global::Gtk.Box.BoxChild)(this.vbox1 [this.imagePhoto]));
+		w1.PackType = PackType.Start;
+		w1.Position = 1;
+		w1.Expand = false;
+		w1.Fill = false;
+		w1.Padding = 0;
 		// Container child vbox1.Gtk.Box+BoxChild
 		this.statusbar1 = new global::Gtk.Statusbar ();
 		this.statusbar1.Name = "statusbar1";
