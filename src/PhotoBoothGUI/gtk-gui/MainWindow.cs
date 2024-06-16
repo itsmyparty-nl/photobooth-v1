@@ -48,6 +48,8 @@ public partial class MainWindow
 		this.statusbar1 = new global::Gtk.Statusbar ();
 		this.statusbar1.Name = "statusbar1";
 		this.statusbar1.Spacing = 0;
+		this.statusbar1.WidthRequest = 1280;
+		this.statusbar1.HeightRequest = 40;
 		this.vbox1.Add (this.statusbar1);
 		global::Gtk.Box.BoxChild w3 = ((global::Gtk.Box.BoxChild)(this.vbox1 [this.statusbar1]));
 		w3.PackType = ((global::Gtk.PackType)(1));
