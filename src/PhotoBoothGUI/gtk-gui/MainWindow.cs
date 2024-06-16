@@ -22,7 +22,8 @@ public partial class MainWindow
 		// Container child MainWindow.Gtk.Container+ContainerChild
 		this.vbox1 = new global::Gtk.VBox ();
 		this.vbox1.Name = "vbox1";
-		this.vbox1.Spacing = 3;
+		this.vbox1.Spacing = 0;
+		this.vbox1.Margin = 0;
 		// Container child vbox1.Gtk.Box+BoxChild
 		this.imagePhoto = new global::Gtk.Image ();
 		this.imagePhoto.HeightRequest = 800;
@@ -48,6 +49,7 @@ public partial class MainWindow
 		this.statusbar1 = new global::Gtk.Statusbar ();
 		this.statusbar1.Name = "statusbar1";
 		this.statusbar1.Spacing = 0;
+		this.statusbar1.Margin = 0;
 		this.statusbar1.WidthRequest = 1280;
 		this.statusbar1.HeightRequest = 40;
 		this.vbox1.Add (this.statusbar1);
@@ -62,6 +64,7 @@ public partial class MainWindow
 		}
 		this.DefaultWidth = 1280;
 		this.DefaultHeight = 1024;
+		this.Margin = 0;
 		this.Show ();
 		this.DeleteEvent += new global::Gtk.DeleteEventHandler (this.OnDeleteEvent);
 	}
