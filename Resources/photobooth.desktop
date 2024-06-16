@@ -1,4 +1,14 @@
 [Desktop Entry]
-Name=Photobooth-GUI
-Exec=/home/pi/StartPhotoBooth.sh
-Type=application
+Version=1.0
+Type=Application
+X-GNOME-Autostart-enabled=true
+Exec=/bin/sh /home/patrick/start-photobooth.sh
+Path=/home/patrick/photobooth
+Terminal=true 
+Name[en_US]=Photobooth
+StartupNotify=true
+#StartupWMClass=PhotoBoothGUI
+Name=Photobooth
+Comment[en_US]=PhotoBooth GUI
+Comment=Photobooth GUI
+Categories=Utility
