@@ -263,43 +263,48 @@
     </Content>
     <None Remove="Resources\FuifVeerle12\empty.png" />
     <Content Include="Resources\FuifVeerle12\empty.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <None Remove="Resources\FuifVeerle12\error.png" />
     <Content Include="Resources\FuifVeerle12\error.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <None Remove="Resources\FuifVeerle12\indicator1of4.png" />
     <Content Include="Resources\FuifVeerle12\indicator1of4.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <None Remove="Resources\FuifVeerle12\indicator2of4.png" />
     <Content Include="Resources\FuifVeerle12\indicator2of4.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <None Remove="Resources\FuifVeerle12\indicator3of4.png" />
     <Content Include="Resources\FuifVeerle12\indicator3of4.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <None Remove="Resources\FuifVeerle12\indicator4of4.png" />
     <Content Include="Resources\FuifVeerle12\indicator4of4.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <None Remove="Resources\FuifVeerle12\largeinstruction.png" />
     <Content Include="Resources\FuifVeerle12\largeinstruction.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <None Remove="Resources\FuifVeerle12\legend.png" />
     <Content Include="Resources\FuifVeerle12\legend.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <None Remove="Resources\FuifVeerle12\ready.png" />
     <Content Include="Resources\FuifVeerle12\ready.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <None Remove="Resources\FuifVeerle12\tilte.png" />
     <Content Include="Resources\FuifVeerle12\tilte.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="appsettings.json">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
   </ItemGroup>
   <ItemGroup>
