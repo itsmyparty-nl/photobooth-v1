@@ -81,7 +81,22 @@ public partial class MainWindow: Gtk.Window
 		imagePhoto.Pixbuf = instructionImages ["instruction"];
 		imageInstruction.Pixbuf = instructionImages ["title"];
 
+		this.Maximize();
 		this.Fullscreen ();
+		this.WindowStateEvent += OnWindowStateEvent;
+	}
+
+	private void OnWindowStateEvent(object o, WindowStateEventArgs args)
+	{
+		if (args.Event.NewWindowState.HasFlag(WindowState.Fullscreen))
+		{
+			Window.FullscreenMode = FullscreenMode.CurrentMonitor;
+			Window.Maximize();
+		}
+		if (!args.Event.NewWindowState.HasFlag(WindowState.Fullscreen))
+		{
+			Window.Fullscreen();
+		}
 	}
 
 	void OnPhotoBoothErrorOccurred (object sender, com.prodg.photobooth.domain.ErrorEventArgs e)
@@ -97,7 +112,7 @@ public partial class MainWindow: Gtk.Window
 	private void HideCursor()
 	{
 		invisibleCursor = new Gdk.Cursor(CursorType.BlankCursor);
-		GdkWindow.Cursor = invisibleCursor;
+		Window.Cursor = invisibleCursor;
 	}
 
 	private void ShowCursor()
