@@ -48,7 +48,7 @@
             <property name="MemberName" />
             <property name="Spacing">0</property>
             <property name="WidthRequest">1280</property>
-            <property name="HeightRequest">40</property>
+            <property name="HeightRequest">20</property>
           </widget>
           <packing>
             <property name="PackType">End</property>
