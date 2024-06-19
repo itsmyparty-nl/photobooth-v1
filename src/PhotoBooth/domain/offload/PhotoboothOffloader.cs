@@ -29,7 +29,7 @@ namespace com.prodg.photobooth.domain.offload
 {
     public class PhotoboothOffloader : IPhotoboothOffloader
     {
-        private readonly long _eventId;
+        private readonly string _eventId;
         private readonly string _eventFolder;
         private readonly PhotoBoothApiClient _client;
         private readonly ILogger<PhotoboothOffloader> _logger;
@@ -131,7 +131,6 @@ namespace com.prodg.photobooth.domain.offload
 
                 var shot = new ShotDTO
                 {
-                    SessionId = session.Id,
                     IsCollage = isCollage,
                     Image = LoadImageAsBase64(fullFilename)
                 };

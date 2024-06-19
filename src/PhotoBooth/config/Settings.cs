@@ -89,7 +89,7 @@ namespace com.prodg.photobooth.config
         public string EventId { get; private set; }
         public string FixedImageFilename { get; private set; }
         public string OverlayImageFilename { get; private set; }
-        public long ApiEventId { get; private set; }
+        public string ApiEventId { get; private set; }
         
         public bool StubCamera { get; private set; }
         
@@ -137,7 +137,7 @@ namespace com.prodg.photobooth.config
                 EventId = settings[EventIdKey]!;
                 FixedImageFilename = settings[FixedImageFilenameKey]!;
                 OverlayImageFilename = settings[OverlayImageFilenameKey]!;
-                ApiEventId = Convert.ToInt64(settings[ApiEventIdKey]!);
+                ApiEventId = settings[ApiEventIdKey]!;
                 StubCamera = settings[StubCameraKey] != null;
 
                 // Check consistency

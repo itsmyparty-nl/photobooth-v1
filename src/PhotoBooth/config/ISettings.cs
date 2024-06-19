@@ -116,7 +116,7 @@ namespace com.prodg.photobooth.config
         bool SaveSessions { get; }
         bool OffloadSessions { get; }
         string OffloadAddress { get; }
-        long ApiEventId { get; }
+        string ApiEventId { get; }
         #endregion
 
         int TriggerDelayMs { get; }
