@@ -97,7 +97,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
@@ -146,14 +146,13 @@
             "description": "Event id to delete",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
@@ -197,14 +196,13 @@
             "description": "ID of event to return. Consider changing to string!",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
@@ -248,8 +246,7 @@
             "description": "",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string"
             }
           }
         ],
@@ -275,7 +272,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
@@ -331,8 +328,7 @@
             "description": "ID of the event for which all images should be retrieved",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string"
             }
           },
           {
@@ -356,7 +352,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           },
           "400": {
             "description": "Bad Request",
@@ -388,7 +384,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
@@ -414,8 +410,7 @@
             "description": "ID of the event for which the session needs to be created",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string"
             }
           }
         ],
@@ -475,8 +470,7 @@
             "description": "ID of the event for which sessions needs to be fetched",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string"
             }
           },
           {
@@ -502,7 +496,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
@@ -551,14 +545,13 @@
             "description": "ID of the event for which the session needs to be deleted",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
@@ -602,14 +595,13 @@
             "description": "ID of the session which needs to be fetched",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
@@ -655,8 +647,7 @@
             "description": "ID of the event for which the session needs to be fetched",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string"
             }
           },
           {
@@ -672,7 +663,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
@@ -718,8 +709,7 @@
             "description": "ID of the event for which sessions needs to be fetched",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string"
             }
           },
           {
@@ -763,7 +753,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
@@ -809,8 +799,7 @@
             "description": "ID of the event for which the session needs to be created",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string"
             }
           },
           {
@@ -890,8 +879,7 @@
             "description": "ID of the event for which the session needs to be created",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string"
             }
           },
           {
@@ -936,7 +924,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
@@ -985,8 +973,7 @@
             "description": "ID of the event for which the session needs to be created",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string"
             }
           },
           {
@@ -1021,7 +1008,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
@@ -1067,8 +1054,7 @@
             "description": "ID of the event for which the session needs to be created",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string"
             }
           },
           {
@@ -1094,7 +1080,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "OK"
           },
           "400": {
             "description": "Bad Request",
@@ -1133,14 +1119,13 @@
             "description": "the shot",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
@@ -1182,28 +1167,23 @@
             "$ref": "#/components/schemas/StatusEnum"
           },
           "id": {
-            "type": "integer",
-            "description": "Gets or Sets Id",
-            "format": "int64"
+            "type": "string",
+            "nullable": true
           },
           "version": {
             "type": "integer",
-            "description": "Gets or Sets Version",
             "format": "int64"
           },
           "name": {
             "type": "string",
-            "description": "Gets or Sets Name",
             "nullable": true
           },
           "description": {
             "type": "string",
-            "description": "Gets or Sets Description",
             "nullable": true
           },
           "date": {
             "type": "string",
-            "description": "Gets or Sets Date",
             "format": "date-time",
             "nullable": true
           },
@@ -1212,12 +1192,10 @@
           },
           "logo": {
             "type": "string",
-            "description": "Base64 encoded Logo",
             "nullable": true
           },
           "sessionCount": {
             "type": "integer",
-            "description": "The number of sessions in the event",
             "format": "int32"
           }
         },
@@ -1254,38 +1232,31 @@
         "type": "object",
         "properties": {
           "id": {
-            "type": "integer",
-            "description": "Gets or Sets Id",
-            "format": "int64"
+            "type": "string",
+            "nullable": true
           },
           "version": {
             "type": "integer",
-            "description": "Gets or Sets Version",
             "format": "int64"
           },
           "index": {
             "type": "integer",
-            "description": "Gets or Sets Index",
             "format": "int32"
           },
           "eventId": {
-            "type": "integer",
-            "description": "Gets or Sets EventId",
-            "format": "int64"
+            "type": "string",
+            "nullable": true
           },
           "timestamp": {
             "type": "string",
-            "description": "Gets or Sets Timestamp",
             "format": "date-time"
           },
           "allowShare": {
             "type": "boolean",
-            "description": "Gets or Sets AllowShare",
             "nullable": true
           },
           "collage": {
             "type": "string",
-            "description": "Base64 encoded collage",
             "nullable": true
           }
         },
@@ -1295,23 +1266,15 @@
         "type": "object",
         "properties": {
           "id": {
-            "type": "integer",
-            "description": "Gets or Sets Id",
-            "format": "int64"
+            "type": "string",
+            "nullable": true
           },
           "version": {
             "type": "integer",
-            "description": "Gets or Sets Version",
-            "format": "int64"
-          },
-          "sessionId": {
-            "type": "integer",
-            "description": "Gets or Sets the session id reference",
             "format": "int64"
           },
           "index": {
             "type": "integer",
-            "description": "Gets or Sets Index",
             "format": "int32"
           },
           "isCollage": {
@@ -1319,7 +1282,6 @@
           },
           "image": {
             "type": "string",
-            "description": "Base64 Encoded image",
             "nullable": true
           }
         },
@@ -1333,7 +1295,6 @@
           3
         ],
         "type": "integer",
-        "description": "Event Status",
         "format": "int32"
       }
     }
