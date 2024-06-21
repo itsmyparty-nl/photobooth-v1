@@ -24,6 +24,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Console;
+using Serilog;
 
 namespace com.prodg.photobooth
 {
@@ -35,6 +36,7 @@ namespace com.prodg.photobooth
 		public static async Task Main (string[] args)
 		{			
 			var services = new ServiceCollection();
+			
 			ConfigureServices(services);
 			services.AddSingleton<MainWindow>();
 			value = services.BuildServiceProvider();
@@ -55,9 +57,18 @@ namespace com.prodg.photobooth
 				.AddJsonFile("appsettings.json")
 				.AddEnvironmentVariables()
 				.Build();
+			
+			Log.Logger = new LoggerConfiguration()
+				.ReadFrom.Configuration(configuration)
+				.CreateLogger();
+			
 			services.AddSingleton<HttpClient>(provider => new HttpClient());
 			services.AddSingleton<IConfiguration>(provider => configuration);
-			services.AddLogging(configure => configure.AddConsole());
+			services.AddLogging(configure =>
+			{
+				configure.AddConsole();
+				configure.AddSerilog(dispose: false);
+			});
 			services.TryAddEnumerable(ServiceDescriptor.Singleton<ILoggerProvider, ConsoleLoggerProvider>());
 			services.AddPhotoBooth(configuration);
 			services.AddSingleton<PhotoBoothHost>();
