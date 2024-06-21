@@ -43,6 +43,7 @@ public class SharpCameraProvider: ICameraProvider
             Id = Info.Id;
             
             _camera.Connect();
+            
             Initialized = true;
         }
         catch (Exception e)
@@ -86,7 +87,15 @@ public class SharpCameraProvider: ICameraProvider
         }
         else
         {
-            _camera.Exit();
+
+            try
+            {
+                _camera.Exit();
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Cannot Exit camera on Clean");
+            }
         }
         Initialize();
     }
