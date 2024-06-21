@@ -21,12 +21,16 @@ public class SharpCameraProvider: ICameraProvider
     {
         try
         {
+            if (_camera != null && _camera.Connected)
+            {
+                _camera.Exit();
+            }
+            
             List<TetheredCamera> cams = TetheredCamera.Scan();
             foreach (TetheredCamera c in cams)
             {
                 _logger.LogInformation("Found camera: {Camera}", c);
             }
-            
 
             if (!cams.Any())
             {
@@ -78,10 +82,12 @@ public class SharpCameraProvider: ICameraProvider
     {
         if (_camera == null || !_camera.Connected)
         {
-            _logger.LogError("Camera not initialized");
-            return;
+            _logger.LogWarning("Camera not initialized");
         }
-        _camera.Exit();
+        else
+        {
+            _camera.Exit();
+        }
         Initialize();
     }
 }
