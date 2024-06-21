@@ -65,6 +65,7 @@ public class SharpCameraProvider: ICameraProvider
             _reconnectionAttempts++;
             if (_reconnectionAttempts < 3)
             {
+                Thread.Sleep(500*_reconnectionAttempts);
                 Initialize();
             }
         }
