@@ -5,6 +5,8 @@ namespace com.prodg.photobooth.infrastructure.hardware;
 
 public class SharpCameraProvider: ICameraProvider
 {
+    private int _reconnectionAttempts = 0;
+    
     private TetheredCamera? _camera;
     private readonly ILogger<SharpCameraProvider> _logger;
     public string Id { get; private set; }
@@ -19,11 +21,20 @@ public class SharpCameraProvider: ICameraProvider
     }
     public void Initialize()
     {
+        _logger.LogInformation("Initialize Camera: attempt {0}", _reconnectionAttempts+1);
         try
         {
             if (_camera != null && _camera.Connected)
             {
-                _camera.Exit();
+                _logger.LogInformation("Try exiting connected camera before init");
+                try
+                {
+                    _camera.Exit();
+                }
+                catch (Exception e)
+                {
+                    _logger.LogWarning(e, "Camera exit failed");
+                }
             }
             
             List<TetheredCamera> cams = TetheredCamera.Scan();
@@ -45,11 +56,17 @@ public class SharpCameraProvider: ICameraProvider
             _camera.Connect();
             
             Initialized = true;
+            _reconnectionAttempts = 0;
         }
         catch (Exception e)
         {
             _logger.LogError(e,"Error while initializing camera");
             Initialized = false;
+            _reconnectionAttempts++;
+            if (_reconnectionAttempts < 3)
+            {
+                Initialize();
+            }
         }
         
     }
@@ -61,6 +78,7 @@ public class SharpCameraProvider: ICameraProvider
 
     public bool Capture(string capturePath)
     {
+        _logger.LogInformation("Capture {0}", capturePath);
         if (_camera == null || !_camera.Connected)
         {
             _logger.LogError("Camera not connected");
@@ -81,6 +99,7 @@ public class SharpCameraProvider: ICameraProvider
 
     public void Clean()
     {
+        _logger.LogInformation("Cleaning camera");
         if (_camera == null || !_camera.Connected)
         {
             _logger.LogWarning("Camera not initialized");
