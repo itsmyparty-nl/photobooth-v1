@@ -5,6 +5,8 @@ namespace com.prodg.photobooth.infrastructure.hardware;
 
 public class SharpCameraProvider: ICameraProvider
 {
+    private int _reconnectionAttempts = 0;
+    
     private TetheredCamera? _camera;
     private readonly ILogger<SharpCameraProvider> _logger;
     public string Id { get; private set; }
@@ -19,6 +21,20 @@ public class SharpCameraProvider: ICameraProvider
     }
     public void Initialize()
     {
+        _logger.LogInformation("Initialize Camera: attempt {0}", _reconnectionAttempts+1);
+        
+        if (IsCameraConnected())
+        {
+            _logger.LogInformation("Try exiting connected camera before init");
+            try
+            {
+                _camera.Exit();
+            }
+            catch (Exception e)
+            {
+                _logger.LogWarning(e, "Camera exit failed as initialize preparation");
+            }
+        }
         try
         {
             List<TetheredCamera> cams = TetheredCamera.Scan();
@@ -26,37 +42,48 @@ public class SharpCameraProvider: ICameraProvider
             {
                 _logger.LogInformation("Found camera: {Camera}", c);
             }
-            
 
             if (!cams.Any())
             {
                 _logger.LogWarning("No camera found");
             }
-            _camera = cams[0];
+            else
+            {
+                _camera = cams[0];
 
-            Info = new CameraInfo(_camera.Name, _camera.Name, _camera.USBPort);
+                Info = new CameraInfo(_camera.Name, _camera.Name, _camera.USBPort);
+                Id = Info.Id;
 
-            Id = Info.Id;
-            
-            _camera.Connect();
-            Initialized = true;
+                _camera.Connect();
+
+                Initialized = true;
+                _reconnectionAttempts = 0;
+            }
         }
         catch (Exception e)
         {
             _logger.LogError(e,"Error while initializing camera");
             Initialized = false;
+            _reconnectionAttempts++;
+            if (_reconnectionAttempts < 3)
+            {
+                Thread.Sleep(500*_reconnectionAttempts);
+                Initialize();
+            }
         }
         
     }
 
     public int GetBatteryLevel()
     {
-        return _camera is {Connected: true} ? 100 : 0;
+        return 100;
     }
 
     public bool Capture(string capturePath)
     {
-        if (_camera == null || !_camera.Connected)
+        
+        _logger.LogInformation("Capture {0}", capturePath);
+        if (!IsCameraConnected())
         {
             _logger.LogError("Camera not connected");
             return false;
@@ -76,12 +103,36 @@ public class SharpCameraProvider: ICameraProvider
 
     public void Clean()
     {
-        if (_camera == null || !_camera.Connected)
+        _logger.LogInformation("Cleaning camera");
+        _reconnectionAttempts = 0;
+        if (!IsCameraConnected())
         {
-            _logger.LogError("Camera not initialized");
-            return;
+            _logger.LogWarning("Camera not initialized");
         }
-        _camera.Exit();
+        else
+        {
+
+            try
+            {
+                _camera.Exit();
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Cannot Exit camera on Clean");
+            }
+        }
         Initialize();
+    }
+
+    private bool IsCameraConnected()
+    {
+        try
+        {
+            return _camera != null && _camera.Connected;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
     }
 }
