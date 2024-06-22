@@ -33,7 +33,7 @@ public class QrCodePrinter: IPrinter
 
         try
         {
-            _lastPrint = _processor.Process(image, eventId, sessionIndex);
+            _lastPrint = _processor.Process(image, sessionIndex);
         }
         catch (Exception e)
         {

@@ -33,6 +33,7 @@ namespace com.prodg.photobooth.domain.image
     {
         private readonly ILogger<QrCodeOverlayImageProcessor> _logger;
         private readonly string _baseUrl;
+        private readonly string _eventId;
 
         /// <summary>
         /// C'tor
@@ -46,18 +47,19 @@ namespace com.prodg.photobooth.domain.image
             var urlBuilder = new System.Text.StringBuilder();
             urlBuilder.Append(settings.OffloadAddress.TrimEnd('/'));
             _baseUrl = urlBuilder.ToString();
+            _eventId = settings.ApiEventId;
         
             _logger.LogInformation("QR Code BaseURL configured to URL '{BaseUrl}'", _baseUrl);
         }
 
-        public Image Process(Image image, string eventId, int sessionIndex)
+        public Image Process(Image image, int sessionIndex)
         {
 	        if (image == null)
 	        {
 		        throw new ArgumentNullException(nameof(image), "image may not be null");
 	        }
 	        
-	        var overlayImage = PrepareQrCode(eventId, sessionIndex);
+	        var overlayImage = PrepareQrCode(sessionIndex);
 	        if (overlayImage == null)
 	        {
 		        return image;
@@ -84,12 +86,12 @@ namespace com.prodg.photobooth.domain.image
 		        throw new ArgumentNullException(nameof(session), "session may not be null");
 	        }
 
-	        return Process(image, session.EventId, session.Id);
+	        return Process(image, session.Id);
         }
         
-        private Image? PrepareQrCode(string eventId, int sessionIndex)
+        private Image? PrepareQrCode(int sessionIndex)
         {
-	        var url = $"{_baseUrl}/api/v1/events/{eventId}/sessions/{sessionIndex}";
+	        var url = $"{_baseUrl}/events/{_eventId}/sessions/{sessionIndex}";
 	        _logger.LogInformation("PrepareQrCode - {Url}", url);
 	        
 	        var urlPayload = new PayloadGenerator.Url(url);
