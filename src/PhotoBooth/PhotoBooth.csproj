@@ -20,7 +20,10 @@
   <ItemGroup>
     <ProjectReference Include="..\CommandMessenger\CommandMessenger.csproj" />
     <ProjectReference Include="..\photobooth-api-client\photobooth-api-client.csproj" />
+    <ProjectReference Include="..\PhotoBoothConfig\PhotoBoothConfig.csproj" />
     <ProjectReference Include="..\PhotoBoothHardwareInterfaces\PhotoBoothHardwareInterfaces.csproj" />
+    <ProjectReference Include="..\PhotoBoothNetPrinter\PhotoBoothNetPrinter.csproj" />
+    <ProjectReference Include="..\PhotoBoothQRCode\PhotoBoothQRCode.csproj" />
     <ProjectReference Include="..\SharpCameraHardware\SharpCameraHardware.csproj" />
   </ItemGroup>
   

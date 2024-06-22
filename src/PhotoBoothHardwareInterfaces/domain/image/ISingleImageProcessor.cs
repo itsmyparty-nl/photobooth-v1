@@ -22,21 +22,16 @@ using SixLabors.ImageSharp;
 namespace com.prodg.photobooth.domain.image
 {
 	/// <summary>
-	/// An image processor processes a collection of images into a single image
+	/// An image processor processes a single image
 	/// </summary>
-	public interface IMultiImageProcessor: IDisposable
-	{
-	    /// <summary>
-	    /// The required number of images to process
-	    /// </summary>
-        int RequiredImages { get; }
-        
+	public interface ISingleImageProcessor
+	{        
         /// <summary>
-		/// Processes the images into a single image
+		/// Processes the image and outputs the processed image
 		/// </summary>
 		/// <returns>
 		/// The resulting image
 		/// </returns>
-		Image? Process(PhotoSession session);
+		Image Process(IPhotoSession? session, Image image);
 	}
 }

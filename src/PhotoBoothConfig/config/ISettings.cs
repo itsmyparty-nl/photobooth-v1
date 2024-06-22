@@ -17,8 +17,6 @@
 */
 #endregion
 
-using com.prodg.photobooth.domain.image;
-
 namespace com.prodg.photobooth.config
 {
     /// <summary>

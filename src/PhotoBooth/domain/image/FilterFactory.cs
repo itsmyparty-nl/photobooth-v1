@@ -20,6 +20,7 @@
 */
 #endregion
 
+using com.prodg.photobooth.config;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
 

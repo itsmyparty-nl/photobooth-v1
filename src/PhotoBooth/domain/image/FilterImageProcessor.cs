@@ -19,6 +19,7 @@
 
 using Microsoft.Extensions.Logging;
 using SixLabors.ImageSharp;
+using com.prodg.photobooth.config;
 using SixLabors.ImageSharp.Processing;
 
 namespace com.prodg.photobooth.domain.image
@@ -51,7 +52,7 @@ namespace com.prodg.photobooth.domain.image
         /// <summary>
         /// Processes the images into a single image
         /// </summary>
-        public Image Process(PhotoSession? session, Image image)
+        public Image Process(IPhotoSession? session, Image image)
         {            
             _logger.LogInformation("Applying filter {FilterType} on image", _filterType);
 

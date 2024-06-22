@@ -17,7 +17,7 @@
 */
 #endregion
 
-namespace com.prodg.photobooth.domain.image
+namespace com.prodg.photobooth.config
 {
     public enum FilterType
     {

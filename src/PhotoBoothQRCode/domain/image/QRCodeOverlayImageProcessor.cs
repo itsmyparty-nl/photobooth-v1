@@ -77,7 +77,7 @@ namespace com.prodg.photobooth.domain.image
         /// <summary>
         /// Processes the images into a single image
         /// </summary>
-        public Image Process(PhotoSession? session, Image image)
+        public Image Process(IPhotoSession? session, Image image)
         {
 	        if (session == null)
 	        {

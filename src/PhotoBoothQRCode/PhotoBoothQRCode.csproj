@@ -8,11 +8,14 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\PhotoBooth\PhotoBooth.csproj" />
+        <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
+        <PackageReference Include="SixLabors.ImageSharp" Version="3.1.4" />
+        <PackageReference Include="QRCoder-ImageSharp" Version="0.10.0" />
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="QRCoder-ImageSharp" Version="0.10.0" />
+      <ProjectReference Include="..\PhotoBoothConfig\PhotoBoothConfig.csproj" />
+      <ProjectReference Include="..\PhotoBoothHardwareInterfaces\PhotoBoothHardwareInterfaces.csproj" />
     </ItemGroup>
 
 </Project>
