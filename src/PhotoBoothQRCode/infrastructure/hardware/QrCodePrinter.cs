@@ -10,11 +10,13 @@ public class QrCodePrinter: IPrinter
     private QrCodeOverlayImageProcessor _processor;
     private readonly string _baseUrl;
     private Image? _lastPrint;
+    private readonly object _locker;
 
     public QrCodePrinter(ILogger<QrCodePrinter> logger, QrCodeOverlayImageProcessor processor)
     {
         _logger = logger;
         _processor = processor;
+        _locker = new object();
     }
     
     public void Initialize()
@@ -33,7 +35,10 @@ public class QrCodePrinter: IPrinter
 
         try
         {
-            _lastPrint = _processor.Process(image, sessionIndex);
+            lock (_locker)
+            {
+                _lastPrint = _processor.Process(image, sessionIndex);
+            }
         }
         catch (Exception e)
         {
@@ -44,6 +49,9 @@ public class QrCodePrinter: IPrinter
 
     public Image? GetLastPrint()
     {
-        return _lastPrint;
+        lock (_locker)
+        {
+            return _lastPrint;
+        }
     }
 }
