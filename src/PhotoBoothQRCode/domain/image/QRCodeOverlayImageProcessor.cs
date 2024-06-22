@@ -21,7 +21,6 @@ using com.prodg.photobooth.config;
 using Microsoft.Extensions.Logging;
 using QRCoder;
 using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 
 namespace com.prodg.photobooth.domain.image
@@ -100,10 +99,8 @@ namespace com.prodg.photobooth.domain.image
 	        {
 		        using QRCodeGenerator qrGenerator = new QRCodeGenerator();
 		        using QRCodeData qrCodeData = qrGenerator.CreateQrCode(urlPayload);
-		        using PngByteQRCode qrCode = new PngByteQRCode(qrCodeData);
-		        var qrCodeBytes = qrCode.GetGraphic(20);
-        
-		        return Image.Load<Argb32>(qrCodeBytes);
+		        using QRCode qrCode = new QRCode(qrCodeData);
+		        return qrCode.GetGraphic(20);
 	        }
 	        catch (Exception e)
 	        {
