@@ -105,6 +105,7 @@ namespace com.prodg.photobooth.domain
             {
                 if (settings.PrinterName.Contains("QRCode", StringComparison.OrdinalIgnoreCase))
                 {
+                    services.AddSingleton<QrCodeOverlayImageProcessor>();
                     services.AddSingleton<IPrinter, QrCodePrinter>();
                 }
                 else
