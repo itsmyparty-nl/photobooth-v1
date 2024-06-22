@@ -43,6 +43,7 @@ public partial class MainWindow: Gtk.Window
 	private readonly ILogger<MainWindow> _logger;
 	private readonly PhotoBoothHost _photoBoothHost;
 	private Gdk.Cursor invisibleCursor;
+	private int lastPrintHashcode;
 
 	public MainWindow(PhotoBoothHost photoBoothHost, PhotoBooth photoBooth, IHardware hardware, IPhotoBoothModel model, IPhotoBoothService service,
 		ISettings settings, ILogger<MainWindow> logger) : base(Gtk.WindowType.Toplevel)
@@ -161,9 +162,31 @@ public partial class MainWindow: Gtk.Window
 
     private void OnPrintControlFired(object sender, TriggerControlEventArgs e)
     {
-		Gtk.Application.Invoke ((b, c) => {
-			imagePhoto.Pixbuf = instructionImages ["instruction"];
-			imageInstruction.Pixbuf = instructionImages ["title"];
+		Gtk.Application.Invoke ((b, c) =>
+		{
+			Thread.Sleep(500);
+			var lastPrint = _hardware.Printer.GetLastPrint();
+
+			if (lastPrint != null)
+			{
+				var hashCode = lastPrint.GetHashCode();
+				if (hashCode != lastPrintHashcode)
+				{
+					lastPrintHashcode = hashCode;
+					//Create and scale the pixbuf
+					var result = CreateAndScalePicture(lastPrint, imagePhoto.Allocation.Height);
+
+					//Set the pixbuf on the UI
+					imagePhoto.Pixbuf = result;
+					ShowAll();
+				}
+			}
+			else
+			{
+				imagePhoto.Pixbuf = instructionImages["instruction"];
+			}
+			
+			imageInstruction.Pixbuf = instructionImages["title"];
 		});
     }
 
