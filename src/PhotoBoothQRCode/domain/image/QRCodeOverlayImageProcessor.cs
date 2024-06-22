@@ -21,6 +21,7 @@ using com.prodg.photobooth.config;
 using Microsoft.Extensions.Logging;
 using QRCoder;
 using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 
 namespace com.prodg.photobooth.domain.image
@@ -33,6 +34,7 @@ namespace com.prodg.photobooth.domain.image
         private readonly ILogger<QrCodeOverlayImageProcessor> _logger;
         private readonly string _baseUrl;
         private readonly string _eventId;
+        private readonly Image<Argb32> _logo;
 
         /// <summary>
         /// C'tor
@@ -47,6 +49,7 @@ namespace com.prodg.photobooth.domain.image
             urlBuilder.Append(settings.OffloadAddress.TrimEnd('/'));
             _baseUrl = urlBuilder.ToString();
             _eventId = settings.ApiEventId;
+            _logo = Image.Load<Argb32>("resources/ItsMyPartyLogoLight.png");
         
             _logger.LogInformation("QR Code BaseURL configured to URL '{BaseUrl}'", _baseUrl);
         }
@@ -87,20 +90,20 @@ namespace com.prodg.photobooth.domain.image
 
 	        return Process(image, session.Id);
         }
-        
+
         private Image? PrepareQrCode(int sessionIndex)
         {
 	        var url = $"{_baseUrl}/#/events/{_eventId}/sessions/{sessionIndex}";
 	        _logger.LogInformation("PrepareQrCode - {Url}", url);
-	        
+
 	        var urlPayload = new PayloadGenerator.Url(url);
-	        
+
 	        try
 	        {
 		        using QRCodeGenerator qrGenerator = new QRCodeGenerator();
 		        using QRCodeData qrCodeData = qrGenerator.CreateQrCode(urlPayload);
 		        using QRCode qrCode = new QRCode(qrCodeData);
-		        return qrCode.GetGraphic(20);
+		        return qrCode.GetGraphic(15, Color.Black, Color.White, _logo, 20, 0, true, Color.White);
 	        }
 	        catch (Exception e)
 	        {

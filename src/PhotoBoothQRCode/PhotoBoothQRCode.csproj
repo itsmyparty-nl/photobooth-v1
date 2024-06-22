@@ -18,4 +18,15 @@
       <ProjectReference Include="..\PhotoBoothHardwareInterfaces\PhotoBoothHardwareInterfaces.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Remove="resources\ItsMyPartyLogoDark.png" />
+      <Content Include="resources\ItsMyPartyLogoDark.png">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+      <None Remove="resources\ItsMyPartyLogoLight.png" />
+      <Content Include="resources\ItsMyPartyLogoLight.png">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
+
 </Project>
