@@ -7,6 +7,7 @@
         <Configurations>Debug;Release;HeadlessRelease</Configurations>
         <Platforms>AnyCPU</Platforms>
         <LangVersion>10</LangVersion>
+        <RootNamespace>com.prodg.photobooth</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
@@ -16,7 +17,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\PhotoBooth\PhotoBooth.csproj" />
+      <ProjectReference Include="..\PhotoBoothConfig\PhotoBoothConfig.csproj" />
+      <ProjectReference Include="..\PhotoBoothHardwareInterfaces\PhotoBoothHardwareInterfaces.csproj" />
     </ItemGroup>
 
 </Project>

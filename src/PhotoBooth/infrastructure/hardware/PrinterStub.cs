@@ -25,6 +25,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
 	public class PrinterStub: IPrinter
 	{
 		private readonly ILogger<PrinterStub> _logger;
+		private Image? _lastPrint = null;
 
 		public PrinterStub (ILogger<PrinterStub> logger)
 		{
@@ -35,17 +36,26 @@ namespace com.prodg.photobooth.infrastructure.hardware
 		/// Print an image
 		/// </summary>
 		/// <param name="image"></param>
-		public void Print(Image image)
+		/// <param name="eventId"></param>
+		/// <param name="sessionIndex"></param>
+		public void Print(Image image, string eventId, int sessionIndex)
 		{
-			_logger.LogInformation("Print ignored by STUB");
+			_logger.LogInformation("Print for {0} - {1} ignored by STUB", eventId, sessionIndex);
+			_lastPrint = image;
+		}
+
+		public Image? GetLastPrint()
+		{
+			_logger.LogInformation("GetLastPrint STUB");
+			return _lastPrint;
 		}
 
 		public void Initialize (){
-			//Do nothing
+			_logger.LogInformation("Initialize STUB");
 		}
 
 		public void DeInitialize(){
-			//Do nothing
+			_logger.LogInformation("DeInitialize STUB");
 		}
 	}
 }

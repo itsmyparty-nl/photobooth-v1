@@ -63,7 +63,7 @@ namespace com.prodg.photobooth.domain.image
 	            new JpegEncoder()));
         }
 
-        public Image? Process(PhotoSession? session)
+        public Image? Process(IPhotoSession? session)
         {
 	        _logger.LogInformation("Process session");
 	        if (session == null)
@@ -80,7 +80,7 @@ namespace com.prodg.photobooth.domain.image
             return PostProcessCombinedImage(session, combinedImage!);
         }
 
-        private void PreProcessImages(PhotoSession session)
+        private void PreProcessImages(IPhotoSession session)
         {
 	        _logger.LogInformation("Preprocessing images");
 	        if (_imagePreProcessors.Any())
@@ -95,7 +95,7 @@ namespace com.prodg.photobooth.domain.image
             }
         }
 
-        private Image PostProcessCombinedImage(PhotoSession session, Image combinedImage)
+        private Image PostProcessCombinedImage(IPhotoSession session, Image combinedImage)
         {
             if (_imagePostProcessors.Any())
             {

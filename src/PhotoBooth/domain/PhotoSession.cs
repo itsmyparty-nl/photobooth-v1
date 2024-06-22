@@ -24,10 +24,10 @@ using SixLabors.ImageSharp.Formats;
 
 namespace com.prodg.photobooth.domain
 {
-    /// <summary>
+	/// <summary>
     /// A single session in which pictures are taken which are processed into a single result image
     /// </summary>
-    public class PhotoSession: IDisposable
+    public class PhotoSession: IDisposable, IPhotoSession
     {
         [JsonPropertyName("EventId")]
         public string EventId { get;} = String.Empty;

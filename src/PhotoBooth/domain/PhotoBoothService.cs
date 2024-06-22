@@ -149,13 +149,16 @@ namespace com.prodg.photobooth.domain
         public Task Print(PhotoSession session)
         {
 	        _logger.LogInformation("Start Printing result image for session {StoragePath}", session.StoragePath);
-
+	        
 	        return Task.Run(() =>
 	        {
 		        try
 		        {
-			        _hardware.Printer.Print(session.ResultImage ??
-			                                throw new InvalidOperationException("Cannot print: ResultImage is null"));
+			        if (session.ResultImage == null)
+			        {
+				        _logger.LogError("Error while printing image: resultImage is null");
+			        }
+			        _hardware.Printer.Print(session.ResultImage!, session.EventId, session.Id);
 		        }
 		        catch (Exception ex)
 		        {
