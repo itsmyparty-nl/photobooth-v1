@@ -33,5 +33,11 @@ namespace com.prodg.photobooth.infrastructure.hardware
 		/// <param name="eventId"></param>
 		/// <param name="sessionIndex"></param>
 		void Print(Image image, string eventId, int sessionIndex);
+
+		/// <summary>
+		/// Retrieves the last printed image
+		/// </summary>
+		/// <returns>printed image</returns>
+		Image? GetLastPrint();
 	}
 }

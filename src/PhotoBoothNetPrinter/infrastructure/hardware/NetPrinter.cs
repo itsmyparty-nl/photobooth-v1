@@ -41,6 +41,7 @@ namespace com.prodg.photobooth.infrastructure.hardware
         private Image _rotatedImage;
         private PrintDocument _pd;
 		private readonly ManualResetEvent _printFinished;
+        private Image? _lastPrint = null;
 
         public NetPrinter(ISettings settings, ILogger<NetPrinter> logger)
         {
@@ -59,6 +60,8 @@ namespace com.prodg.photobooth.infrastructure.hardware
 
             try
             {
+                _lastPrint = image;
+
                 //Store variables for printing
 				_storedImage = image;
                 _rotatedImage = _storedImage.Clone(context => context.RotateFlip(RotateMode.Rotate90, FlipMode.None));
@@ -88,12 +91,18 @@ namespace com.prodg.photobooth.infrastructure.hardware
 				_pd.Print();
 
 				_printFinished.WaitOne();
+
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error while printing");
 				throw;
             }
+        }
+
+        public Image? GetLastPrint()
+        {
+            return _lastPrint;
         }
 
         void printDocument_EndPrint (object sender, PrintEventArgs e)

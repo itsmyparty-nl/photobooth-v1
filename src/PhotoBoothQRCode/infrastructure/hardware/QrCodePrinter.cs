@@ -9,6 +9,7 @@ public class QrCodePrinter: IPrinter
     private readonly ILogger<QrCodePrinter> _logger;
     private QrCodeOverlayImageProcessor _processor;
     private readonly string _baseUrl;
+    private Image? _lastPrint;
 
     public QrCodePrinter(ILogger<QrCodePrinter> logger, QrCodeOverlayImageProcessor processor)
     {
@@ -30,6 +31,19 @@ public class QrCodePrinter: IPrinter
     {
         _logger.LogInformation("Print - {0}, {1}", eventId, sessionIndex);
 
-        var mergedImage = _processor.Process(image, eventId, sessionIndex);
+        try
+        {
+            _lastPrint = _processor.Process(image, eventId, sessionIndex);
+        }
+        catch (Exception e)
+        {
+           _logger.LogError(e, "Error while printing");
+           _lastPrint = image;
+        }
+    }
+
+    public Image? GetLastPrint()
+    {
+        return _lastPrint;
     }
 }
