@@ -103,7 +103,7 @@ namespace com.prodg.photobooth.domain.image
 		        using QRCodeGenerator qrGenerator = new QRCodeGenerator();
 		        using QRCodeData qrCodeData = qrGenerator.CreateQrCode(urlPayload);
 		        using QRCode qrCode = new QRCode(qrCodeData);
-		        return qrCode.GetGraphic(15, Color.Black, Color.White, _logo, 25, 10, true, Color.White);
+		        return qrCode.GetGraphic(22, Color.Black, Color.White, _logo, 20, 15, true, Color.Goldenrod);
 	        }
 	        catch (Exception e)
 	        {
