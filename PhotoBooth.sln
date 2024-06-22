@@ -21,7 +21,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PhotoBoothHardwareInterface
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "photobooth-api-client", "src\photobooth-api-client\photobooth-api-client.csproj", "{3EE87E88-692A-4070-A243-7B53F95979F8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QRCodePrinter", "src\QRCodePrinter\QRCodePrinter.csproj", "{BCE03945-EB2A-48F5-B916-63E0054D971C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PhotoBoothQRCode", "src\PhotoBoothQRCode\PhotoBoothQRCode.csproj", "{BCE03945-EB2A-48F5-B916-63E0054D971C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
