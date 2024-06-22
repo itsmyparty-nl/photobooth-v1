@@ -49,7 +49,7 @@ namespace com.prodg.photobooth.domain.image
             urlBuilder.Append(settings.OffloadAddress.TrimEnd('/'));
             _baseUrl = urlBuilder.ToString();
             _eventId = settings.ApiEventId;
-            _logo = Image.Load<Argb32>("resources/ItsMyPartyLogoLight.png");
+            _logo = Image.Load<Argb32>("resources/camera-emoji.png");
         
             _logger.LogInformation("QR Code BaseURL configured to URL '{BaseUrl}'", _baseUrl);
         }
@@ -103,7 +103,7 @@ namespace com.prodg.photobooth.domain.image
 		        using QRCodeGenerator qrGenerator = new QRCodeGenerator();
 		        using QRCodeData qrCodeData = qrGenerator.CreateQrCode(urlPayload);
 		        using QRCode qrCode = new QRCode(qrCodeData);
-		        return qrCode.GetGraphic(15, Color.Black, Color.White, _logo, 20, 0, true, Color.White);
+		        return qrCode.GetGraphic(15, Color.Black, Color.White, _logo, 30, 0, true, Color.White);
 	        }
 	        catch (Exception e)
 	        {

@@ -27,6 +27,10 @@
       <Content Include="resources\ItsMyPartyLogoLight.png">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </Content>
+      <None Remove="resources\camera-emoji.png" />
+      <Content Include="resources\camera-emoji.png">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
     </ItemGroup>
 
 </Project>
