@@ -29,7 +29,9 @@ namespace com.prodg.photobooth.infrastructure.hardware
 		/// <summary>
 		/// Print a photo session
 		/// </summary>
-        /// <param name="image"></param>
-		void Print(Image image);
+		/// <param name="image"></param>
+		/// <param name="eventId"></param>
+		/// <param name="sessionIndex"></param>
+		void Print(Image image, string eventId, int sessionIndex);
 	}
 }

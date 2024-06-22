@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PhotoBoothHardwareInterface
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "photobooth-api-client", "src\photobooth-api-client\photobooth-api-client.csproj", "{3EE87E88-692A-4070-A243-7B53F95979F8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QRCodePrinter", "src\QRCodePrinter\QRCodePrinter.csproj", "{BCE03945-EB2A-48F5-B916-63E0054D971C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -81,6 +83,12 @@ Global
 		{60C3900D-211C-40D3-8DA5-6BC4D6860F9E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{60C3900D-211C-40D3-8DA5-6BC4D6860F9E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{60C3900D-211C-40D3-8DA5-6BC4D6860F9E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BCE03945-EB2A-48F5-B916-63E0054D971C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BCE03945-EB2A-48F5-B916-63E0054D971C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BCE03945-EB2A-48F5-B916-63E0054D971C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BCE03945-EB2A-48F5-B916-63E0054D971C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BCE03945-EB2A-48F5-B916-63E0054D971C}.HeadlessRelease|Any CPU.ActiveCfg = Debug|Any CPU
+		{BCE03945-EB2A-48F5-B916-63E0054D971C}.HeadlessRelease|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -53,8 +53,10 @@ namespace com.prodg.photobooth.infrastructure.hardware
         /// Print an image
         /// </summary>
         /// <param name="image"></param>
-        public void Print(Image image)
+        public void Print(Image image, string eventId, int sessionIndex)
         {
+            _logger.LogInformation("Print - {0}, {1}", eventId, sessionIndex);
+
             try
             {
                 //Store variables for printing
