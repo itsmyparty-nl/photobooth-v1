@@ -91,7 +91,7 @@ namespace com.prodg.photobooth.domain.image
         
         private Image? PrepareQrCode(int sessionIndex)
         {
-	        var url = $"{_baseUrl}/events/{_eventId}/sessions/{sessionIndex}";
+	        var url = $"{_baseUrl}/#/events/{_eventId}/sessions/{sessionIndex}";
 	        _logger.LogInformation("PrepareQrCode - {Url}", url);
 	        
 	        var urlPayload = new PayloadGenerator.Url(url);
