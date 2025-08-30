@@ -116,12 +116,13 @@ jobs:
     name: Create Release
     needs: [ prepare, build, vulnerability-test]
     runs-on: [ ubuntu-latest ]
-    if: ${{ github.actor != 'dependabot[bot]' }} AND ${{github.ref == 'refs/heads/main'}}
+    if: ${{ github.actor != 'dependabot[bot]' && github.ref == 'refs/heads/main' && github.event_name == 'push' }}
     permissions:
       id-token: write
       contents: write
         
     steps:
+      - uses: actions/checkout@v4
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
