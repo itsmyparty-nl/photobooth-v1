@@ -1,0 +1,36 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <RootNamespace>com.prodg.photobooth</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
+        <PackageReference Include="SixLabors.ImageSharp" Version="3.1.4" />
+        <PackageReference Include="QRCoder-ImageSharp" Version="0.10.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\PhotoBoothConfig\PhotoBoothConfig.csproj" />
+      <ProjectReference Include="..\PhotoBoothHardwareInterfaces\PhotoBoothHardwareInterfaces.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="resources\ItsMyPartyLogoDark.png" />
+      <Content Include="resources\ItsMyPartyLogoDark.png">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+      <None Remove="resources\ItsMyPartyLogoLight.png" />
+      <Content Include="resources\ItsMyPartyLogoLight.png">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+      <None Remove="resources\camera-emoji.png" />
+      <Content Include="resources\camera-emoji.png">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
+
+</Project>

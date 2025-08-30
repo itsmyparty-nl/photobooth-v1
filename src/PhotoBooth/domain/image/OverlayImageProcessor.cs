@@ -55,7 +55,7 @@ namespace com.prodg.photobooth.domain.image
         /// <summary>
         /// Processes the images into a single image
         /// </summary>
-        public Image Process(PhotoSession? session, Image image)
+        public Image Process(IPhotoSession? session, Image image)
         {            
             _logger.LogInformation("Applying overlay on image: {OverlayImage}" , Path.GetFileNameWithoutExtension(_overlayImageFileName));
 

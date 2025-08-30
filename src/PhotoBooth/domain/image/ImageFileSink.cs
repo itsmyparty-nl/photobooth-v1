@@ -44,7 +44,7 @@ namespace com.prodg.photobooth.domain.image
         /// <summary>
         /// Processes the images into a single image
         /// </summary>
-        public Image Process(PhotoSession? session, Image image)
+        public Image Process(IPhotoSession? session, Image image)
         {
             _logger.LogInformation("Storing file to disk {StoragePath} - {FileName}", session?.StoragePath, _fileName); 
             if (image == null) { throw new ArgumentNullException(nameof(image), "image may not be null"); }

@@ -103,7 +103,15 @@ namespace com.prodg.photobooth.domain
             // Note that for some boards (e.g. Sparkfun Pro Micro) DtrEnable may need to be true.
             if (!string.IsNullOrWhiteSpace(settings.PrinterName))
             {
-                //services.AddSingleton<IPrinter, NetPrinter>();
+                if (settings.PrinterName.Contains("QRCode", StringComparison.OrdinalIgnoreCase))
+                {
+                    services.AddSingleton<QrCodeOverlayImageProcessor>();
+                    services.AddSingleton<IPrinter, QrCodePrinter>();
+                }
+                else
+                {
+                    services.AddSingleton<IPrinter, NetPrinter>();
+                }
             }
             else
             {
