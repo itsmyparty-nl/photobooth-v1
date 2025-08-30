@@ -17,15 +17,9 @@
 */
 #endregion
 
-using System;
-using System.Drawing.Imaging;
-using System.IO;
-using System.Threading.Tasks;
 using System.Globalization;
 using com.prodg.photobooth.config;
 using Gtk;
-using Pango;
-using System.Collections.Generic;
 using com.prodg.photobooth.domain;
 using com.prodg.photobooth.infrastructure.hardware;
 using Gdk;
@@ -37,13 +31,10 @@ public partial class MainWindow: Gtk.Window
 {
 	private readonly PhotoBooth _photoBooth;
 	private readonly IHardware _hardware;
-	private readonly IPhotoBoothModel _model;
-	private readonly IPhotoBoothService _service;
-	private readonly ISettings _settings;
 	private readonly ILogger<MainWindow> _logger;
 	private readonly PhotoBoothHost _photoBoothHost;
-	private Gdk.Cursor invisibleCursor;
-	private int lastPrintHashcode;
+	private Cursor _invisibleCursor;
+	private int _lastPrintHashcode;
 
 	public MainWindow(PhotoBoothHost photoBoothHost, PhotoBooth photoBooth, IHardware hardware, IPhotoBoothModel model, IPhotoBoothService service,
 		ISettings settings, ILogger<MainWindow> logger) : base(Gtk.WindowType.Toplevel)
@@ -57,13 +48,10 @@ public partial class MainWindow: Gtk.Window
 
 		_photoBooth = photoBooth;
 		_hardware = hardware;
-		_model = model;
-		_service = service;
-		_settings = settings;
 		_logger = logger;
 		_photoBoothHost = photoBoothHost;
 
-		PreloadImages(_settings);
+		PreloadImages(settings);
 		HideCursor ();
 
 		hardware.Camera.StateChanged += OnCameraStateChanged;
@@ -82,9 +70,9 @@ public partial class MainWindow: Gtk.Window
 		imagePhoto.Pixbuf = instructionImages ["instruction"];
 		imageInstruction.Pixbuf = instructionImages ["title"];
 
-		this.Maximize();
-		this.Fullscreen ();
-		this.WindowStateEvent += OnWindowStateEvent;
+		Maximize();
+		Fullscreen ();
+		WindowStateEvent += OnWindowStateEvent;
 	}
 
 	private void OnWindowStateEvent(object o, WindowStateEventArgs args)
@@ -112,16 +100,16 @@ public partial class MainWindow: Gtk.Window
 
 	private void HideCursor()
 	{
-		invisibleCursor = new Gdk.Cursor(CursorType.BlankCursor);
-		Window.Cursor = invisibleCursor;
+		_invisibleCursor = new Gdk.Cursor(CursorType.BlankCursor);
+		Window.Cursor = _invisibleCursor;
 	}
 
 	private void ShowCursor()
 	{
-		if (invisibleCursor != null)
+		if (_invisibleCursor != null)
 		{
-			invisibleCursor.Dispose ();
-			invisibleCursor = null;
+			_invisibleCursor.Dispose ();
+			_invisibleCursor = null;
 		}
 	}
 
@@ -170,9 +158,9 @@ public partial class MainWindow: Gtk.Window
 			if (lastPrint != null)
 			{
 				var hashCode = lastPrint.GetHashCode();
-				if (hashCode != lastPrintHashcode)
+				if (hashCode != _lastPrintHashcode)
 				{
-					lastPrintHashcode = hashCode;
+					_lastPrintHashcode = hashCode;
 					//Create and scale the pixbuf
 					var result = CreateAndScalePicture(lastPrint, imagePhoto.Allocation.Height);
 
