@@ -7,8 +7,7 @@ namespace com.prodg.photobooth.infrastructure.hardware;
 public class QrCodePrinter: IPrinter
 {
     private readonly ILogger<QrCodePrinter> _logger;
-    private QrCodeOverlayImageProcessor _processor;
-    private readonly string _baseUrl;
+    private readonly QrCodeOverlayImageProcessor _processor;
     private Image? _lastPrint;
     private readonly object _locker;
 

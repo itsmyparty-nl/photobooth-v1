@@ -17,8 +17,6 @@
 */
 #endregion
 
-using System;
-
 namespace CommandMessenger.TransportLayer
 {
     /// <summary>
@@ -60,7 +58,7 @@ namespace CommandMessenger.TransportLayer
         /// <summary> Reads the serial buffer into the string buffer. </summary>
         public byte[] Read()
         {
-            var buffer = new byte[0];
+            var buffer = Array.Empty<byte>();
             
             return buffer;
         }
