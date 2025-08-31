@@ -306,6 +306,46 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <CopyToPublishDirectory>Always</CopyToPublishDirectory>
     </Content>
+    <None Remove="Resources\CeesNel50JaarGetrouwd\empty.png" />
+    <Content Include="Resources\CeesNel50JaarGetrouwd\empty.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <None Remove="Resources\CeesNel50JaarGetrouwd\error.png" />
+    <Content Include="Resources\CeesNel50JaarGetrouwd\error.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <None Remove="Resources\CeesNel50JaarGetrouwd\indicator1of4.png" />
+    <Content Include="Resources\CeesNel50JaarGetrouwd\indicator1of4.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <None Remove="Resources\CeesNel50JaarGetrouwd\indicator2of4.png" />
+    <Content Include="Resources\CeesNel50JaarGetrouwd\indicator2of4.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <None Remove="Resources\CeesNel50JaarGetrouwd\indicator3of4.png" />
+    <Content Include="Resources\CeesNel50JaarGetrouwd\indicator3of4.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <None Remove="Resources\CeesNel50JaarGetrouwd\indicator4of4.png" />
+    <Content Include="Resources\CeesNel50JaarGetrouwd\indicator4of4.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <None Remove="Resources\CeesNel50JaarGetrouwd\largeinstruction.png" />
+    <Content Include="Resources\CeesNel50JaarGetrouwd\largeinstruction.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <None Remove="Resources\CeesNel50JaarGetrouwd\legend.png" />
+    <Content Include="Resources\CeesNel50JaarGetrouwd\legend.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <None Remove="Resources\CeesNel50JaarGetrouwd\ready.png" />
+    <Content Include="Resources\CeesNel50JaarGetrouwd\ready.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <None Remove="Resources\CeesNel50JaarGetrouwd\title.png" />
+    <Content Include="Resources\CeesNel50JaarGetrouwd\title.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="GtkSharp" Version="3.24.24.95" />
