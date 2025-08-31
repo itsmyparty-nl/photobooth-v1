@@ -72,6 +72,9 @@
     <Content Include="Resources\BruiloftJoliesEnErik\tilte.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Resources\CeesNel50JaarGetrouwd\tilte.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Resources\FeestjeNoora\300pxLogo.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -342,10 +345,7 @@
     <Content Include="Resources\CeesNel50JaarGetrouwd\ready.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <None Remove="Resources\CeesNel50JaarGetrouwd\title.png" />
-    <Content Include="Resources\CeesNel50JaarGetrouwd\title.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <None Remove="Resources\CeesNel50JaarGetrouwd\tilte.png" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="GtkSharp" Version="3.24.24.95" />

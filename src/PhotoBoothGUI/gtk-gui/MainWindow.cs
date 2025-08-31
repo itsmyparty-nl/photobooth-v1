@@ -19,8 +19,10 @@ public partial class MainWindow
 		// Widget MainWindow
 		this.Name = "MainWindow";
 		this.WindowPosition = WindowPosition.CenterAlways;
+		this.OverrideBackgroundColor(StateFlags.Normal, new Gdk.RGBA { Red = 1.0, Green = 0.792, Blue = 0.765, Alpha = 1.0 }); // Sets background to #ffcac3
 		// Container child MainWindow.Gtk.Container+ContainerChild
 		this.vbox1 = new global::Gtk.VBox ();
+		this.vbox1.OverrideBackgroundColor(StateFlags.Normal, new Gdk.RGBA { Red = 1.0, Green = 0.792, Blue = 0.765, Alpha = 1.0 }); // Sets background to #ffcac3
 		this.vbox1.Name = "vbox1";
 		this.vbox1.Spacing = 0;
 		this.vbox1.Margin = 0;
@@ -40,6 +42,7 @@ public partial class MainWindow
 		this.imagePhoto = new global::Gtk.Image ();
 		this.imagePhoto.HeightRequest = 800;
 		this.imagePhoto.Name = "imagePhoto";
+		this.imagePhoto.OverrideBackgroundColor(StateFlags.Normal, new Gdk.RGBA { Red = 1.0, Green = 0.792, Blue = 0.765, Alpha = 1.0 }); // Sets background to #ffcac3
 		this.vbox1.Add (this.imagePhoto);
 		global::Gtk.Box.BoxChild w1 = ((global::Gtk.Box.BoxChild)(this.vbox1 [this.imagePhoto]));
 		w1.PackType = PackType.Start;
