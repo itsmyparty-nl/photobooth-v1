@@ -26,7 +26,7 @@ jobs:
       statuses: write
       checks: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Git Semantic Version Pre-Release
         uses: PaulHatch/semantic-version@v5.4.0
@@ -52,7 +52,7 @@ jobs:
       statuses: write
       checks: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -117,7 +117,7 @@ jobs:
       contents: write
         
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
